@@ -7,10 +7,11 @@ from spacy.tokens import Doc
 from spacy.vocab import Vocab
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from lxml import etree
-import os
-import subprocess
-import re
 import enum
+import os
+import re
+import subprocess
+import yaml
 
 
 NON_AZ_REGEXP = re.compile("[^a-z]")
@@ -785,3 +786,7 @@ def create_es_index(es_index, force_creation):
     finally:
         return created
 
+
+def get_config(config_file):
+    with open(config_file, "r") as f:
+        return yaml.safe_load(f)
