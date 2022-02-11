@@ -31,5 +31,4 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # [num_words, num_words, ...]
     num_words = documents.map(lambda document: len(list(document.words())))
     result = [documents.count(), num_words.reduce(add)]
-    return {"num_documents": result[0],
-            "num_words": result[1]}
+    return {"num_documents": result[0], "num_words": result[1]}

@@ -23,48 +23,48 @@ class Document(object):
         :type archive: defoe.alto.archive.Archive
         """
         self.namespaces = {
-            "mods": 'http://www.loc.gov/mods/v3',
-            "mets": 'http://www.loc.gov/METS/',
+            "mods": "http://www.loc.gov/mods/v3",
+            "mets": "http://www.loc.gov/METS/",
             "xsi": "http://www.w3.org/2001/XMLSchema-instance",
             "premis": "info:lc/xmlns/premis-v2",
             "dcterms": "http://purl.org/dc/terms/",
             "fits": "http://hul.harvard.edu/ois/xml/ns/fits/fits_output",
-             "xlink": "http://www.w3.org/1999/xlink"
+            "xlink": "http://www.w3.org/1999/xlink",
         }
         self.archive = archive
         self.code = code
         self.num_pages = 0
         self.metadata = self.archive.open_document(self.code)
         self.metadata_tree = etree.parse(self.metadata)
-        self.title = self.single_query('//mods:title/text()')
-        self.page_codes = \
-            sorted(self.archive.document_codes[self.code], key=Document.sorter)
+        self.title = self.single_query("//mods:title/text()")
+        self.page_codes = sorted(
+            self.archive.document_codes[self.code], key=Document.sorter
+        )
         self.num_pages = len(self.page_codes)
-        self.years = \
-            Document.parse_year(self.single_query('//mods:dateIssued/text()'))
-        self.publisher = self.single_query('//mods:publisher/text()')
-        self.place = self.single_query('//mods:placeTerm/text()')
+        self.years = Document.parse_year(self.single_query("//mods:dateIssued/text()"))
+        self.publisher = self.single_query("//mods:publisher/text()")
+        self.place = self.single_query("//mods:placeTerm/text()")
         # place may often have a year in.
         self.years += Document.parse_year(self.place)
         self.years = sorted(self.years)
-        self.documentId= self.single_query('//mods:identifier/text()')
+        self.documentId = self.single_query("//mods:identifier/text()")
         if self.years:
             self.year = self.years[0]
         else:
             self.year = None
-        self.date = self.single_query('//mods:dateIssued/text()')
+        self.date = self.single_query("//mods:dateIssued/text()")
         self.document_type = "newspaper"
         self.model = "fmp"
 
         #### New ############
-        #[art0001, art0002, art0003]
-        self.articlesId=self.parse_structMap_Logical()
-        #{'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
-        #{'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
-        self.articlesParts, self.partsPage=self.parse_structLink()
-        #{'pa0001001': ['RECT', '1220,5,2893,221'], 'pa0001003': ['RECT', '2934,14,3709,211'], 'pa0004044': ['RECT', '5334,2088,5584,2121']}
-        self.partsCoord=self.parse_structMap_Physical()
-        self.num_articles=len(self.articlesId)
+        # [art0001, art0002, art0003]
+        self.articlesId = self.parse_structMap_Logical()
+        # {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
+        # {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
+        self.articlesParts, self.partsPage = self.parse_structLink()
+        # {'pa0001001': ['RECT', '1220,5,2893,221'], 'pa0001003': ['RECT', '2934,14,3709,211'], 'pa0004044': ['RECT', '5334,2088,5584,2121']}
+        self.partsCoord = self.parse_structMap_Physical()
+        self.num_articles = len(self.articlesId)
         #######################
 
     @staticmethod
@@ -91,7 +91,9 @@ class Document(object):
         :rtype: set(int)
         """
         try:
-            date_pattern = re.compile("(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))")
+            date_pattern = re.compile(
+                "(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))"
+            )
             if date_pattern.match(text):
                 return [int(text[0:4])]
             long_pattern = re.compile("(1[6-9]\d\d)")
@@ -120,7 +122,7 @@ class Document(object):
         :return: list of page codes
         :rtype: list(int)
         """
-        codes = list(map(int, page_code.split('_')))
+        codes = list(map(int, page_code.split("_")))
         return codes
 
     def query(self, query):
@@ -158,8 +160,6 @@ class Document(object):
         :rtype: defoe.alto.page.Page
         """
         return Page(self, code)
-
-
 
     def get_document_info(self):
         """
@@ -214,7 +214,7 @@ class Document(object):
         for page in self:
             for string in page.strings:
                 yield page, string
-    
+
     def scan_tb(self):
         """
         Iterate over textblocks in pages
@@ -225,7 +225,6 @@ class Document(object):
         for page in self:
             for tb in page.tb:
                 yield page, tb
-
 
     def scan_words(self):
         """
@@ -238,7 +237,6 @@ class Document(object):
             for word in page.words:
                 yield page, word
 
-    
     def scan_wc(self):
         """
         Iterate over words cualities in pages.
@@ -250,7 +248,6 @@ class Document(object):
             for wc in page.wc:
                 yield page, wc
 
-    
     @property
     def articles(self):
         """
@@ -261,22 +258,21 @@ class Document(object):
         {'art0001': ['pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', page1 area3], ...]], ...} 
         """
         self.document_articles = {}
-        articlesInfo=self.articles_info()
+        articlesInfo = self.articles_info()
         for page in self:
             for tb in page.tb:
                 for articleId in articlesInfo:
-                     for partId in articlesInfo[articleId]:
-                         if partId == tb.textblock_id:
-                             if articleId not in self.document_articles:
-                                 self.document_articles[articleId] = []
-                             tb.textblock_shape=articlesInfo[articleId][partId][0]
-                             tb.textblock_coords=articlesInfo[articleId][partId][1]
-                             tb.textblock_page_area=articlesInfo[articleId][partId][2]
-                             self.document_articles[articleId].append(tb)
+                    for partId in articlesInfo[articleId]:
+                        if partId == tb.textblock_id:
+                            if articleId not in self.document_articles:
+                                self.document_articles[articleId] = []
+                            tb.textblock_shape = articlesInfo[articleId][partId][0]
+                            tb.textblock_coords = articlesInfo[articleId][partId][1]
+                            tb.textblock_page_area = articlesInfo[articleId][partId][2]
+                            self.document_articles[articleId].append(tb)
 
         return self.document_articles
-                  
-    
+
     def scan_cc(self):
         """
         Iterate over characters cualities in pages.
@@ -308,7 +304,7 @@ class Document(object):
         """
         for _, string in self.scan_strings():
             yield string
-    
+
     def tb(self):
         """
         Iterate over strings.
@@ -318,7 +314,6 @@ class Document(object):
         """
         for _, tb in self.scan_tb():
             yield tb
-    
 
     def words(self):
         """
@@ -340,7 +335,6 @@ class Document(object):
         for _, image in self.scan_images():
             yield image
 
-    
     def wc(self):
         """
         Iterate over words cualities.
@@ -350,7 +344,7 @@ class Document(object):
         """
         for _, wc in self.scan_wc():
             yield wc
-    
+
     def cc(self):
         """
         Iterate over characters cualities.
@@ -369,15 +363,20 @@ class Document(object):
         {'pa0001001': ['RECT', '1220,5,2893,221'], 'pa0001003': ['RECT', '2934,14,3709,211'], 'pa0004044': ['RECT', '5334,2088,5584,2121']}
         """
         partsCoord = dict()
-        elem = self.metadata_tree.find('mets:structMap[@TYPE="PHYSICAL"]', self.namespaces)
+        elem = self.metadata_tree.find(
+            'mets:structMap[@TYPE="PHYSICAL"]', self.namespaces
+        )
         for physic in elem:
             parts = physic.findall('mets:div[@TYPE="page"]', self.namespaces)
             for part in parts:
-               metadata_parts = part.findall('mets:div', self.namespaces)
-               for metadata in metadata_parts:
-                   fptr = metadata.find('mets:fptr', self.namespaces)
-                   for fp in fptr:
-                       partsCoord[list(metadata.values())[0]] =[list(fp.values())[1], list(fp.values())[2]]
+                metadata_parts = part.findall("mets:div", self.namespaces)
+                for metadata in metadata_parts:
+                    fptr = metadata.find("mets:fptr", self.namespaces)
+                    for fp in fptr:
+                        partsCoord[list(metadata.values())[0]] = [
+                            list(fp.values())[1],
+                            list(fp.values())[2],
+                        ]
         return partsCoord
 
     def parse_structMap_Logical(self):
@@ -387,8 +386,10 @@ class Document(object):
         :rtype: list
         [art0001, art0002, art0003]
         """
-        articlesId=[]
-        elem = self.metadata_tree.find('mets:structMap[@TYPE="LOGICAL"]', self.namespaces)
+        articlesId = []
+        elem = self.metadata_tree.find(
+            'mets:structMap[@TYPE="LOGICAL"]', self.namespaces
+        )
         for logic in elem:
             articles = logic.findall('mets:div[@TYPE="ARTICLE"]', self.namespaces)
             for article in articles:
@@ -404,23 +405,22 @@ class Document(object):
         {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
         {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
         """
-        articlesId=[]
+        articlesId = []
         articlesParts = dict()
-        partsPage= dict()
-        elem = self.metadata_tree.findall('mets:structLink', self.namespaces)
+        partsPage = dict()
+        elem = self.metadata_tree.findall("mets:structLink", self.namespaces)
         for smlinkgrp in elem:
-            parts = smlinkgrp.findall('mets:smLinkGrp', self.namespaces)
+            parts = smlinkgrp.findall("mets:smLinkGrp", self.namespaces)
             for linklocator in smlinkgrp:
-                linkl = linklocator.findall('mets:smLocatorLink', self.namespaces)
-                article_parts=[]
+                linkl = linklocator.findall("mets:smLocatorLink", self.namespaces)
+                article_parts = []
                 for link in linkl:
-                    idstring=list(link.values())[0]
-                    partId=re.sub('[^A-Za-z0-9]+', '', idstring)
+                    idstring = list(link.values())[0]
+                    partId = re.sub("[^A-Za-z0-9]+", "", idstring)
                     article_parts.append(partId)
-                    partsPage[partId]=list(link.values())[1]
-                articlesParts[article_parts[0]]=article_parts[1:]
-        return articlesParts, partsPage     
-
+                    partsPage[partId] = list(link.values())[1]
+                articlesParts[article_parts[0]] = article_parts[1:]
+        return articlesParts, partsPage
 
     def articles_info(self):
         """
@@ -428,12 +428,13 @@ class Document(object):
         :rtype: dictionary
         #{'art0001 {'pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', 'page1 area3'], ....}}
         """
-        articlesId=[]
+        articlesId = []
         articlesInfo = dict()
         for a_id in self.articlesId:
-            articlesInfo[a_id]= dict()
+            articlesInfo[a_id] = dict()
             for p_id in self.articlesParts[a_id]:
                 if p_id in self.partsCoord:
-                   self.partsCoord[p_id].append(self.partsPage[p_id])
-                   articlesInfo[a_id][p_id] = self.partsCoord[p_id]
-        return articlesInfo       
+                    self.partsCoord[p_id].append(self.partsPage[p_id])
+                    articlesInfo[a_id][p_id] = self.partsCoord[p_id]
+        return articlesInfo
+

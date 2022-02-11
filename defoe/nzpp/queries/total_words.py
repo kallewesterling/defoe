@@ -27,10 +27,10 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     # [article, article, ...]
-    articles = all_articles.flatMap(lambda articles:
-                                    [article for article in articles.articles])
+    articles = all_articles.flatMap(
+        lambda articles: [article for article in articles.articles]
+    )
     # [num_words, num_words, ...]
     num_words = articles.map(lambda article: len(list(article.words)))
     result = [articles.count(), num_words.reduce(add)]
-    return {"num_articles": result[0],
-            "num_words": result[1]}
+    return {"num_articles": result[0], "num_words": result[1]}

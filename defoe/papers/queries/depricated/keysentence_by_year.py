@@ -58,55 +58,72 @@ def do_query(issues, config_file=None, logger=None, context=None):
     with open(config_file, "r") as f:
         config = yaml.load(f)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config,
-                                              os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keysentences = []
-    with open(data_file, 'r') as f:
+    with open(data_file, "r") as f:
         for keysentence in list(f):
             k_split = keysentence.split()
-            sentence_word = [query_utils.preprocess_word(
-                word, preprocess_type) for word in k_split]
-            sentence_norm = ''
+            sentence_word = [
+                query_utils.preprocess_word(word, preprocess_type) for word in k_split
+            ]
+            sentence_norm = ""
             for word in sentence_word:
-                if sentence_norm == '':
+                if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
     # [(year, article_string)
     articles = issues.flatMap(
-        lambda issue: [(issue.date.year, get_article_as_string(
-            article, preprocess_type)) for article in issue.articles])
+        lambda issue: [
+            (issue.date.year, get_article_as_string(article, preprocess_type))
+            for article in issue.articles
+        ]
+    )
 
     # [(year, article_string)
     filter_articles = articles.filter(
         lambda year_article: any(
-            keysentence in year_article[1] for keysentence in keysentences))
+            keysentence in year_article[1] for keysentence in keysentences
+        )
+    )
 
     # [(year, [keysentence, keysentence]), ...]
     matching_articles = filter_articles.map(
-        lambda year_article: (year_article[0],
-                              get_sentences_list_matches(
-                                  year_article[1],
-                                  keysentences)))
+        lambda year_article: (
+            year_article[0],
+            get_sentences_list_matches(year_article[1], keysentences),
+        )
+    )
 
     # [[(year, keysentence), 1) ((year, keysentence), 1) ] ...]
     matching_sentences = matching_articles.flatMap(
-        lambda year_sentence: [((year_sentence[0], sentence), 1)
-                               for sentence in year_sentence[1]])
+        lambda year_sentence: [
+            ((year_sentence[0], sentence), 1) for sentence in year_sentence[1]
+        ]
+    )
 
     # [((year, keysentence), num_keysentences), ...]
     # =>
     # [(year, (keysentence, num_keysentences)), ...]
     # =>
     # [(year, [keysentence, num_keysentences]), ...]
-    result = matching_sentences\
-        .reduceByKey(add)\
-        .map(lambda yearsentence_count:
-             (yearsentence_count[0][0],
-              (yearsentence_count[0][1], yearsentence_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_sentencecount:
-             (year_sentencecount[0], list(year_sentencecount[1]))) \
+    result = (
+        matching_sentences.reduceByKey(add)
+        .map(
+            lambda yearsentence_count: (
+                yearsentence_count[0][0],
+                (yearsentence_count[0][1], yearsentence_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(
+            lambda year_sentencecount: (
+                year_sentencecount[0],
+                list(year_sentencecount[1]),
+            )
+        )
         .collect()
+    )
+
     return result

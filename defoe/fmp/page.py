@@ -14,23 +14,22 @@ class Page(object):
     in METS/MODS format.
     """
 
-    WORDS_XPATH = etree.XPath('//String/@CONTENT')
+    WORDS_XPATH = etree.XPath("//String/@CONTENT")
     """ XPath query for String content """
-    STRINGS_XPATH = etree.XPath('//String')
+    STRINGS_XPATH = etree.XPath("//String")
     """ XPath query for String elements """
-    IMAGES_XPATH = etree.XPath('//GraphicalElement')
+    IMAGES_XPATH = etree.XPath("//GraphicalElement")
     """ XPath query for Graphical Element """
-    PAGE_XPATH = etree.XPath('//Page')
+    PAGE_XPATH = etree.XPath("//Page")
     """ XPath query for Page """
-    WC_XPATH = etree.XPath('//String/@WC')
+    WC_XPATH = etree.XPath("//String/@WC")
     """ XPath query for Word Confidence  content """
-    CC_XPATH = etree.XPath('//String/@CC')
+    CC_XPATH = etree.XPath("//String/@CC")
     """ XPath query for Caracther Confidence content """
-    TB_XPATH_ID = etree.XPath('//TextBlock/@ID')
+    TB_XPATH_ID = etree.XPath("//TextBlock/@ID")
     """ XPath query for Textblock ID """
-    TB_XPATH = etree.XPath('//TextBlock')
+    TB_XPATH = etree.XPath("//TextBlock")
     """ XPath query for Textblock content """
-   
 
     def __init__(self, document, code, source=None):
         """
@@ -58,9 +57,11 @@ class Page(object):
         self.page_images = None
         self.page_wc = None
         self.page_cc = None
-        self.page_blocks_id= None
-        self.tb = [TextBlock(tb, document.code, code) for tb in self.query(Page.TB_XPATH)] 
-        #self.page_tb = None
+        self.page_blocks_id = None
+        self.tb = [
+            TextBlock(tb, document.code, code) for tb in self.query(Page.TB_XPATH)
+        ]
+        # self.page_tb = None
 
     def query(self, xpath_query):
         """
@@ -113,7 +114,7 @@ class Page(object):
             self.page_wc = list(self.query(Page.WC_XPATH))
 
         return self.page_wc
-    
+
     @property
     def cc(self):
         """
@@ -138,9 +139,9 @@ class Page(object):
         :rtype: list(lxml.etree._ElementStringResult)
         """
         if not self.page_strings:
-            self.page_strings =self.query(Page.STRINGS_XPATH)
+            self.page_strings = self.query(Page.STRINGS_XPATH)
         return self.page_strings
-    
+
     @property
     def textblock_ids(self):
         """
@@ -176,4 +177,4 @@ class Page(object):
         :return: content
         :rtype: str or unicode
         """
-        return ' '.join(self.words)
+        return " ".join(self.words)

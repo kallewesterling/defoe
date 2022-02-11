@@ -48,26 +48,30 @@ def do_query(issues, config_file=None, logger=None, context=None):
         keywords = [query_utils.normalize(word) for word in list(f)]
     # [(year, article), ...]
     articles = issues.flatMap(
-        lambda issue: [(issue.date.year, article)
-                       for article in issue.articles])
+        lambda issue: [(issue.date.year, article) for article in issue.articles]
+    )
     # [((year, [word, word, ...]), 1), ...]
     words = articles.map(
         lambda year_article: (
-            (year_article[0],
-             get_article_keywords(year_article[1],
-                                  keywords,
-                                  PreprocessWordType.NORMALIZE)),
-            1))
+            (
+                year_article[0],
+                get_article_keywords(
+                    year_article[1], keywords, PreprocessWordType.NORMALIZE
+                ),
+            ),
+            1,
+        )
+    )
     # [((year, [word, word, ...]), 1), ...]
-    match_words = words.filter(
-        lambda yearword_count: len(yearword_count[0][1]) > 1)
+    match_words = words.filter(lambda yearword_count: len(yearword_count[0][1]) > 1)
     # [((year, "word, word, ..."), 1), ...]
     # Convert word list to string so can serve as a key.
     multi_words = match_words.map(
         lambda yearword_count: (
-            (yearword_count[0][0],
-             ",".join(yearword_count[0][1])),
-            yearword_count[1]))
+            (yearword_count[0][0], ",".join(yearword_count[0][1])),
+            yearword_count[1],
+        )
+    )
     # [((year, "word, word, ..."), 1), ...]
     # =>
     # [((year, "word, word, ..."), count), ...]
@@ -78,17 +82,24 @@ def do_query(issues, config_file=None, logger=None, context=None):
     #            "count": count}, ...],
     #          ...]
     # list of words is restored from string of words.
-    result = multi_words \
-        .reduceByKey(add) \
-        .map(lambda yearword_count:
-             (yearword_count[0][0],
-              (yearword_count[0][1],
-               yearword_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_wordcount:
-             (year_wordcount[0],
-              word_article_count_list_to_dict(year_wordcount[1])))\
+    result = (
+        multi_words.reduceByKey(add)
+        .map(
+            lambda yearword_count: (
+                yearword_count[0][0],
+                (yearword_count[0][1], yearword_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(
+            lambda year_wordcount: (
+                year_wordcount[0],
+                word_article_count_list_to_dict(year_wordcount[1]),
+            )
+        )
         .collect()
+    )
+
     return result
 
 
@@ -115,6 +126,6 @@ def word_article_count_list_to_dict(word_counts):
     """
     result = []
     for word_count in word_counts:
-        result.append({"words": word_count[0].split(","),
-                       "count": word_count[1]})
+        result.append({"words": word_count[0].split(","), "count": word_count[1]})
+
     return result

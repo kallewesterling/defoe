@@ -318,7 +318,7 @@ spark-submit --py-files defoe.zip defoe/run_query.py sg_one_page.txt nls defoe.n
 Check your sample_97437554_97440572.34_orig_geoparser result file with [this one](https://github.com/defoe-code/defoe/blob/master/others/sample_97437554_97440572.34_orig_geoparser)
 
 
-# Installing HADDOP (Optional)
+# Installing Hadoop (Optional)
 
 You need to have JAVA already installed
 ```

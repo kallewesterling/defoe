@@ -22,8 +22,8 @@ class TestArticleNcco(TestArticle):
         Creates Issue from test file fixtures/1912_11_10_ncco.xml then
         retrieves first Article.
         """
-        self.filename = get_path(fixtures, '1912_11_10_ncco.xml')
+        self.filename = get_path(fixtures, "1912_11_10_ncco.xml")
         issue = Issue(self.filename)
         self.article = issue.articles[0]
-        self.article_id = 'NID123-1912-NOV10-001-001'
-        self.page_id = '001'
+        self.article_id = "NID123-1912-NOV10-001-001"
+        self.page_id = "001"

@@ -30,37 +30,26 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :return: metadata about the document
     :rtype: dict
     """
-    doc_types = documents.map(lambda document:
-                              (document.doc_type, 1))
-    doc_type_counts = doc_types. \
-        reduceByKey(add). \
-        collect()
-    root_elements = documents.map(lambda document:
-                                  (document.root_element_tag, 1))
-    root_element_counts = root_elements. \
-        reduceByKey(add). \
-        collect()
-    namespaces = documents.flatMap(lambda document:
-                                   get_namespaces(document))
-    namespace_counts = namespaces. \
-        reduceByKey(add). \
-        collect()
-    schema_locations = documents.flatMap(lambda document:
-                                         get_schema_locations(document))
-    schema_location_counts = schema_locations. \
-        reduceByKey(add). \
-        collect()
-    no_ns_locations = documents.map(lambda document:
-                                    (document.no_ns_schema_location, 1))
-    no_ns_location_counts = no_ns_locations. \
-        reduceByKey(add). \
-        collect()
+    doc_types = documents.map(lambda document: (document.doc_type, 1))
+    doc_type_counts = doc_types.reduceByKey(add).collect()
+    root_elements = documents.map(lambda document: (document.root_element_tag, 1))
+    root_element_counts = root_elements.reduceByKey(add).collect()
+    namespaces = documents.flatMap(lambda document: get_namespaces(document))
+    namespace_counts = namespaces.reduceByKey(add).collect()
+    schema_locations = documents.flatMap(
+        lambda document: get_schema_locations(document)
+    )
+    schema_location_counts = schema_locations.reduceByKey(add).collect()
+    no_ns_locations = documents.map(
+        lambda document: (document.no_ns_schema_location, 1)
+    )
+    no_ns_location_counts = no_ns_locations.reduceByKey(add).collect()
     result = {
         "doc_type": doc_type_counts,
         "root": root_element_counts,
         "namespace": namespace_counts,
         "schemaLocation": schema_location_counts,
-        "noNsSchemaLocation": no_ns_location_counts
+        "noNsSchemaLocation": no_ns_location_counts,
     }
     return result
 

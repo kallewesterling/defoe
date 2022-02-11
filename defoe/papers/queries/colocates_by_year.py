@@ -59,39 +59,42 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     window = 0
-    if config_file is not None and\
-       os.path.exists(config_file) and\
-       os.path.isfile(config_file):
+    if (
+        config_file is not None
+        and os.path.exists(config_file)
+        and os.path.isfile(config_file)
+    ):
         with open(config_file, "r") as f:
             config = yaml.load(f)
         start_word = query_utils.normalize(config["start_word"])
         end_word = query_utils.normalize(config["end_word"])
         window = config["window"]
         if window < 0:
-            raise ValueError('window must be at least 0')
+            raise ValueError("window must be at least 0")
 
     # [(issue, article), ...]
     issue_articles = issues.flatMap(
-        lambda issue: [(issue, article) for article in issue.articles])
+        lambda issue: [(issue, article) for article in issue.articles]
+    )
 
     # [(issue, article, matches), ...]
     colocated_words = issue_articles.map(
-        lambda issue_article: (issue_article[0],
-                               issue_article[1],
-                               get_colocates_matches(issue_article[1],
-                                                     start_word,
-                                                     end_word,
-                                                     window)))
+        lambda issue_article: (
+            issue_article[0],
+            issue_article[1],
+            get_colocates_matches(issue_article[1], start_word, end_word, window),
+        )
+    )
     # [(issue, article, matches), ...]
     colocated_words = colocated_words.filter(
-        lambda issue_article_matches: len(issue_article_matches[2]) > 0)
+        lambda issue_article_matches: len(issue_article_matches[2]) > 0
+    )
 
     # [(issue, article, matches), ...]
     # =>
     # [(year, {"title": title, ...}), ...]
     matching_articles = colocated_words.map(
-        lambda issue_article_matches:
-        (
+        lambda issue_article_matches: (
             issue_article_matches[0].date.year,
             {
                 "title": issue_article_matches[1].title_string,
@@ -99,19 +102,20 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 "page_ids": list(issue_article_matches[1].page_ids),
                 "issue_id": issue_article_matches[0].newspaper_id,
                 "filename": issue_article_matches[0].filename,
-                "matches": issue_article_matches[2]
-            }
+                "matches": issue_article_matches[2],
+            },
         )
     )
 
     # [(year, {"title": title, ...}), ...]
     # =>
     # [(year, [{"title": title, ...], {...}), ...)]
-    result = matching_articles \
-        .groupByKey() \
-        .map(lambda year_context:
-             (year_context[0], list(year_context[1]))) \
+    result = (
+        matching_articles.groupByKey()
+        .map(lambda year_context: (year_context[0], list(year_context[1])))
         .collect()
+    )
+
     return result
 
 

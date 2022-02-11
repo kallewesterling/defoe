@@ -28,13 +28,14 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     """
     # [(article, ...)]
     articles = all_articles.flatMap(
-        lambda articles: [article for article in articles.articles])
+        lambda articles: [article for article in articles.articles]
+    )
     # [(year, 1, num_words)]
-    counts = articles.map(
-        lambda article: (article.date.year, (1, len(article.words))))
-    result = counts \
-        .reduceByKey(lambda x, y:
-                     tuple(i + j for i, j in zip(x, y))) \
-        .map(lambda year_data: (year_data[0], list(year_data[1]))) \
+    counts = articles.map(lambda article: (article.date.year, (1, len(article.words))))
+    result = (
+        counts.reduceByKey(lambda x, y: tuple(i + j for i, j in zip(x, y)))
+        .map(lambda year_data: (year_data[0], list(year_data[1])))
         .collect()
+    )
+
     return result

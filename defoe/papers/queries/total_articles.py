@@ -29,5 +29,4 @@ def do_query(issues, config_file=None, logger=None, context=None):
     # [num_articles, num_articles, ...]
     num_articles = issues.map(lambda issue: len(issue.articles))
     result = [issues.count(), num_articles.reduce(add)]
-    return {"num_issues": result[0],
-            "num_articles": result[1]}
+    return {"num_issues": result[0], "num_articles": result[1]}

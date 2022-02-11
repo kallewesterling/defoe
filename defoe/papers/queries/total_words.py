@@ -27,10 +27,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     # [article, article, ...]
-    articles = issues.flatMap(lambda issue:
-                              [article for article in issue.articles])
+    articles = issues.flatMap(lambda issue: [article for article in issue.articles])
     # [num_words, num_words, ...]
     num_words = articles.map(lambda article: len(list(article.words)))
     result = [issues.count(), num_words.reduce(add)]
-    return {"num_issues": result[0],
-            "num_words": result[1]}
+    return {"num_issues": result[0], "num_words": result[1]}

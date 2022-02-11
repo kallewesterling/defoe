@@ -13,6 +13,7 @@ from pyspark.sql.functions import col, when
 
 import yaml, os
 
+
 def do_query(df, config_file=None, logger=None, context=None):
     """ 
     It ingests NLS pages, applies the original geoparser for identifying the possible locations of each page. 
@@ -57,7 +58,7 @@ def do_query(df, config_file=None, logger=None, context=None):
     :return: "0"
     :rtype: string
     """
-    
+
     with open(config_file, "r") as f:
         config = yaml.load(f)
     gazetteer = config["gazetteer"]
@@ -69,41 +70,68 @@ def do_query(df, config_file=None, logger=None, context=None):
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
         else:
-            os_type= "sys-i386-snow-leopard"
+            os_type = "sys-i386-snow-leopard"
     else:
-            os_type = "sys-i386-64"
-    if "defoe_path" in config :
+        os_type = "sys-i386-64"
+    if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:
         defoe_path = "./"
 
     fdf = df.withColumn("source_text_clean", blank_as_null("source_text_clean"))
 
-    newdf=fdf.filter(fdf.source_text_clean.isNotNull()).filter(fdf["model"]=="nls").filter(df["year"]=="1828").select(fdf.year, fdf.title, fdf.edition, fdf.archive_filename, fdf.source_text_filename, fdf.text_unit_id, fdf.source_text_clean)
+    newdf = (
+        fdf.filter(fdf.source_text_clean.isNotNull())
+        .filter(fdf["model"] == "nls")
+        .filter(df["year"] == "1828")
+        .select(
+            fdf.year,
+            fdf.title,
+            fdf.edition,
+            fdf.archive_filename,
+            fdf.source_text_filename,
+            fdf.text_unit_id,
+            fdf.source_text_clean,
+        )
+    )
 
-    pages=newdf.rdd.map(tuple)
+    pages = newdf.rdd.map(tuple)
 
     geo_xml_pages = pages.flatMap(
-        lambda clean_page: [(clean_page[0], clean_page[1], clean_page[2],\
-                               clean_page[3], clean_page[4], clean_page[5], query_utils.geoparser_cmd(clean_page[6], defoe_path, os_type, gazetteer, bounding_box))])
-    
-     
-    matching_pages = geo_xml_pages.map(
-        lambda geo_page:
-        (geo_page[0],
-         {"title": geo_page[1],
-          "edition": geo_page[2],
-          "archive": geo_page[3], 
-          "page_filename": geo_page[4],
-          "text_unit id": geo_page[5],
-          "lang_model": "geoparser_original", 
-          "georesolution_page": query_utils.geoparser_coord_xml(geo_page[6])}))
+        lambda clean_page: [
+            (
+                clean_page[0],
+                clean_page[1],
+                clean_page[2],
+                clean_page[3],
+                clean_page[4],
+                clean_page[5],
+                query_utils.geoparser_cmd(
+                    clean_page[6], defoe_path, os_type, gazetteer, bounding_box
+                ),
+            )
+        ]
+    )
 
-    
-    result = matching_pages \
-        .groupByKey() \
-        .map(lambda date_context:
-             (date_context[0], list(date_context[1]))) \
+    matching_pages = geo_xml_pages.map(
+        lambda geo_page: (
+            geo_page[0],
+            {
+                "title": geo_page[1],
+                "edition": geo_page[2],
+                "archive": geo_page[3],
+                "page_filename": geo_page[4],
+                "text_unit id": geo_page[5],
+                "lang_model": "geoparser_original",
+                "georesolution_page": query_utils.geoparser_coord_xml(geo_page[6]),
+            },
+        )
+    )
+
+    result = (
+        matching_pages.groupByKey()
+        .map(lambda date_context: (date_context[0], list(date_context[1])))
         .collect()
+    )
+
     return result
-    

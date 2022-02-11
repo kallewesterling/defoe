@@ -58,46 +58,53 @@ def do_query(issues, config_file=None, logger=None, context=None):
     with open(config_file, "r") as f:
         config = yaml.load(f)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config,
-                                              os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keywords = []
-    with open(data_file, 'r') as f:
-        keywords = [query_utils.preprocess_word(
-            word, preprocess_type) for word in list(f)]
+    with open(data_file, "r") as f:
+        keywords = [
+            query_utils.preprocess_word(word, preprocess_type) for word in list(f)
+        ]
 
     target_word = keywords[0]
     # [(year, article), ...]
     articles = issues.flatMap(
-        lambda issue: [(issue.date.year, article)
-                       for article in issue.articles])
+        lambda issue: [(issue.date.year, article) for article in issue.articles]
+    )
     # [(year, article), ...]
     target_articles = articles.filter(
         lambda year_article: article_contains_word(
-            year_article[1], target_word, preprocess_type))
+            year_article[1], target_word, preprocess_type
+        )
+    )
 
     # [((year, word), 1), ...]
     words = target_articles.flatMap(
         lambda target_article: [
-            ((target_article[0],
-              query_utils.preprocess_word(word, preprocess_type)), 1)
+            ((target_article[0], query_utils.preprocess_word(word, preprocess_type)), 1)
             for word in target_article[1].words
-        ])
+        ]
+    )
 
     # [((year, word), 1), ...]
     matching_words = words.filter(
-        lambda yearword_count: yearword_count[0][1] in keywords)
+        lambda yearword_count: yearword_count[0][1] in keywords
+    )
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]
     # =>
     # [(year, [word, num_words]), ...]
-    result = matching_words \
-        .reduceByKey(add) \
-        .map(lambda yearword_count:
-             (yearword_count[0][0],
-              (yearword_count[0][1], yearword_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_wordcount:
-             (year_wordcount[0], list(year_wordcount[1]))) \
+    result = (
+        matching_words.reduceByKey(add)
+        .map(
+            lambda yearword_count: (
+                yearword_count[0][0],
+                (yearword_count[0][1], yearword_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1])))
         .collect()
+    )
+
     return result

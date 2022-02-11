@@ -19,7 +19,7 @@ class TestSetup(TestCase):
         Tests filename_to_object with a bad ZIP file results in a
         tuple with a filename and an error message.
         """
-        filename = get_path(fixtures, 'bad.zip')
+        filename = get_path(fixtures, "bad.zip")
         result = filename_to_object(filename)
         self.assertTrue(result[0] is not None)
         self.assertTrue(isinstance(result[0], str))
@@ -33,7 +33,7 @@ class TestSetup(TestCase):
         Tests filename_to_object with a non-existant file results in
         a tuple with a filename and an error message.
         """
-        filename = get_path(fixtures, 'no-such-file.zip')
+        filename = get_path(fixtures, "no-such-file.zip")
         result = filename_to_object(filename)
         self.assertTrue(result[0] is not None)
         self.assertTrue(isinstance(result[0], str))

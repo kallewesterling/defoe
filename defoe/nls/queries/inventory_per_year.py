@@ -22,17 +22,23 @@ def do_query(archives, config_file=None, logger=None, context=None):
     """
     # [(year, title, edition)]
     documents = archives.flatMap(
-        lambda archive: [(document.year, document.title, document.edition) for document in list(archive)])
-    doc_years = documents.map(lambda document: (document[0], (document[1], document[2])))
+        lambda archive: [
+            (document.year, document.title, document.edition)
+            for document in list(archive)
+        ]
+    )
+    doc_years = documents.map(
+        lambda document: (document[0], (document[1], document[2]))
+    )
 
     # [(year, ("title", "edition")), ...]
     # =>
     # [(year, [( title, edition ...),...)]
-    result = doc_years \
-        .groupByKey() \
-        .map(lambda year_context:
-             (year_context[0], list(year_context[1]))) \
+    result = (
+        doc_years.groupByKey()
+        .map(lambda year_context: (year_context[0], list(year_context[1])))
         .collect()
+    )
+
     return result
 
-     

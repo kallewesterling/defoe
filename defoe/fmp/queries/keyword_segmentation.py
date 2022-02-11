@@ -57,54 +57,67 @@ def do_query(archives, config_file=None, logger=None, context=None):
     with open(config_file, "r") as f:
         config = yaml.load(f)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config,
-                                              os.path.dirname(config_file))
-    year_min, year_max=query_utils.extract_years_filter(config)
+    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
     keywords = []
-    with open(data_file, 'r') as f:
-        keywords = [query_utils.preprocess_word(word, preprocess_type)
-                    for word in list(f)]
+    with open(data_file, "r") as f:
+        keywords = [
+            query_utils.preprocess_word(word, preprocess_type) for word in list(f)
+        ]
 
     # [document, ...]
 
-
     documents = archives.flatMap(
-        lambda archive: [document for document in list(archive) if document.year >= int(year_min) and document.year <= int(year_max) ])
+        lambda archive: [
+            document
+            for document in list(archive)
+            if document.year >= int(year_min) and document.year <= int(year_max)
+        ]
+    )
 
     filtered_words = documents.flatMap(
-        lambda document: get_article_matches(document , keywords, preprocess_type))
+        lambda document: get_article_matches(document, keywords, preprocess_type)
+    )
 
-
-    #[(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword), ....]
+    # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword), ....]
     # =>
     # [(word, {"article_id": article_id, ...}), ...]
     matching_docs = filtered_words.map(
-        lambda document_article_word:
-        (document_article_word[9],
-         {"title": document_article_word[1].title,
-          "place": document_article_word[1].place,
-          "article_id": document_article_word[2],
-          "textblock_id": document_article_word[3], 
-          "coord": document_article_word[4],
-          "page_area": document_article_word[5],
-          "year": document_article_word[0],
-          "words":  document_article_word[6],
-          "date":  document_article_word[1].date,
-          "preprocessed_words":  document_article_word[7],
-          "page_filename":  document_article_word[8],
-          "issue_id": document_article_word[1].documentId,
-          "issue_dirname": document_article_word[1].archive.filename,
-          "cropped_image": segment_image(document_article_word[4], document_article_word[8], document_article_word[1].archive.filename, document_article_word[9], output_path)
-         }))
-
+        lambda document_article_word: (
+            document_article_word[9],
+            {
+                "title": document_article_word[1].title,
+                "place": document_article_word[1].place,
+                "article_id": document_article_word[2],
+                "textblock_id": document_article_word[3],
+                "coord": document_article_word[4],
+                "page_area": document_article_word[5],
+                "year": document_article_word[0],
+                "words": document_article_word[6],
+                "date": document_article_word[1].date,
+                "preprocessed_words": document_article_word[7],
+                "page_filename": document_article_word[8],
+                "issue_id": document_article_word[1].documentId,
+                "issue_dirname": document_article_word[1].archive.filename,
+                "cropped_image": segment_image(
+                    document_article_word[4],
+                    document_article_word[8],
+                    document_article_word[1].archive.filename,
+                    document_article_word[9],
+                    output_path,
+                ),
+            },
+        )
+    )
 
     # [(word, {"article_id": article_id, ...}), ...]
     # =>
     # [(word, [{"article_id": article_id, ...], {...}), ...)]
-    result = matching_docs \
-        .groupByKey() \
-        .map(lambda word_context:
-             (word_context[0], list(word_context[1]))) \
+    result = (
+        matching_docs.groupByKey()
+        .map(lambda word_context: (word_context[0], list(word_context[1])))
         .collect()
+    )
+
     return result

@@ -53,30 +53,34 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     # [(date, issue, article, word), ...]
     filtered_words = issues.flatMap(
-        lambda issue: get_article_matches(issue,
-                                          keywords,
-                                          PreprocessWordType.NORMALIZE))
+        lambda issue: get_article_matches(issue, keywords, PreprocessWordType.NORMALIZE)
+    )
 
     # [(date, issue, article, word), ...]
     # =>
     # [(date, {"title": title, ...}), ...]
     matching_docs = filtered_words.map(
-        lambda date_issue_article_word:
-        (date_issue_article_word[0],
-         {"title": date_issue_article_word[2].title_string,
-          "page_ids": list(date_issue_article_word[2].page_ids),
-          "content": date_issue_article_word[2].words_string,
-          "word": date_issue_article_word[3],
-          "article_id": date_issue_article_word[2].article_id,
-          "issue_id": date_issue_article_word[1].newspaper_id,
-          "filename": date_issue_article_word[1].filename}))
+        lambda date_issue_article_word: (
+            date_issue_article_word[0],
+            {
+                "title": date_issue_article_word[2].title_string,
+                "page_ids": list(date_issue_article_word[2].page_ids),
+                "content": date_issue_article_word[2].words_string,
+                "word": date_issue_article_word[3],
+                "article_id": date_issue_article_word[2].article_id,
+                "issue_id": date_issue_article_word[1].newspaper_id,
+                "filename": date_issue_article_word[1].filename,
+            },
+        )
+    )
 
     # [(date, {"title": title, ...}), ...]
     # =>
     # [(date, [{"title": title, ...], {...}), ...)]
-    result = matching_docs \
-        .groupByKey() \
-        .map(lambda date_context:
-             (date_context[0], list(date_context[1]))) \
+    result = (
+        matching_docs.groupByKey()
+        .map(lambda date_context: (date_context[0], list(date_context[1])))
         .collect()
+    )
+
     return result

@@ -50,7 +50,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str or unicode
         """
-        return '([0-9]*)_metadata\.xml'  # pylint: disable=anomalous-backslash-in-string
+        return "([0-9]*)_metadata\.xml"  # pylint: disable=anomalous-backslash-in-string
 
     def get_page_pattern(self):
         """
@@ -59,7 +59,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str or unicode
         """
-        return 'ALTO\/([0-9]*?)_([0-9_]*)\.xml'  # pylint: disable=anomalous-backslash-in-string
+        return "ALTO\/([0-9]*?)_([0-9_]*)\.xml"  # pylint: disable=anomalous-backslash-in-string
 
     def get_document_info(self, document_code):
         """
@@ -70,7 +70,7 @@ class Archive(AltoArchive):
         :return: information
         :rtype: zipfile.ZipInfo
         """
-        return self.zip.getinfo(document_code + '_metadata.xml')
+        return self.zip.getinfo(document_code + "_metadata.xml")
 
     def get_page_info(self, document_code, page_code):
         """
@@ -83,8 +83,7 @@ class Archive(AltoArchive):
         :return: information
         :rtype: zipfile.ZipInfo
         """
-        return self.zip.getinfo(
-            'ALTO/' + document_code + '_' + page_code + '.xml')
+        return self.zip.getinfo("ALTO/" + document_code + "_" + page_code + ".xml")
 
     def open_document(self, document_code):
         """
@@ -95,7 +94,7 @@ class Archive(AltoArchive):
         :return: stream
         :rtype: zipfile.ZipExt
         """
-        return self.zip.open(document_code + '_metadata.xml')
+        return self.zip.open(document_code + "_metadata.xml")
 
     def open_page(self, document_code, page_code):
         """
@@ -108,5 +107,4 @@ class Archive(AltoArchive):
         :return: stream
         :rtype: zipfile.ZipExt
         """
-        return self.zip.open(
-            'ALTO/' + document_code + '_' + page_code + '.xml')
+        return self.zip.open("ALTO/" + document_code + "_" + page_code + ".xml")

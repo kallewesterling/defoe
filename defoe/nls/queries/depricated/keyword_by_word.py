@@ -43,29 +43,36 @@ def do_query(archives, config_file=None, logger=None, context=None):
         keywords = [query_utils.normalize(word) for word in list(f)]
     # [(year, document), ...]
     documents = archives.flatMap(
-        lambda archive: [(document.year, document) for document in list(archive)])
+        lambda archive: [(document.year, document) for document in list(archive)]
+    )
     # [((year, word), 1), ...]
     words = documents.flatMap(
         lambda year_document: [
             ((year_document[0], query_utils.normalize(word)), 1)
             for (_, word) in year_document[1].scan_words()
-        ])
+        ]
+    )
     # [((year, word), 1), ...]
     matching_words = words.filter(
-        lambda yearword_count: yearword_count[0][1] in keywords)
+        lambda yearword_count: yearword_count[0][1] in keywords
+    )
 
     # [((year, word), num_words), ...]
     # =>
     # [(word, (year, num_words)), ...]
     # =>
     # [(word, [year, num_words]), ...]
-    result = matching_words \
-        .reduceByKey(add) \
-        .map(lambda yearword_count:
-             (yearword_count[0][1],
-              (yearword_count[0][0], yearword_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_wordcount:
-             (year_wordcount[0], list(year_wordcount[1]))) \
+    result = (
+        matching_words.reduceByKey(add)
+        .map(
+            lambda yearword_count: (
+                yearword_count[0][1],
+                (yearword_count[0][0], yearword_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1])))
         .collect()
+    )
+
     return result

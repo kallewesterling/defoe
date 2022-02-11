@@ -9,6 +9,7 @@ from defoe.alto.query_utils import extract_sentences, total_preprocessed
 from defoe.alto.query_utils import PreprocessWordType
 from defoe.query_utils import PreprocessWordType
 
+
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Gets concordance and collocation analysis for keywords giving a target word,  and it groups the results by date.
@@ -38,23 +39,24 @@ def do_query(archives, config_file=None, logger=None, context=None):
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     # [document, ...]
     documents = archives.flatMap(
-        lambda archive: [document for document in list(archive)])
+        lambda archive: [document for document in list(archive)]
+    )
 
     # [(year, sentences), ...]
-    raw_sentences = documents.flatMap(
-        lambda document: extract_sentences(document))
+    raw_sentences = documents.flatMap(lambda document: extract_sentences(document))
 
     # [(year, [preprocess_sentences]), (year, [preprocessed_sentence] ) , ...]
     preprocessed_sentences = raw_sentences.flatMap(
-        lambda raw_sentences: [total_preprocessed(raw_sentences)])
-    
+        lambda raw_sentences: [total_preprocessed(raw_sentences)]
+    )
+
     print("Preprocessed  %s" % preprocessed_sentences.take(3))
-    
+
     # [[year, [preprocess sentence],[preprocess sentence], year, []], ...]
-    result = preprocessed_sentences.groupByKey() \
-             .map(lambda year_wordcount:
-              (year_wordcount[0], list(year_wordcount[1]))) \
-            .collect()
-    
- 
+    result = (
+        preprocessed_sentences.groupByKey()
+        .map(lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1])))
+        .collect()
+    )
+
     return result

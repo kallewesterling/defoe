@@ -20,7 +20,7 @@ class TestArticle(TestCase):
 
     def test_article_id(self):
         """
-        Tests Article.article_id attribute holds the expected article ID>
+        Tests Article.article_id attribute holds the expected article ID.
         """
         self.assertEqual(self.article_id, self.article.article_id)
 
@@ -33,7 +33,7 @@ class TestArticle(TestCase):
     def test_words(self):
         """
         Tests Article.words attribute holds the expected number of
-        words and that the words are as expected:
+        words and that the words are as expected.
         """
         words = self.article.words
         self.assertEqual(7, len(words))
@@ -46,8 +46,7 @@ class TestArticle(TestCase):
         content.
         """
         words = self.article.words_string
-        self.assertEqual("Article 1 Title A B C D E F",
-                         words)
+        self.assertEqual("Article 1 Title A B C D E F", words)
 
     def test_title_string(self):
         """

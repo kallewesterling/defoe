@@ -40,12 +40,12 @@ class Issue(object):
         stream = open_stream(self.filename)
 
         self.issue_tree = None
-        self.issue = ''
-        self.newspaper_id = ''
+        self.issue = ""
+        self.newspaper_id = ""
         self.articles = []
         self.date = datetime.now()
         self.page_count = 0
-        self.day_of_week = ''
+        self.day_of_week = ""
         self.document_type = "newspaper"
         self.model = "papers"
         # Attempt to parse the file, even if its XML is invalid e.g:
@@ -57,31 +57,32 @@ class Issue(object):
         if not has_issue:
             raise Exception("Missing 'issue' element")
 
-        self.issue = self.single_query('.//issue')
+        self.issue = self.single_query(".//issue")
 
         # bl_ncnp_issue_apex.dtd, GALENP.dtd, nccoissue.dtd
-        newspaper_id = self.single_query('//issue/id/text()')
+        newspaper_id = self.single_query("//issue/id/text()")
         if newspaper_id is None:
             # LTO_issue.md
-            newspaper_id = self.single_query('//issue/metadatainfo/PSMID/text()')
+            newspaper_id = self.single_query("//issue/metadatainfo/PSMID/text()")
         if newspaper_id is not None:
             self.newspaper_id = newspaper_id
 
-        self.articles = [Article(article, self.filename)
-                         for article in self.query('.//article')]
+        self.articles = [
+            Article(article, self.filename) for article in self.query(".//article")
+        ]
 
         # bl_ncnp_issue_apex.dtd, GALENP.dtd, LTO_issue.dtd
-        raw_date = self.single_query('//pf/text()')
+        raw_date = self.single_query("//pf/text()")
         if raw_date is None:
             # nccoissue.dtd
-            raw_date = self.single_query('//da/searchableDateStart/text()')
+            raw_date = self.single_query("//da/searchableDateStart/text()")
         if raw_date:
-            self.date = datetime.strptime(raw_date, '%Y%m%d')
+            self.date = datetime.strptime(raw_date, "%Y%m%d")
         else:
             self.date = None
 
         try:
-            self.page_count = int(self.single_query('//ip/text()'))
+            self.page_count = int(self.single_query("//ip/text()"))
         except Exception:
             pass
 

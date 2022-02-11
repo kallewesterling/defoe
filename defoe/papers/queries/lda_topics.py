@@ -54,22 +54,23 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: LDA topics
     :rtype: dict
     """
-    with open(config_file, 'r') as f:
+    with open(config_file, "r") as f:
         config = load(f)
-        keyword = config['keyword']
-        optimizer = config['optimizer']
-        if optimizer != 'online' and optimizer != 'em':
-            raise ValueError("optmizer must be 'online' or 'em' but is '{}'"
-                             .format(optimizer))
-        max_iterations = config['max_iterations']
+        keyword = config["keyword"]
+        optimizer = config["optimizer"]
+        if optimizer != "online" and optimizer != "em":
+            raise ValueError(
+                "optmizer must be 'online' or 'em' but is '{}'".format(optimizer)
+            )
+        max_iterations = config["max_iterations"]
         if max_iterations < 1:
-            raise ValueError('max_iterations must be at least 1')
-        ntopics = config['ntopics']
+            raise ValueError("max_iterations must be at least 1")
+        ntopics = config["ntopics"]
         if ntopics < 1:
-            raise ValueError('ntopics must be at least 1')
-        topic_words = config['topic_words']
+            raise ValueError("ntopics must be at least 1")
+        topic_words = config["topic_words"]
         if topic_words < 1:
-            raise ValueError('topic_words must be at least 1')
+            raise ValueError("topic_words must be at least 1")
 
     keyword = query_utils.normalize(keyword)
 
@@ -78,10 +79,11 @@ def do_query(issues, config_file=None, logger=None, context=None):
     # [(yesr, year), ...]
     # =>
     # (year, year)
-    min_year, max_year = issues \
-        .filter(lambda issue: issue.date) \
-        .map(lambda issue: (issue.date.year, issue.date.year)) \
+    min_year, max_year = (
+        issues.filter(lambda issue: issue.date)
+        .map(lambda issue: (issue.date.year, issue.date.year))
         .reduce(min_max_tuples)
+    )
 
     # [issue, issue, ...]
     # =>
@@ -90,45 +92,46 @@ def do_query(issues, config_file=None, logger=None, context=None):
     # [(article, 0), (article, 1), ...]
     # =>
     # [Row, Row, ...]
-    articles_rdd = issues.flatMap(lambda issue: issue.articles) \
-        .filter(lambda article:
-                article_contains_word(article,
-                                      keyword,
-                                      PreprocessWordType.NORMALIZE)) \
-        .zipWithIndex() \
+    articles_rdd = (
+        issues.flatMap(lambda issue: issue.articles)
+        .filter(
+            lambda article: article_contains_word(
+                article, keyword, PreprocessWordType.NORMALIZE
+            )
+        )
+        .zipWithIndex()
         .map(article_idx_to_words_row)
+    )
 
-    spark = SparkSession \
-        .builder \
-        .appName('lda') \
-        .getOrCreate()
+    spark = SparkSession.builder.appName("lda").getOrCreate()
 
     articles_df = spark.createDataFrame(articles_rdd)
 
-    remover = StopWordsRemover(inputCol='words', outputCol='filtered')
+    remover = StopWordsRemover(inputCol="words", outputCol="filtered")
     articles_df = remover.transform(articles_df)
 
-    vectortoriser = CountVectorizer(inputCol='filtered', outputCol='vectors')
+    vectortoriser = CountVectorizer(inputCol="filtered", outputCol="vectors")
     model = vectortoriser.fit(articles_df)
 
     vocabulary = model.vocabulary
     articles_df = model.transform(articles_df)
 
-    corpus = articles_df \
-        .select('idx', 'vectors') \
-        .rdd \
-        .map(lambda a: [a[0], Vectors.fromML(a[1])]) \
+    corpus = (
+        articles_df.select("idx", "vectors")
+        .rdd.map(lambda a: [a[0], Vectors.fromML(a[1])])
         .cache()
+    )
 
     # Cluster the documents into N topics using LDA.
-    lda_model = LDA.train(corpus,
-                          k=ntopics,
-                          maxIterations=max_iterations,
-                          optimizer=optimizer)
-    topics_final = [topic_render(topic, topic_words, vocabulary)
-                    for topic in lda_model.describeTopics(maxTermsPerTopic=topic_words)]
+    lda_model = LDA.train(
+        corpus, k=ntopics, maxIterations=max_iterations, optimizer=optimizer
+    )
+    topics_final = [
+        topic_render(topic, topic_words, vocabulary)
+        for topic in lda_model.describeTopics(maxTermsPerTopic=topic_words)
+    ]
 
-    topics = [('years', [min_year, max_year])]
+    topics = [("years", [min_year, max_year])]
     for i, topic in enumerate(topics_final):
         term_words = []
         for term in topic:
@@ -174,7 +177,7 @@ def article_idx_to_words_row(article_idx):
     words = []
     for word in article.words:
         normalized_word = query_utils.normalize(word)
-        if len(word) > 2:   # Anything less is a stop word
+        if len(word) > 2:  # Anything less is a stop word
             words.append(normalized_word)
     return Row(idx=idx, words=words)
 

@@ -62,42 +62,46 @@ def do_query(issues, config_file=None, logger=None, context=None):
     with open(config_file, "r") as f:
         config = yaml.load(f)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config,
-                                              os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keywords = []
-    with open(data_file, 'r') as f:
-        keywords = [query_utils.preprocess_word(word, preprocess_type)
-                    for word in list(f)]
+    with open(data_file, "r") as f:
+        keywords = [
+            query_utils.preprocess_word(word, preprocess_type) for word in list(f)
+        ]
 
     target_word = keywords[0]
     keywords = keywords[1:]
 
     # [(year, article), ...]
     articles = issues.flatMap(
-        lambda issue: [(issue.date.year, article)
-                       for article in issue.articles])
+        lambda issue: [(issue.date.year, article) for article in issue.articles]
+    )
     # [(year, article), ...]
     target_articles = articles.filter(
         lambda year_article: article_contains_word(
-            year_article[1], target_word, preprocess_type))
+            year_article[1], target_word, preprocess_type
+        )
+    )
     # [((year, [word, word, ...]), 1), ...]
     words = target_articles.map(
         lambda year_article: (
-            (year_article[0],
-             get_article_keywords(year_article[1],
-                                  keywords,
-                                  preprocess_type)),
-            1))
+            (
+                year_article[0],
+                get_article_keywords(year_article[1], keywords, preprocess_type),
+            ),
+            1,
+        )
+    )
     # [((year, [word, word, ...]), 1), ...]
-    match_words = words.filter(
-        lambda yearword_count: len(yearword_count[0][1]) > 0)
+    match_words = words.filter(lambda yearword_count: len(yearword_count[0][1]) > 0)
     # [((year, "target_word, word, word, ..."), 1), ...]
     # Convert word list to string so can serve as a key.
     multi_words = match_words.map(
         lambda yearword_count: (
-            (yearword_count[0][0],
-             ",".join(yearword_count[0][1])),
-            yearword_count[1]))
+            (yearword_count[0][0], ",".join(yearword_count[0][1])),
+            yearword_count[1],
+        )
+    )
     # [((year, "word, word, ..."), 1), ...]
     # =>
     # [((year, "word, word, ..."), count), ...]
@@ -108,18 +112,24 @@ def do_query(issues, config_file=None, logger=None, context=None):
     #            "count": count}, ...],
     #          ...]
     # list of words is restored from string of words.
-    result = multi_words \
-        .reduceByKey(add) \
-        .map(lambda yearword_count:
-             (yearword_count[0][0],
-              (yearword_count[0][1],
-               yearword_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_wordcount:
-             (year_wordcount[0],
-              word_article_count_list_to_dict(target_word,
-                                              year_wordcount[1])))\
+    result = (
+        multi_words.reduceByKey(add)
+        .map(
+            lambda yearword_count: (
+                yearword_count[0][0],
+                (yearword_count[0][1], yearword_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(
+            lambda year_wordcount: (
+                year_wordcount[0],
+                word_article_count_list_to_dict(target_word, year_wordcount[1]),
+            )
+        )
         .collect()
+    )
+
     return result
 
 
@@ -150,7 +160,12 @@ def word_article_count_list_to_dict(target_word, word_counts):
     """
     result = []
     for word_count in word_counts:
-        result.append({"target_word": target_word,
-                       "words": word_count[0].split(","),
-                       "count": word_count[1]})
+        result.append(
+            {
+                "target_word": target_word,
+                "words": word_count[0].split(","),
+                "count": word_count[1],
+            }
+        )
+
     return result

@@ -63,37 +63,41 @@ def do_query(archives, config_file=None, logger=None):
     :rtype: dict
     """
     window = 0
-    if config_file is not None and\
-       os.path.exists(config_file) and\
-       os.path.isfile(config_file):
+    if (
+        config_file is not None
+        and os.path.exists(config_file)
+        and os.path.isfile(config_file)
+    ):
         with open(config_file, "r") as f:
             config = yaml.load(f)
         start_word = query_utils.normalize(config["start_word"])
         end_word = query_utils.normalize(config["end_word"])
         window = config["window"]
         if window < 0:
-            raise ValueError('window must be at least 0')
+            raise ValueError("window must be at least 0")
 
     # [document, ...]
     documents = archives.flatMap(
-        lambda archive: [document for document in list(archive)])
+        lambda archive: [document for document in list(archive)]
+    )
 
     # [(document, matches), ...]
     colocated_words = documents.map(
-        lambda document: (document, get_colocates_matches(document,
-                                                          start_word,
-                                                          end_word,
-                                                          window)))
+        lambda document: (
+            document,
+            get_colocates_matches(document, start_word, end_word, window),
+        )
+    )
     # [(document, matches), ...]
     colocated_words = colocated_words.filter(
-        lambda document_matches: len(document_matches[1]) > 0)
+        lambda document_matches: len(document_matches[1]) > 0
+    )
 
     # [(document, matches), ...]
     # =>
     # [(year, {"title": title, ...}), ...]
     matching_docs = colocated_words.map(
-        lambda document_matches:
-        (
+        lambda document_matches: (
             document_matches[0].year,
             {
                 "title": document_matches[0].title,
@@ -101,19 +105,20 @@ def do_query(archives, config_file=None, logger=None):
                 "publisher": document_matches[0].publisher,
                 "document_id": document_matches[0].code,
                 "filename": document_matches[0].archive.filename,
-                "matches": document_matches[1]
-            }
+                "matches": document_matches[1],
+            },
         )
     )
 
     # [(year, {"title": title, ...}), ...]
     # =>
     # [(year, [{"title": title, ...], {...}), ...)]
-    result = matching_docs \
-        .groupByKey() \
-        .map(lambda year_context:
-             (year_context[0], list(year_context[1]))) \
+    result = (
+        matching_docs.groupByKey()
+        .map(lambda year_context: (year_context[0], list(year_context[1])))
         .collect()
+    )
+
     return result
 
 
@@ -163,9 +168,13 @@ def get_colocates_matches(document, start_word, end_word, window=0):
                 span_length = 0
                 continue
             if normalized_word == end_word:
-                matches.append({"start_page": str(start_page.code),
-                                "end_page": str(page.code),
-                                "span": span})
+                matches.append(
+                    {
+                        "start_page": str(start_page.code),
+                        "end_page": str(page.code),
+                        "span": span,
+                    }
+                )
                 start_page = None
                 span = []
                 span_length = 0

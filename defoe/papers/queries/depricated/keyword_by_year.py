@@ -43,29 +43,36 @@ def do_query(issues, config_file=None, logger=None, context=None):
         keywords = [query_utils.normalize(word) for word in list(f)]
     # [(year, article), ...]
     articles = issues.flatMap(
-        lambda issue: [(issue.date.year, article) for article in issue.articles])
+        lambda issue: [(issue.date.year, article) for article in issue.articles]
+    )
     # [((year, word), 1), ...]
     words = articles.flatMap(
         lambda year_article: [
             ((year_article[0], query_utils.normalize(word)), 1)
             for word in year_article[1].words
-        ])
+        ]
+    )
 
     # [((year, word), 1), ...]
     matching_words = words.filter(
-        lambda yearword_count: yearword_count[0][1] in keywords)
+        lambda yearword_count: yearword_count[0][1] in keywords
+    )
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]
     # =>
     # [(year, [word, num_words]), ...]
-    result = matching_words \
-        .reduceByKey(add) \
-        .map(lambda yearword_count:
-             (yearword_count[0][0],
-              (yearword_count[0][1], yearword_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_wordcount:
-             (year_wordcount[0], list(year_wordcount[1]))) \
+    result = (
+        matching_words.reduceByKey(add)
+        .map(
+            lambda yearword_count: (
+                yearword_count[0][0],
+                (yearword_count[0][1], yearword_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1])))
         .collect()
+    )
+
     return result

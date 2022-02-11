@@ -10,9 +10,13 @@ from defoe.query_utils import PreprocessWordType
 import re
 
 
-def get_article_matches(issue,
-                        keysentences, defoe_path, os_type,
-                        preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_article_matches(
+    issue,
+    keysentences,
+    defoe_path,
+    os_type,
+    preprocess_type=PreprocessWordType.LEMMATIZE,
+):
     """
     Get articles within an issue that include one or more keywords.
     For each article that includes a specific keyword, add a tuple of
@@ -40,8 +44,10 @@ def get_article_matches(issue,
     for keysentence in keysentences:
         for article in issue:
             sentence_match = None
-            clean_article=clean_article_as_string(article, defoe_path, os_type)
-            preprocess_article=preprocess_clean_article(clean_article, preprocess_type)
+            clean_article = clean_article_as_string(article, defoe_path, os_type)
+            preprocess_article = preprocess_clean_article(
+                clean_article, preprocess_type
+            )
             sentence_match = get_sentences_list_matches(preprocess_article, keysentence)
             if sentence_match:
                 match = (issue.date.date(), issue, article, keysentence, clean_article)
@@ -49,9 +55,9 @@ def get_article_matches(issue,
     return matches
 
 
-def get_article_keywords(article,
-                         keywords,
-                         preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_article_keywords(
+    article, keywords, preprocess_type=PreprocessWordType.LEMMATIZE
+):
     """
     Get list of keywords occuring within an article.
 
@@ -67,16 +73,15 @@ def get_article_keywords(article,
     """
     matches = set()
     for word in article.words:
-        preprocessed_word = query_utils.preprocess_word(word,
-                                                        preprocess_type)
+        preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
         if preprocessed_word in keywords:
             matches.add(preprocessed_word)
     return sorted(list(matches))
 
 
-def article_contains_word(article,
-                          keyword,
-                          preprocess_type=PreprocessWordType.LEMMATIZE):
+def article_contains_word(
+    article, keyword, preprocess_type=PreprocessWordType.LEMMATIZE
+):
     """
     Check if a keyword occurs within an article.
 
@@ -91,15 +96,13 @@ def article_contains_word(article,
     :rtype: bool
     """
     for word in article.words:
-        preprocessed_word = query_utils.preprocess_word(word,
-                                                        preprocess_type)
+        preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
         if keyword == preprocessed_word:
             return True
     return False
 
 
-def article_stop_words_removal(article,
-                               preprocess_type=PreprocessWordType.LEMMATIZE):
+def article_stop_words_removal(article, preprocess_type=PreprocessWordType.LEMMATIZE):
     """
     Remove the stop words of an article.
 
@@ -111,7 +114,7 @@ def article_stop_words_removal(article,
     :return: article words without stop words
     :rtype: list(str or unicode)
     """
-    stop_words = set(stopwords.words('english'))
+    stop_words = set(stopwords.words("english"))
     article_words = []
     for word in article.words:
         preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
@@ -120,8 +123,7 @@ def article_stop_words_removal(article,
     return article_words
 
 
-def get_article_as_string(article,
-                          preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_article_as_string(article, preprocess_type=PreprocessWordType.LEMMATIZE):
     """
     Return an article as a single string.
 
@@ -133,13 +135,13 @@ def get_article_as_string(article,
     :return: article words as a string
     :rtype: string or unicode
     """
-    article_string = ''
+    article_string = ""
     for word in article.words:
         preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
-        if article_string == '':
+        if article_string == "":
             article_string = preprocessed_word
         else:
-            article_string += (' ' + preprocessed_word)
+            article_string += " " + preprocessed_word
     return article_string
 
 
@@ -162,9 +164,9 @@ def get_sentences_list_matches_2(text, keysentence):
     return sorted(list(match))
 
 
-def get_article_keyword_idx(article,
-                            keywords,
-                            preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_article_keyword_idx(
+    article, keywords, preprocess_type=PreprocessWordType.LEMMATIZE
+):
     """
     Gets a list of keywords (and their position indices) within an
     article.
@@ -188,11 +190,9 @@ def get_article_keyword_idx(article,
     return sorted(list(matches))
 
 
-def get_concordance(article,
-                    keyword,
-                    idx,
-                    window,
-                    preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_concordance(
+    article, keyword, idx, window, preprocess_type=PreprocessWordType.LEMMATIZE
+):
     """
     For a given keyword (and its position in an article), return
     the concordance of words (before and after) using a window.
@@ -225,14 +225,11 @@ def get_concordance(article,
 
     concordance_words = []
     for word in article.words[start_idx:end_idx]:
-        concordance_words.append(
-            query_utils.preprocess_word(word, preprocess_type))
+        concordance_words.append(query_utils.preprocess_word(word, preprocess_type))
     return concordance_words
 
 
-
 def clean_article_as_string(article, defoe_path, os_type):
-        
     """
     Clean a article as a single string,
     Handling hyphenated words: combine and split and also fixing the long-s
@@ -242,35 +239,35 @@ def clean_article_as_string(article, defoe_path, os_type):
     :return: clean article words as a string
     :rtype: string or unicode
     """
-    article_string = ''
+    article_string = ""
     for word in article.words:
-        if article_string == '':
+        if article_string == "":
             article_string = word
         else:
-            article_string += (' ' + word)
+            article_string += " " + word
 
-    article_separete = article_string.split('- ')
-    article_combined = ''.join(article_separete)
-  
-    if (len(article_combined) > 1) and ('f' in article_combined): 
-       article_clean = longsfix_sentence(article_combined, defoe_path, os_type) 
-       return article_clean
+    article_separete = article_string.split("- ")
+    article_combined = "".join(article_separete)
+
+    if (len(article_combined) > 1) and ("f" in article_combined):
+        article_clean = longsfix_sentence(article_combined, defoe_path, os_type)
+        return article_clean
     else:
         return article_combined
 
-def preprocess_clean_article(clean_article,
-                          preprocess_type=PreprocessWordType.LEMMATIZE):
 
+def preprocess_clean_article(
+    clean_article, preprocess_type=PreprocessWordType.LEMMATIZE
+):
 
-    clean_list = clean_article.split(' ') 
-    article_string = ''
+    clean_list = clean_article.split(" ")
+    article_string = ""
     for word in clean_list:
-        preprocessed_word = query_utils.preprocess_word(word,
-                                                         preprocess_type)
-        if article_string == '':
+        preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+        if article_string == "":
             article_string = preprocessed_word
         else:
-            article_string += (' ' + preprocessed_word)
+            article_string += " " + preprocessed_word
     return article_string
 
 
@@ -279,7 +276,7 @@ def get_sentences_list_matches(text, keysentence):
     Check which key-sentences from occurs within a string
     and return the list of matches.
     
-    o	Term count: The query counts as a “hint” every time that finds a term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated 10 times in an article, it will be counted as 10. In this way, we are basically calculating the “frequency of terms” over time.
+    Term count: The query counts as a “hint” every time that finds a term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated 10 times in an article, it will be counted as 10. In this way, we are basically calculating the “frequency of terms” over time.
 
     :param text: text
     :type text: str or unicode
@@ -287,26 +284,25 @@ def get_sentences_list_matches(text, keysentence):
     :return: Set of sentences
     :rtype: set(str or unicode)
     """
-    match = []
-    text_list= text.split()
+    matches = []
+    text_list = text.split()
     for sentence in keysentence:
         if len(sentence.split()) > 1:
             if sentence in text:
                 count = text.count(sentence)
                 for i in range(0, count):
-                    match.append(sentence)
+                    matches.append(sentence)
         else:
-            pattern = re.compile(r'^%s$'%sentence)
+            pattern = re.compile(r"^%s$" % sentence)
             for word in text_list:
                 if re.search(pattern, word):
-                    match.append(sentence)
-    return sorted(match)
+                    matches.append(sentence)
+    return sorted(matches)
 
 
 def get_articles_list_matches(text, keysentence):
-    
     """
-    o	Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time. 
+    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time. 
 
     Check which key-sentences from occurs within a string
     and return the list of matches.
@@ -318,24 +314,24 @@ def get_articles_list_matches(text, keysentence):
     :rtype: set(str or unicode)
     """
 
-    match = []
-    text_list= text.split()
+    matches = []
+    text_list = text.split()
     for sentence in keysentence:
         if len(sentence.split()) > 1:
             if sentence in text:
-                match.append(sentence)
+                matches.append(sentence)
 
         else:
-            pattern = re.compile(r'^%s$'%sentence)
+            pattern = re.compile(r"^%s$" % sentence)
             for word in text_list:
-                if re.search(pattern, word) and (sentence not in match):
-                    match.append(sentence)
-    return sorted(match)
+                if re.search(pattern, word) and (sentence not in matches):
+                    matches.append(sentence)
+    return sorted(matches)
+
 
 def get_articles_text_matches(text, keysentence):
-    
     """
-    o	Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time. 
+    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time. 
 
     Check which key-sentences from occurs within a string
     and return the list of matches.
@@ -351,10 +347,10 @@ def get_articles_text_matches(text, keysentence):
         if len(sentence.split()) > 1:
             if sentence in text:
                 if sentence not in match_text:
-                    match_text[sentence]=text
+                    match_text[sentence] = text
         else:
-            text_list= text.split()
-            pattern = re.compile(r'^%s$'%sentence)
+            text_list = text.split()
+            pattern = re.compile(r"^%s$" % sentence)
             for word in text_list:
                 if re.search(pattern, word) and (sentence not in match_text):
                     match_text[sentence] = text

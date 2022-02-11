@@ -70,35 +70,44 @@ def main():
     """
     root_module = "defoe"
     setup_module = "setup"
-    models = ["books", "papers", "fmp", "nzpp", "generic_xml", "nls", "nlsArticles", "hdfs", "psql", "es"]
+    models = [
+        "books",
+        "papers",
+        "fmp",
+        "nzpp",
+        "generic_xml",
+        "nls",
+        "nlsArticles",
+        "hdfs",
+        "psql",
+        "es",
+    ]
 
     parser = ArgumentParser(description="Run Spark text analysis job")
-    parser.add_argument("data_file",
-                        help="Data file listing data files to query")
-    parser.add_argument("model_name",
-                        help="Data model to which data files conform: " +
-                        str(models))
-    parser.add_argument("query_name",
-                        help="Query module name")
-    parser.add_argument("query_config_file",
-                        nargs="?",
-                        default=None,
-                        help="Query-specific configuration file")
-    parser.add_argument("-n",
-                        "--num_cores",
-                        nargs="?",
-                        default=1,
-                        help="Number of cores")
-    parser.add_argument("-r",
-                        "--results_file",
-                        nargs="?",
-                        default="results.yml",
-                        help="Query results file")
-    parser.add_argument("-e",
-                        "--errors_file",
-                        nargs="?",
-                        default="errors.yml",
-                        help="Errors file")
+    parser.add_argument("data_file", help="Data file listing data files to query")
+    parser.add_argument(
+        "model_name", help="Data model to which data files conform: " + str(models)
+    )
+    parser.add_argument("query_name", help="Query module name")
+    parser.add_argument(
+        "query_config_file",
+        nargs="?",
+        default=None,
+        help="Query-specific configuration file",
+    )
+    parser.add_argument(
+        "-n", "--num_cores", nargs="?", default=1, help="Number of cores"
+    )
+    parser.add_argument(
+        "-r",
+        "--results_file",
+        nargs="?",
+        default="results.yml",
+        help="Query results file",
+    )
+    parser.add_argument(
+        "-e", "--errors_file", nargs="?", default="errors.yml", help="Errors file"
+    )
 
     args = parser.parse_args()
     model_name = args.model_name
@@ -113,14 +122,10 @@ def main():
         if os.path.exists(f):
             os.remove(f)
 
-    assert model_name in models, ("'model' must be one of " + str(models))
+    assert model_name in models, "'model' must be one of " + str(models)
 
     # Dynamically load model and query modules.
-    setup = importlib.import_module(root_module +
-                                    "." +
-                                    model_name +
-                                    "." +
-                                    setup_module)
+    setup = importlib.import_module(root_module + "." + model_name + "." + setup_module)
     query = importlib.import_module(query_name)
 
     filename_to_object = setup.filename_to_object
@@ -133,43 +138,42 @@ def main():
 
     # Submit job.
     context = SparkContext(conf=conf)
-    log = context._jvm.org.apache.log4j.LogManager.getLogger(__name__)  # pylint: disable=protected-access
+    log = context._jvm.org.apache.log4j.LogManager.getLogger(
+        __name__
+    )  # pylint: disable=protected-access
 
     # Check the data_file size, just in case it is empty, which means that we just need to execute the query
-    # because the data has been already preprocessed and saved into HDFS | db. 
+    # because the data has been already preprocessed and saved into HDFS | db.
 
-    if (model_name!= "hdfs") and (model_name!= "psql") and (model_name!= "es"):
+    if (model_name != "hdfs") and (model_name != "psql") and (model_name != "es"):
         # [filename,...]
         rdd_filenames = files_to_rdd(context, num_cores, data_file=data_file)
         # [(object, None)|(filename, error_message), ...]
-        data = rdd_filenames.map(
-             lambda filename: filename_to_object(filename))
+        data = rdd_filenames.map(lambda filename: filename_to_object(filename))
 
         # [object, ...]
-        ok_data = data \
-            .filter(lambda obj_file_err: obj_file_err[1] is None) \
-            .map(lambda obj_file_err: obj_file_err[0])
+        ok_data = data.filter(lambda obj_file_err: obj_file_err[1] is None).map(
+            lambda obj_file_err: obj_file_err[0]
+        )
         # [(filename, error_message), ...]
-        error_data = data \
-            .filter(lambda obj_file_err: obj_file_err[1] is not None) \
-            .map(lambda obj_file_err: (obj_file_err[0], obj_file_err[1]))
+        error_data = data.filter(lambda obj_file_err: obj_file_err[1] is not None).map(
+            lambda obj_file_err: (obj_file_err[0], obj_file_err[1])
+        )
         # Collect and record problematic files before attempting query.
         errors = error_data.collect()
         errors = list(errors)
         if errors:
             with open(errors_file, "w") as f:
-                 f.write(yaml.safe_dump(list(errors)))
-    
-    else:
-        ok_data=filename_to_object(data_file, context)
-    
-    results = do_query(ok_data, query_config_file, log, context)
-    if results!="0":
-        with open(results_file, "w") as f:
-             #f.write(yaml.dump(dict(results), allow_unicode=True))
-             f.write(yaml.safe_dump(dict(results)))
+                f.write(yaml.safe_dump(list(errors)))
 
-      
+    else:
+        ok_data = filename_to_object(data_file, context)
+
+    results = do_query(ok_data, query_config_file, log, context)
+    if results != "0":
+        with open(results_file, "w") as f:
+            # f.write(yaml.dump(dict(results), allow_unicode=True))
+            f.write(yaml.safe_dump(dict(results)))
 
 
 if __name__ == "__main__":

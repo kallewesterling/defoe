@@ -20,6 +20,6 @@ class TestIssueGalen(TestIssue):
         """
         Creates Issue from test file fixtures/1912_11_10_galen.xml.
         """
-        self.filename = get_path(fixtures, '1912_11_10_galen.xml')
+        self.filename = get_path(fixtures, "1912_11_10_galen.xml")
         self.issue = Issue(self.filename)
         self.issue_id = "NID123-1912-1110"

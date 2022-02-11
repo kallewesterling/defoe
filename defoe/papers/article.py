@@ -33,27 +33,26 @@ class Article(object):
         """
         self.article_tree = article_tree
         self.filename = filename
-        self.quality = self.article_tree.xpath('ocr/text()')
+        self.quality = self.article_tree.xpath("ocr/text()")
         if not self.quality:
             self.quality = None
         elif len(self.quality) == 1:
             self.quality = float(self.quality[0])
         else:
             self.quality = None
-        self.title = self.article_tree.xpath('text/text.title/p/wd/text()')
-        self.preamble = self.article_tree.xpath(
-            'text/text.preamble/p/wd/text()')
-        self.content = self.article_tree.xpath('text/text.cr/p/wd/text()')
+        self.title = self.article_tree.xpath("text/text.title/p/wd/text()")
+        self.preamble = self.article_tree.xpath("text/text.preamble/p/wd/text()")
+        self.content = self.article_tree.xpath("text/text.cr/p/wd/text()")
         self.article_id = ""
-        article_id = self.article_tree.xpath('id/text()')
+        article_id = self.article_tree.xpath("id/text()")
         if article_id:
             self.article_id = str(article_id[0])
-        self.authors= ""
-        authors= self.article_tree.xpath('au/text()')
+        self.authors = ""
+        authors = self.article_tree.xpath("au/text()")
         if authors:
             self.authors = authors
         self.page_ids = []
-        pi_text = self.article_tree.xpath('pi/text()')
+        pi_text = self.article_tree.xpath("pi/text()")
         splitter = None
         if pi_text:
             if "_" in pi_text[0]:
@@ -89,7 +88,7 @@ class Article(object):
         :return: full text
         :rtype: str or unicode
         """
-        return ' '.join(self.words).replace(' - ', '')
+        return " ".join(self.words).replace(" - ", "")
 
     @property
     def title_string(self):
@@ -104,7 +103,7 @@ class Article(object):
         :return: full text
         :rtype: str or unicode
         """
-        return ' '.join(self.title).replace(' - ', '')
+        return " ".join(self.title).replace(" - ", "")
 
     @property
     def authors_string(self):
@@ -119,4 +118,4 @@ class Article(object):
         :return: full text
         :rtype: str or unicode
         """
-        return ' '.join(self.authors).replace(' - ', '')
+        return " ".join(self.authors).replace(" - ", "")

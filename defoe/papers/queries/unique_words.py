@@ -44,27 +44,30 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     threshold = 1
-    if config_file is not None and\
-       os.path.exists(config_file) and\
-       os.path.isfile(config_file):
+    if (
+        config_file is not None
+        and os.path.exists(config_file)
+        and os.path.isfile(config_file)
+    ):
         with open(config_file, "r") as f:
             config = yaml.load(f)
         value = config["threshold"]
         threshold = max(threshold, value)
 
     # [article, article, ...]
-    articles = issues.flatMap(lambda issue:
-                              [article for article in issue.articles])
+    articles = issues.flatMap(lambda issue: [article for article in issue.articles])
 
     # [(word, 1), (word, 1), ...]
-    words = articles.flatMap(lambda article:
-                             [(query_utils.normalize(word), 1) for word in article.words])
+    words = articles.flatMap(
+        lambda article: [(query_utils.normalize(word), 1) for word in article.words]
+    )
 
     # [(word, 1), (word, 1), ...]
     # =>
     # [(word, count), (word, count), ...]
-    word_counts = words. \
-        reduceByKey(add). \
-        filter(lambda word_year: word_year[1] > threshold). \
-        collect()
+    word_counts = (
+        words.reduceByKey(add)
+        .filter(lambda word_year: word_year[1] > threshold)
+        .collect()
+    )
     return word_counts

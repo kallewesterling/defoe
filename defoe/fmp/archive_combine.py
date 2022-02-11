@@ -13,7 +13,7 @@ from os import listdir
 from os.path import isfile, join
 
 
-class AltoArchive(abc.ABCMeta('ABC', (object,), {})):
+class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
     """
     Abstract base class for object model representation of ZIP|UNZIP archive
     of files in ALTO format.
@@ -32,13 +32,19 @@ class AltoArchive(abc.ABCMeta('ABC', (object,), {})):
             self.zip = zipfile.ZipFile(stream)
             self.filenames = [entry.filename for entry in self.zip.infolist()]
         else:
-            self.filenames = [entry for entry in listdir(self.filename) if isfile(join(self.filename, entry))]
+            self.filenames = [
+                entry
+                for entry in listdir(self.filename)
+                if isfile(join(self.filename, entry))
+            ]
         document_pattern = re.compile(self.get_document_pattern())
         page_pattern = re.compile(self.get_page_pattern())
         document_matches = [
-            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f]
+            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f
+        ]
         page_matches = [
-            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f]
+            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f
+        ]
         self.document_codes = {match.group(1): [] for match in document_matches}
         for match in page_matches:
             self.document_codes[match.group(1)].append(match.group(2))

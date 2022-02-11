@@ -27,9 +27,11 @@ def do_query(issues, config_file=None, logger=None, context=None):
     """
     # [(year, [quality]), ...]
     qualities = issues.flatMap(
-        lambda issue: [(issue.date.year, [article.quality]) for article in issue.articles])
+        lambda issue: [
+            (issue.date.year, [article.quality]) for article in issue.articles
+        ]
+    )
 
-    result = qualities \
-        .reduceByKey(concat) \
-        .collect()
+    result = qualities.reduceByKey(concat).collect()
+
     return result

@@ -8,6 +8,7 @@ from defoe.hdfs.query_utils import get_sentences_list_matches
 
 import yaml, os
 
+
 def do_query(df, config_file=None, logger=None, context=None):
     """
     Read from HDFS, and counts number of occurrences of keywords or keysentences and groups by year.
@@ -66,74 +67,82 @@ def do_query(df, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    
+
     # Reading data from HDFS
-    pages_hdfs = context.textFile(hdfs_data) 
-    
-    # Ignoring the first character '(' and last character ')' of each entry, and spliting by "'," 
-    pages = pages_hdfs.map(
-       lambda p_string: p_string[1:-1].split("\',")) 
-  
-    # Cleaning the first ' of each element.  
-    pages_clean = pages.map(
-      lambda p_entry: [item.split("\'")[1] for item in p_entry]) 
+    pages_hdfs = context.textFile(hdfs_data)
+
+    # Ignoring the first character '(' and last character ')' of each entry, and spliting by "',"
+    pages = pages_hdfs.map(lambda p_string: p_string[1:-1].split("',"))
+
+    # Cleaning the first ' of each element.
+    pages_clean = pages.map(lambda p_entry: [item.split("'")[1] for item in p_entry])
 
     # Getting the preprocess type from the first entry - position 10.
-    f_entry=pages_clean.take(1) 
+    f_entry = pages_clean.take(1)
     preprocess_type = f_entry[0][10]
-    
+
     with open(config_file, "r") as f:
         config = yaml.load(f)
-    
-    data_file = query_utils.extract_data_file(config,
-                                              os.path.dirname(config_file))
+
+    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keysentences = []
-    with open(data_file, 'r') as f:
+    with open(data_file, "r") as f:
         for keysentence in list(f):
             k_split = keysentence.split()
-            sentence_word = [query_utils.preprocess_word(
-                word, preprocess_type) for word in k_split]
-            sentence_norm = ''
+            sentence_word = [
+                query_utils.preprocess_word(word, preprocess_type) for word in k_split
+            ]
+            sentence_norm = ""
             for word in sentence_word:
-                if sentence_norm == '':
+                if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
-    
-     
+
     filter_pages = pages_clean.filter(
         lambda year_page: any(
-            keysentence in year_page[11] for keysentence in keysentences))
-    
-    
+            keysentence in year_page[11] for keysentence in keysentences
+        )
+    )
+
     # [(year, [keysentence, keysentence]), ...]
     # We also need to convert the string as an integer spliting first the '.
     matching_pages = filter_pages.map(
-        lambda year_page: (int(year_page[2]),
-                              get_sentences_list_matches(
-                                  year_page[11],
-                                  keysentences)))
-    
+        lambda year_page: (
+            int(year_page[2]),
+            get_sentences_list_matches(year_page[11], keysentences),
+        )
+    )
 
     # [[(year, keysentence), 1) ((year, keysentence), 1) ] ...]
     matching_sentences = matching_pages.flatMap(
-        lambda year_sentence: [((year_sentence[0], sentence), 1)
-                               for sentence in year_sentence[1]])
-
+        lambda year_sentence: [
+            ((year_sentence[0], sentence), 1) for sentence in year_sentence[1]
+        ]
+    )
 
     # [((year, keysentence), num_keysentences), ...]
     # =>
     # [(year, (keysentence, num_keysentences)), ...]
     # =>
     # [(year, [keysentence, num_keysentences]), ...]
-    result = matching_sentences\
-        .reduceByKey(add)\
-        .map(lambda yearsentence_count:
-             (yearsentence_count[0][0],
-              (yearsentence_count[0][1], yearsentence_count[1]))) \
-        .groupByKey() \
-        .map(lambda year_sentencecount:
-             (year_sentencecount[0], list(year_sentencecount[1]))) \
+    result = (
+        matching_sentences.reduceByKey(add)
+        .map(
+            lambda yearsentence_count: (
+                yearsentence_count[0][0],
+                (yearsentence_count[0][1], yearsentence_count[1]),
+            )
+        )
+        .groupByKey()
+        .map(
+            lambda year_sentencecount: (
+                year_sentencecount[0],
+                list(year_sentencecount[1]),
+            )
+        )
         .collect()
+    )
+
     return result

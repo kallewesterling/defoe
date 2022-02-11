@@ -50,42 +50,49 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
 
     # [(article, ...)]
     articles = all_articles.flatMap(
-        lambda articles: [article for article in articles.articles])
+        lambda articles: [article for article in articles.articles]
+    )
 
     # [(article, words), ...]
     # This exploits defoe.papers.query_utils.get_article_keywords
     # use of only a "words" property from the given article.
     articles_words = articles.map(
-        lambda article: (article,
-                         get_article_keywords(article, keywords)))
+        lambda article: (article, get_article_keywords(article, keywords))
+    )
 
     # [(article, words), ...]
     filtered_words = articles_words.filter(
-        lambda article_words: len(article_words[1]) > 0)
+        lambda article_words: len(article_words[1]) > 0
+    )
 
     # [(article, word), ...]
     article_words = filtered_words.flatMap(
-        lambda article_words: [(article_words[0], word)
-                               for word in article_words[1]])
+        lambda article_words: [(article_words[0], word) for word in article_words[1]]
+    )
 
     # [(article, word), ...]
     # =>
     # [(date, {"title": title, ...}), ...]
     matching_docs = article_words.map(
-        lambda article_word:
-        (article_word[0].date.date(),
-         {"title": article_word[0].title_string,
-          "paper_name": article_word[0].paper_name,
-          "content": article_word[0].words_string,
-          "word":  article_word[1],
-          "filename": article_word[0].filename}))
+        lambda article_word: (
+            article_word[0].date.date(),
+            {
+                "title": article_word[0].title_string,
+                "paper_name": article_word[0].paper_name,
+                "content": article_word[0].words_string,
+                "word": article_word[1],
+                "filename": article_word[0].filename,
+            },
+        )
+    )
 
     # [(date, {"title": title, ...}), ...]
     # =>
     # [(date, [{"title": title, ...], {...}), ...)]
-    result = matching_docs \
-        .groupByKey() \
-        .map(lambda date_context:
-             (date_context[0], list(date_context[1]))) \
+    result = (
+        matching_docs.groupByKey()
+        .map(lambda date_context: (date_context[0], list(date_context[1])))
         .collect()
+    )
+
     return result

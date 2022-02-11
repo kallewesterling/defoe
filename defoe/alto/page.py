@@ -13,17 +13,17 @@ class Page(object):
     in METS/MODS format.
     """
 
-    WORDS_XPATH = etree.XPath('//String/@CONTENT')
+    WORDS_XPATH = etree.XPath("//String/@CONTENT")
     """ XPath query for String content """
-    STRINGS_XPATH = etree.XPath('//String')
+    STRINGS_XPATH = etree.XPath("//String")
     """ XPath query for String elements """
-    IMAGES_XPATH = etree.XPath('//GraphicalElement')
+    IMAGES_XPATH = etree.XPath("//GraphicalElement")
     """ XPath query for Graphical Element """
-    PAGE_XPATH = etree.XPath('//Page')
+    PAGE_XPATH = etree.XPath("//Page")
     """ XPath query for Page """
-    WC_XPATH = etree.XPath('//String/@WC')
+    WC_XPATH = etree.XPath("//String/@WC")
     """ XPath query for Word Confidence  content """
-    CC_XPATH = etree.XPath('//String/@CC')
+    CC_XPATH = etree.XPath("//String/@CC")
     """ XPath query for Caracther Confidence content """
 
     def __init__(self, document, code, source=None):
@@ -90,7 +90,7 @@ class Page(object):
         if not self.page_words:
             self.page_words = list(map(str, self.query(Page.WORDS_XPATH)))
         return self.page_words
-    
+
     @property
     def wc(self):
         """
@@ -104,7 +104,7 @@ class Page(object):
             self.page_wc = list(self.query(Page.WC_XPATH))
 
         return self.page_wc
-    
+
     @property
     def cc(self):
         """
@@ -154,4 +154,4 @@ class Page(object):
         :return: content
         :rtype: str or unicode
         """
-        return ' '.join(self.words)
+        return " ".join(self.words)
