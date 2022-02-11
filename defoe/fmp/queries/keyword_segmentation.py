@@ -56,7 +56,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    config = query_utils.get_config()
+    config = query_utils.get_config(config_file)
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
