@@ -13,33 +13,31 @@ import os
 def do_query(df, config_file=None, logger=None, context=None):
     """
     Read from HDFS, and counts number of occurrences of keywords or keysentences and groups by year.
-    We have an entry in the HFDS file with the following information:   
+    We have an entry in the HFDS file with the following information:
     - title, edition, year, place, archive filename, page filename, page id, num pages, type of archive, model, type of preprocess treatment, prep_page_string
 
     Notice, that year is in position "2", preprocess type in poistion "10",
     and the preprocessed page as an string is in position 11. However, the information per entry has been saved as an string.
-    
-    Example of one entry saved as string. 
-    
-       u"('Encyclopaedia Britannica', 'Seventh edition, Volume 13, LAB-Magnetism', '1842', 'Edinburgh', 
-       '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/193108323', 'alto/193201394.34.xml', 
-       'Page9', '810', 'book', 'nls', 'PreprocessWordType.NORMALIZE', u'the encyclopaedia britannica dictionary of 
-        arts sciences and general literature seventh edition i with preliminary dissertations on the history of the 
-        sciences and other extensive improvements and additions including the late supplement a general index and 
+
+    Example of one entry saved as string.
+
+        u"('Encyclopaedia Britannica', 'Seventh edition, Volume 13, LAB-Magnetism', '1842', 'Edinburgh',
+        '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/193108323', 'alto/193201394.34.xml',
+        'Page9', '810', 'book', 'nls', 'PreprocessWordType.NORMALIZE', u'the encyclopaedia britannica dictionary of
+        arts sciences and general literature seventh edition i with preliminary dissertations on the history of the
+        sciences and other extensive improvements and additions including the late supplement a general index and
         numerous engravings volume xiii adam and charles black edinburgh mdcccxlii')"
-    
-     Therefore,  we need first to recreate a list per entry by spliting each string. 
 
-       [u"'Encyclopaedia Britannica", u" 'Seventh edition, Volume 13, LAB-Magnetism", u" '1842", u" 'Edinburgh", 
-       u" '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/193108323", u" 'alto/193201394.34.xml", 
-       u" 'Page9", u" '810", u" 'book", u" 'nls", u" 'PreprocessWordType.NORMALIZE", u" u'the encyclopaedia britannica dictionary of 
-       arts sciences and general literature seventh edition i with preliminary dissertations on the history of the sciences and other extensive improvements 
-       and additions including the late supplement a general index and numerous engravings volume xiii adam and charles black edinburgh mdcccxlii'"]
-   
-    And later, for this query we need to get the year (position 2, and convert it into a integer) 
-    ,preprocess type (position 10) and page (position 11). 
+    Therefore,  we need first to recreate a list per entry by spliting each string.
 
+        [u"'Encyclopaedia Britannica", u" 'Seventh edition, Volume 13, LAB-Magnetism", u" '1842", u" 'Edinburgh",
+        u" '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/193108323", u" 'alto/193201394.34.xml",
+        u" 'Page9", u" '810", u" 'book", u" 'nls", u" 'PreprocessWordType.NORMALIZE", u" u'the encyclopaedia britannica dictionary of
+        arts sciences and general literature seventh edition i with preliminary dissertations on the history of the sciences and other extensive improvements
+        and additions including the late supplement a general index and numerous engravings volume xiii adam and charles black edinburgh mdcccxlii'"]
 
+    And later, for this query we need to get the year (position 2, and convert it into a integer)
+    ,preprocess type (position 10) and page (position 11).
 
     config_file must be the path to a configuration file with a list
     of the keywords to search for, one per line.
@@ -50,13 +48,13 @@ def do_query(df, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -69,8 +67,12 @@ def do_query(df, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
+    config = query_utils.get_config(config_file)
+
     # Reading data from HDFS
-    pages_hdfs = context.textFile(hdfs_data)
+    pages_hdfs = context.textFile(
+        hdfs_data
+    )  # TODO: Looks like a bug: hdfs_data is not defined — or, since deprecated, remove file altogether
 
     # Ignoring the first character '(' and last character ')' of each entry, and spliting by "',"
     pages = pages_hdfs.map(lambda p_string: p_string[1:-1].split("',"))
@@ -81,9 +83,6 @@ def do_query(df, config_file=None, logger=None, context=None):
     # Getting the preprocess type from the first entry - position 10.
     f_entry = pages_clean.take(1)
     preprocess_type = f_entry[0][10]
-
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
 
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keysentences = []

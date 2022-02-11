@@ -7,7 +7,6 @@ crop or the filtered textblocks.
 from defoe import query_utils
 from defoe.fmp.query_utils import get_article_matches, segment_image, get_tb_matches
 
-import yaml
 import os
 
 
@@ -17,39 +16,41 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     Config_file must a yml file that has the following values:
         * preprocess: Treatment to use for preprocessing the words. Options: [normalize|stem|lemmatize|none]
-        * data: TXT file with a list of the keywords to search for, one per line. 
+        * data: TXT file with a list of the keywords to search for, one per line.
                 This should be in the same path at the configuration file.
 
         Important!! : The first two words in this list are treated as targetwords.
 
-        *years_filter: Min and Max years to filter the data. Separeted by "-"
-        *output_path: The path to store the cropped images.
+        * years_filter: Min and Max years to filter the data. Separeted by "-"
+        * output_path: The path to store the cropped images.
 
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            { "article_id": <ARTICLE ID>,
-              "issue_filename": <ISSUE.ZIP>, 
-              "issue_id": <ISSUE ID>
-              "coord": <COORDENATES>,
-              "cropped_image": <IMAGE.JPG> 
-              "page_area": <PAGE AREA>,
-              "page_filename": < PAGE FILENAME>,
-              "place": <PLACE>,
-              "textblock_id": <TEXTBLOCK ID>,
-              "title": <TITLER>,
-              "words": <WORDS>,
-              "preprocessed_words": <PREPROCESSED WORDS> 
-              "year": <YEAR>,
-              "date": <DATE>
-            },
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    {
+                        "article_id": <ARTICLE ID>,
+                        "issue_filename": <ISSUE.ZIP>,
+                        "issue_id": <ISSUE ID>,
+                        "coord": <COORDENATES>,
+                        "cropped_image": <IMAGE.JPG>,
+                        "page_area": <PAGE AREA>,
+                        "page_filename": < PAGE FILENAME>,
+                        "place": <PLACE>,
+                        "textblock_id": <TEXTBLOCK ID>,
+                        "title": <TITLER>,
+                        "words": <WORDS>,
+                        "preprocessed_words": <PREPROCESSED WORDS>,
+                        "year": <YEAR>,
+                        "date": <DATE>
+                    },
+                    ...
+                ],
+            <WORD>:
+                ...
         }
+
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
@@ -60,8 +61,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by word
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     year_min, year_max = query_utils.extract_years_filter(config)
@@ -75,12 +77,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # We can change the following line, if we want to include more or less words as target_words.
     # In this case, the first two words of the lexicon are selected as target_words
     target_words = keywords[0:2]
+
     # The rest of words of the lexicon are selected as keywords
     keywords = keywords[2:]
-    # [document, ...]
 
     # We will select/filter the textblocks that follows this rule: The text contains at least one target words AND one keyword.
 
+    # [document, ...]
     documents = archives.flatMap(
         lambda archive: [
             document

@@ -55,8 +55,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+    config = query_utils.get_config(config_file)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keywords = []

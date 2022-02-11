@@ -11,7 +11,6 @@ from defoe.papers.query_utils import (
     get_articles_list_matches,
 )
 
-import yaml
 import os
 
 
@@ -29,22 +28,24 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     Returns result of form:
         {
-          <YEAR>:
-          [
-            [- article_id:
-             - authors:
-             - filename:
-             - issue_id:
-             - page_ids:
-             - text:
-             - term
-             - title ]
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [
+                        article_id: ...
+                        authors: ...
+                        filename: ...
+                        issue_id: ...
+                        page_ids: ...
+                        text: ...
+                        term: ...
+                        title: ...
+                    ],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
-        
+
     :param issues: RDD of defoe.papers.issue.Issue
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
@@ -54,8 +55,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -84,8 +86,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
-    # [(year, article_string), ...]
 
+    # [(year, article_string), ...]
     clean_articles = issues.flatMap(
         lambda issue: [
             (
@@ -154,7 +156,6 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     # [(date, {"title": title, ...}), ...]
     # =>
-
     result = (
         matching_data.groupByKey()
         .map(lambda date_context: (date_context[0], list(date_context[1])))

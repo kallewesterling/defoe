@@ -5,7 +5,6 @@ Gets concordance for keywords and groups by word.
 from defoe import query_utils
 from defoe.fmp.query_utils import get_article_matches
 
-import yaml
 import os
 
 
@@ -22,23 +21,24 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            { "article_id": <ARTICLE ID>,
-              "issue_filename": <ISSUE.ZIP>, 
-              "coord": <COORDENATES>, 
-              "page_area": <PAGE AREA>,
-              "page_filename": < PAGE FILENAME>,
-              "place": <PLACE>,
-              "textblock_id": <TEXTBLOCK ID>,
-              "title": <TITLER>,
-              "words": <WORDS>
-              "year": <YEAR>,
-            },
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    {
+                        "article_id": <ARTICLE ID>,
+                        "issue_filename": <ISSUE.ZIP>,
+                        "coord": <COORDENATES>,
+                        "page_area": <PAGE AREA>,
+                        "page_filename": < PAGE FILENAME>,
+                        "place": <PLACE>,
+                        "textblock_id": <TEXTBLOCK ID>,
+                        "title": <TITLER>,
+                        "words": <WORDS>
+                        "year": <YEAR>,
+                    },
+                    ...
+                ],
+            <WORD>:
+                ...
         }
 
     :param archives: RDD of defoe.fmp.archive.Archive
@@ -51,8 +51,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by word
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
@@ -70,6 +71,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     filtered_words = documents.flatMap(
         lambda document: get_article_matches(document, keywords, preprocess_type)
     )
+
     # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, page_name, keyword), ....]
     # =>
     # [(word, {"article_id": article_id, ...}), ...]

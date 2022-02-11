@@ -6,31 +6,30 @@ from defoe import query_utils
 from defoe.hdfs.query_utils import get_sentences_list_matches, blank_as_null
 
 from operator import add
-import yaml
 import os
 
 
 def do_query(df, config_file=None, logger=None, context=None):
     """
     Read from HDFS, and counts number of occurrences of keywords or keysentences and groups by year.
-    We have an entry in the HFDS file with the following information: 
-    
-    "title",  "edition", "year", "place", "archive_filename",  "source_text_filename", 
-    "text_unit", "text_unit_id", "num_text_unit", "type_archive", "model", "source_text_raw", 
+    We have an entry in the HFDS file with the following information:
+
+    "title",  "edition", "year", "place", "archive_filename",  "source_text_filename",
+    "text_unit", "text_unit_id", "num_text_unit", "type_archive", "model", "source_text_raw",
     "source_text_clean", "source_text_norm", "source_text_lemmatize", "source_text_stem", "num_words"
 
     A configuration file is needed, to indicate the lexicon, the preprocessed treatment to use.
-  
+
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -43,8 +42,8 @@ def do_query(df, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+    config = query_utils.get_config(config_file)
+
     preprocess_config = config["preprocess"]
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))

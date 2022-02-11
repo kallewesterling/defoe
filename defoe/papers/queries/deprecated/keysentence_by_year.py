@@ -7,12 +7,10 @@ stemmed, or normalized and lemmatized (default).
 """
 
 from defoe import query_utils
-from defoe.papers.query_utils import get_article_as_string
-from defoe.papers.query_utils import get_sentences_list_matches
+from defoe.papers.query_utils import get_article_as_string, get_sentences_list_matches
 
 from operator import add
 import os.path
-import yaml
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -55,10 +53,12 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keysentences grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -73,6 +73,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
+
     # [(year, article_string)
     articles = issues.flatMap(
         lambda issue: [

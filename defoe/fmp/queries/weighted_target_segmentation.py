@@ -128,30 +128,32 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            { "article_id": <ARTICLE ID>,
-              "issue_filename": <ISSUE.ZIP>, 
-              "issue_id": <ISSUE ID>
-              "coord": <COORDENATES>,
-              "cropped_image": <IMAGE.JPG> 
-              "page_area": <PAGE AREA>,
-              "page_filename": < PAGE FILENAME>,
-              "place": <PLACE>,
-              "textblock_id": <TEXTBLOCK ID>,
-              "title": <TITLER>,
-              "words": <WORDS>,
-              "preprocessed_words": <PREPROCESSED WORDS> 
-              "year": <YEAR>,
-              "date": <DATE>,
-              "distance": <DISTANCE BETWEEN TARGET AND KEYWORD>,
-              "total_words": <NUMBER OF WORDS IN TEXTBLOCK>
-            },
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    {
+                        "article_id": <ARTICLE ID>,
+                        "issue_filename": <ISSUE.ZIP>,
+                        "issue_id": <ISSUE ID>
+                        "coord": <COORDENATES>,
+                        "cropped_image": <IMAGE.JPG>,
+                        "page_area": <PAGE AREA>,
+                        "page_filename": < PAGE FILENAME>,
+                        "place": <PLACE>,
+                        "textblock_id": <TEXTBLOCK ID>,
+                        "title": <TITLER>,
+                        "words": <WORDS>,
+                        "preprocessed_words": <PREPROCESSED WORDS>,
+                        "year": <YEAR>,
+                        "date": <DATE>,
+                        "distance": <DISTANCE BETWEEN TARGET AND KEYWORD>,
+                        "total_words": <NUMBER OF WORDS IN TEXTBLOCK>
+                    },
+                    ...
+                ],
+            <WORD>:
+                ...
         }
+
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
@@ -162,8 +164,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by word
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     year_min, year_max = query_utils.extract_years_filter(config)

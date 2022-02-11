@@ -6,13 +6,14 @@ Words in articles, target words and keywords can be normalized,
 normalized and stemmed, or normalized and lemmatized (default).
 """
 
-import os.path
-import yaml
-
 from defoe import query_utils
-from defoe.papers.query_utils import article_contains_word
-from defoe.papers.query_utils import get_article_keyword_idx
-from defoe.papers.query_utils import get_concordance
+from defoe.papers.query_utils import (
+    article_contains_word,
+    get_article_keyword_idx,
+    get_concordance,
+)
+
+import os.path
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -61,8 +62,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
     by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     window = query_utils.extract_window_size(config)
@@ -80,12 +82,14 @@ def do_query(issues, config_file=None, logger=None, context=None):
             for article in issue.articles
         ]
     )
+
     # [(year, article, filename, ocr), ...]
     target_articles = articles.filter(
         lambda year_article_file_ocr: article_contains_word(
             year_article_file_ocr[1], target_word, preprocess_type
         )
     )
+
     # [(year, article, filename, [(word, idx), (word, idx) ...], ocr), ...]
     matching_idx = target_articles.map(
         lambda year_article_file_ocr: (
@@ -100,6 +104,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
             )
         )
     )
+
     # [(year, [(filename, word, [concordance, ...], ocr), ...])]
     concordance_words = matching_idx.flatMap(
         lambda year_article_file_matches_ocr: [

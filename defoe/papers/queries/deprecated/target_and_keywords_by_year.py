@@ -12,7 +12,6 @@ from defoe.papers.query_utils import get_article_keywords
 
 from operator import add
 import os.path
-import yaml
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -37,17 +36,17 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {
-              "target_word": <WORD>,
-              "words": [<WORD>, <WORD>, ...],
-              "count": <COUNT>
-            },
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    {
+                        "target_word": <WORD>,
+                        "words": [<WORD>, <WORD>, ...],
+                        "count": <COUNT>
+                    },
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -59,10 +58,12 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keywords = []
     with open(data_file, "r") as f:
         keywords = [
@@ -76,12 +77,14 @@ def do_query(issues, config_file=None, logger=None, context=None):
     articles = issues.flatMap(
         lambda issue: [(issue.date.year, article) for article in issue.articles]
     )
+
     # [(year, article), ...]
     target_articles = articles.filter(
         lambda year_article: article_contains_word(
             year_article[1], target_word, preprocess_type
         )
     )
+
     # [((year, [word, word, ...]), 1), ...]
     words = target_articles.map(
         lambda year_article: (
@@ -92,8 +95,10 @@ def do_query(issues, config_file=None, logger=None, context=None):
             1,
         )
     )
+
     # [((year, [word, word, ...]), 1), ...]
     match_words = words.filter(lambda yearword_count: len(yearword_count[0][1]) > 0)
+
     # [((year, "target_word, word, word, ..."), 1), ...]
     # Convert word list to string so can serve as a key.
     multi_words = match_words.map(
@@ -102,6 +107,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
             yearword_count[1],
         )
     )
+
     # [((year, "word, word, ..."), 1), ...]
     # =>
     # [((year, "word, word, ..."), count), ...]
@@ -141,7 +147,10 @@ def word_article_count_list_to_dict(target_word, word_counts):
 
     List is of form:
 
-       [("word, word, ...", count), ...]
+        [
+            ("word, word, ...", count),
+            ...
+        ]
 
     Dictionary is of form:
 
@@ -158,6 +167,7 @@ def word_article_count_list_to_dict(target_word, word_counts):
     :return: dict
     :rtype: dict
     """
+
     result = []
     for word_count in word_counts:
         result.append(

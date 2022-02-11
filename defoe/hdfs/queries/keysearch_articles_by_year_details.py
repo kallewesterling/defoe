@@ -1,14 +1,13 @@
 """
 Select the EB articles using a keysentences or keywords list and groups by date.
-Use this query ONLY for searching in the EB articles stored in HDFS previously 
-using nlsArticles/write_articles_pages_df_hdfs.py query. 
+Use this query ONLY for searching in the EB articles stored in HDFS previously
+using nlsArticles/write_articles_pages_df_hdfs.py query.
 """
 
 from defoe import query_utils
 from defoe.hdfs.query_utils import get_articles_list_matches, blank_as_null
 from defoe.nls.query_utils import preprocess_clean_page
 
-import yaml
 import os
 
 
@@ -17,36 +16,39 @@ def do_query(df, config_file=None, logger=None, context=None):
     Gets concordance using a window of words, for keywords and groups by date.
 
     Data in HDFS have the following colums:
-    
-    "title",  "edition", "year", "place", "archive_filename",  "source_text_filename", "text_unit", 
+
+    "title",  "edition", "year", "place", "archive_filename",  "source_text_filename", "text_unit",
     "text_unit_id", "num_text_unit", "type_archive", "model", "type_page", "header", "term", "definition",
-    "num_articles", "num_page_words", "num_article_words", 
+    "num_articles", "num_page_words", "num_article_words",
 
-    config_file must be the path to a lexicon file with a list of the keywords 
+    config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
-    Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system. 
 
-      Returns result of form:
+    Also the config_file can indicate the preprocess treatment, along with the defoe
+    path, and the type of operating system.
+
+    Returns result of form:
         {
-          <YEAR>:
-          [
-            [- title: 
-             - edition:
-             - archive_filename:
-             - page number:
-             - header:
-             - term:
-             - article:
-             - article-definition: ], 
-             [], 
-            ...
-         
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [
+                        "title": ...
+                        edition: ...
+                        archive_filename: ...
+                        page number: ...
+                        header: ...
+                        term: ...
+                        article: ...
+                        article-definition: ...
+                    ],
+                    [
+                        ...
+                    ],
+                ...
+            <YEAR>:
+                ...
         }
-  
+
     :type issues: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
     :type config_file: str or unicode
@@ -56,8 +58,9 @@ def do_query(df, config_file=None, logger=None, context=None):
     by date
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     # Filter out the pages that are null, which model is nls, and select only 2 columns: year and the page as string (either raw or preprocessed).

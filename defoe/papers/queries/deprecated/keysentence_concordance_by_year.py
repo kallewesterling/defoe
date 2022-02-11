@@ -6,8 +6,6 @@ from defoe import query_utils
 from defoe.papers.query_utils import get_article_matches
 from defoe.papers.query_utils import PreprocessWordType
 
-
-import yaml
 import os
 
 
@@ -24,21 +22,21 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <DATE>:
-          [
-            {
-              "title": <TITLE>,
-              "page_ids": <PAGE_IDS>,
-              "content": <PAGE_CONTENT>,
-              "word": <WORD>,
-              "article_id": <ARTICLE_ID>,
-              "issue_id": <ISSUE_ID>,
-              "filename": <FILENAME>
-            },
+            <DATE>:
+                [
+                    {
+                        "title": <TITLE>,
+                        "page_ids": <PAGE_IDS>,
+                        "content": <PAGE_CONTENT>,
+                        "word": <WORD>,
+                        "article_id": <ARTICLE_ID>,
+                        "issue_id": <ISSUE_ID>,
+                        "filename": <FILENAME>
+                    },
+                    ...
+                ],
+            <DATE>:
             ...
-          ],
-          <DATE>:
-          ...
         }
 
     :param issues: RDD of defoe.alto.issue.Issue
@@ -51,10 +49,12 @@ def do_query(issues, config_file=None, logger=None, context=None):
     by date
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):

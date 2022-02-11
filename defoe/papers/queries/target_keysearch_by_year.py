@@ -1,58 +1,54 @@
 """
 Count number of articles in which appear keywords or keysentences.
 Filter those by target words, and group results by year
-This query is the recommended to use when there are target words. 
+This query is the recommended to use when there are target words.
 """
 
-from operator import add
-
 from defoe import query_utils
-from defoe.papers.query_utils import preprocess_clean_article, clean_article_as_string
 from defoe.papers.query_utils import (
-    get_sentences_list_matches,
+    preprocess_clean_article,
+    clean_article_as_string,
     get_articles_list_matches,
 )
 
-import yaml
+from operator import add
 import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
     """
     Counts number of occurrences of keywords or keysentences and groups by year.
-    
-    Furthermore, this query allow us to specify the target words, to select all articles 
-    which have at least one of the target words.  
+
+    Furthermore, this query allow us to specify the target words, to select all articles
+    which have at least one of the target words.
 
     config_file must be the path to a lexicon file with a list
     of the keywords to search for, one per line.
-    
-    Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system. We can also configure how many target words 
-    we want to use, and in which position the lexicon words starts. 
-    
-    For indicating the number of target words to use from the lexicon file, we can indicate it 
-    in the configuration file as, num_target: 1. That means, that we have only one word/sentence
-    as the target word (the first one). 
-    
-    If we want to include the target words in the lexicon, we should indicate in 
-    the configuration file as, lexicon_start: 0.
-    
-    If we do not want to include the target words (lets image that we have just one target word) 
-    in the lexicon, we should indicate in the configuration file as, lexicon_start: 1.
-    
 
+    Also the config_file can indicate the preprocess treatment, along with the defoe
+    path, and the type of operating system. We can also configure how many target words
+    we want to use, and in which position the lexicon words starts.
+
+    For indicating the number of target words to use from the lexicon file, we can indicate it
+    in the configuration file as, num_target: 1. That means, that we have only one word/sentence
+    as the target word (the first one).
+
+    If we want to include the target words in the lexicon, we should indicate in
+    the configuration file as, lexicon_start: 0.
+
+    If we do not want to include the target words (lets image that we have just one target word)
+    in the lexicon, we should indicate in the configuration file as, lexicon_start: 1.
 
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -64,8 +60,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -82,6 +79,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     num_target = int(config["num_target"])
     lexicon_start = int(config["lexicon_start"])
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -96,8 +94,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
-    # [(year, article_string), ...]
 
+    # [(year, article_string), ...]
     target_sentences = keysentences[0:num_target]
     keysentences = keysentences[lexicon_start:]
     clean_articles = issues.flatMap(

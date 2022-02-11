@@ -6,7 +6,6 @@ from defoe import query_utils
 from defoe.hdfs.query_utils import get_sentences_list_matches
 
 from operator import add
-import yaml
 import os
 
 
@@ -36,8 +35,7 @@ def do_query(df, config_file=None, logger=None, context=None):
         arts sciences and general literature seventh edition i with preliminary dissertations on the history of the sciences and other extensive improvements
         and additions including the late supplement a general index and numerous engravings volume xiii adam and charles black edinburgh mdcccxlii'"]
 
-    And later, for this query we need to get the year (position 2, and convert it into a integer)
-    ,preprocess type (position 10) and page (position 11).
+    And later, for this query we need to get the year (position 2, and convert it into a integer), preprocess type (position 10) and page (position 11).
 
     config_file must be the path to a configuration file with a list
     of the keywords to search for, one per line.
@@ -48,13 +46,13 @@ def do_query(df, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -67,8 +65,12 @@ def do_query(df, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
+    config = query_utils.get_config(config_file)
+
     # Reading data from HDFS
-    pages_hdfs = context.textFile(hdfs_data)
+    pages_hdfs = context.textFile(
+        hdfs_data
+    )  # TODO: Looks like a bug: hdfs_data is not defined — or, since deprecated, remove file altogether
 
     # Ignoring the first character '(' and last character ')' of each entry, and spliting by "',"
     pages = pages_hdfs.map(lambda p_string: p_string[1:-1].split("',"))
@@ -79,9 +81,6 @@ def do_query(df, config_file=None, logger=None, context=None):
     # Getting the preprocess type from the first entry - position 10.
     f_entry = pages_clean.take(1)
     preprocess_type = f_entry[0][10]
-
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
 
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keysentences = []

@@ -1,7 +1,7 @@
 """
 Counts number of articles in which appear keywords or keysentences.
-Groups results by year. 
-This query is the recommended to use when there are not target words.  
+Groups results by year.
+This query is the recommended to use when there are not target words.
 """
 
 from operator import add
@@ -10,34 +10,31 @@ from defoe import query_utils
 from defoe.papers.query_utils import preprocess_clean_article, clean_article_as_string
 from defoe.papers.query_utils import get_sentences_list_matches
 
-import yaml
 import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
     """
     Counts number of occurrences of keywords or keysentences and groups by year.
-    
-    This query is the recommended to use when there are not target words.  
+
+    This query is the recommended to use when there are not target words.
 
     config_file must be the path to a lexicon file with a list
     of the keywords to search for, one per line.
-    
-    Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system. 
 
-   
+    Also the config_file can indicate the preprocess treatment, along with the defoe
+    path, and the type of operating system.
 
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -49,8 +46,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -65,6 +63,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -79,6 +78,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
+
     # [(year, article_string), ...]
     clean_articles = issues.flatMap(
         lambda issue: [
@@ -93,6 +93,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
             (cl_article[0], preprocess_clean_article(cl_article[1], preprocess_type))
         ]
     )
+
     # [(year, clean_article_string)
     filter_articles = t_articles.filter(
         lambda year_article: any(

@@ -2,10 +2,9 @@
 Gets colocated words and groups by year.
 """
 
-import os
-import yaml
-
 from defoe import query_utils
+
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -59,13 +58,17 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     window = 0
+    """
+    TODO: I believe the if statement here should be in the get_config function
+    - and raise an error if something happens?
+    """
     if (
         config_file is not None
         and os.path.exists(config_file)
         and os.path.isfile(config_file)
     ):
-        with open(config_file, "r") as f:
-            config = yaml.safe_load(f)
+        config = query_utils.get_config(config_file)
+
         start_word = query_utils.normalize(config["start_word"])
         end_word = query_utils.normalize(config["end_word"])
         window = config["window"]

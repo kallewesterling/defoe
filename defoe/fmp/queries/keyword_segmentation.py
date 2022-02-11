@@ -5,7 +5,6 @@ Segementation of images for keywords and groups by word.
 from defoe import query_utils
 from defoe.fmp.query_utils import get_article_matches, segment_image
 
-import yaml
 import os
 
 
@@ -69,7 +68,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
         ]
 
     # [document, ...]
-
     documents = archives.flatMap(
         lambda archive: [
             document

@@ -12,7 +12,6 @@ from defoe.papers.query_utils import (
     get_articles_list_matches,
 )
 
-import yaml
 import os
 
 
@@ -42,23 +41,23 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [- article_id:
-             - authors:
-             - filename:
-             - issue_id:
-             - page_ids:
-             - preprocessed_text:
-             - term
-             - title ]
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [
+                        - article_id: ...
+                        - authors: ...
+                        - filename: ...
+                        - issue_id: ...
+                        - page_ids: ...
+                        - preprocessed_text: ...
+                        - term: ...
+                        - title: ...
+                    ],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
-        
-
 
     :param issues: RDD of defoe.papers.issue.Issue
     :type archives: pyspark.rdd.PipelinedRDD
@@ -69,8 +68,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -87,6 +87,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     num_target = int(config["num_target"])
     lexicon_start = int(config["lexicon_start"])
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -101,8 +102,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 else:
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
-    # [(year, article_string), ...]
 
+    # [(year, article_string), ...]
     target_sentences = keysentences[0:num_target]
     keysentences = keysentences[lexicon_start:]
     clean_articles = issues.flatMap(
@@ -146,7 +147,6 @@ def do_query(issues, config_file=None, logger=None, context=None):
     # [(year, [keysentence, keysentence]), ...]
     # Note: get_articles_list_matches ---> articles count
     # Note: get_sentences_list_matches ---> word_count
-
     matching_articles = filter_articles.map(
         lambda year_article: (
             year_article[0],
@@ -188,7 +188,6 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     # [(date, {"title": title, ...}), ...]
     # =>
-
     result = (
         matching_data.groupByKey()
         .map(lambda date_context: (date_context[0], list(date_context[1])))

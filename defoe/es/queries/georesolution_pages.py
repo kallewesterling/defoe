@@ -1,62 +1,60 @@
 """
 It uses ES stored data
-Identify the locations per page and geo-resolve them. 
+Identify the locations per page and geo-resolve them.
 It uses spaCy for identifying all posible locations within a page.
 It uses the Edinburgh georesolve for getting the latituted and longitude of each location.
 """
 
 from defoe.hdfs.query_utils import blank_as_null
 from defoe.nls.query_utils import georesolve_page_2
-
-import yaml
+from defoe import query_utils
 
 
 def do_query(df, config_file=None, logger=None, context=None):
     """
-    Retrieves NLS pages from ES, which have been previously clean and stored. 
+    Retrieves NLS pages from ES, which have been previously clean and stored.
     Applies spaCy NLP pipeline for identifying the possible locations of each page. And applies the edinburgh geoparser for getting the latituted and longitude of each of them.
-    
-    A config_file must be the path to a lexicon file with a list of the keywords 
+
+    A config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
-    A config_file should be indicated to specify the lang_model, gazetteer to use, 
-    the defoe_path, the bounding box (optional), as well as the operating system. 
-    
+
+    A config_file should be indicated to specify the lang_model, gazetteer to use,
+    the defoe_path, the bounding box (optional), as well as the operating system.
+
     Example:
-      - 1842:
-        - archive: /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554
-        - edition: 1842, Volume 1
-        - georesolution_page:
-            - Aberdeenshire-19:
-              - in-cc: ''
-              - lat: '57.21923117162595'
-              - long: '-2.801013003249016'
-              - pop: ''
-              - snippet: 'BUCHAN , a district of Aberdeenshire , extending along the coast '
-              - type: civila
-            - Cumberland-12:
-              - in-cc: ''
-              - lat: '51.4342921249674'
-              - long: '-0.6131610294930387'
-              - pop: ''
-              - snippet: 'all the low country of Cumberland lies full before you , '
-              - type: fac
-             ....
-        - lang_model: en_core_web_lg
-        - page_filename: alto/97440572.34.xml
-    
+        - 1842:
+            - archive: /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554
+            - edition: 1842, Volume 1
+            - georesolution_page:
+                - Aberdeenshire-19:
+                    - in-cc: ''
+                    - lat: '57.21923117162595'
+                    - long: '-2.801013003249016'
+                    - pop: ''
+                    - snippet: 'BUCHAN , a district of Aberdeenshire , extending along the coast '
+                    - type: civila
+                - Cumberland-12:
+                    - in-cc: ''
+                    - lat: '51.4342921249674'
+                    - long: '-0.6131610294930387'
+                    - pop: ''
+                    - snippet: 'all the low country of Cumberland lies full before you , '
+                    - type: fac
+                ....
+            - lang_model: en_core_web_lg
+            - page_filename: alto/97440572.34.xml
+
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
     :type config_file: str or unicode
     :param logger: logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: 
+    :return:
     :rtype: string
     """
 
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+    config = query_utils.get_config(config_file)
 
     lang_model = config["lang_model"]
     gazetteer = config["gazetteer"]

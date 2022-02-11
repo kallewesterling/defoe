@@ -7,7 +7,6 @@ from defoe import query_utils
 from defoe.nls.query_utils import get_pages_matches_no_prep
 from defoe.hdfs.query_utils import blank_as_null
 
-import yaml
 import os
 
 
@@ -17,32 +16,33 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     Data in ES have the following colums:
 
-    "title",  "edition", "year", "place", "archive_filename", 
-    "source_text_filename", "text_unit", "text_unit_id", 
-    "num_text_unit", "type_archive", "model", "source_text_raw", 
+    "title",  "edition", "year", "place", "archive_filename",
+    "source_text_filename", "text_unit", "text_unit_id",
+    "num_text_unit", "type_archive", "model", "source_text_raw",
     "source_text_clean", "source_text_norm", "source_text_lemmatize", "source_text_stem",
     "num_words"
 
     config_file must be used for indicated the list of words/sentences (lexicon) to search,
-    and the preprocess treatment to select from ES. 
+    and the preprocess treatment to select from ES.
 
 
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {"title": 
-            "edition": 
-            "archive_name": 
-            "filename": 
-            "text": 
-            "keysentence": 
-            },
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    {
+                        "title": ...
+                        "edition": ...
+                        "archive_name": ...
+                        "filename": ...
+                        "text": ...
+                        "keysentence": ...
+                    },
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param issues: RDD of defoe.alto.issue.Issue
@@ -55,8 +55,9 @@ def do_query(df, config_file=None, logger=None, context=None):
     by date
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     preprocess_config = config["preprocess"]
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
