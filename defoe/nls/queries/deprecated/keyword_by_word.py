@@ -39,7 +39,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO: Can remove keywords here as it's defined afterwards
+    # TODO #1: Remove `keywords = []` as it is defined below?
     keywords = []
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]

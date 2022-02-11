@@ -39,7 +39,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO: `keyword` can be removed here as it's defined below
+    TODO  # 1: Remove as it is unneccesary?
     keywords = []
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]

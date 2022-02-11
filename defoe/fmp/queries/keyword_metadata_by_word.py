@@ -57,6 +57,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
+    # TODO #1: Remove `keywords = []` as it is defined below?
     keywords = []
     with open(data_file, "r") as f:
         keywords = [

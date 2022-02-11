@@ -20,13 +20,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<WORD>, <NUM_WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<WORD>, <NUM_WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive
@@ -38,9 +38,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
+
+    # TODO #1: Remove `keywords = []` as it is defined below?
     keywords = []
+
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]
+
     # [(year, document), ...]
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]

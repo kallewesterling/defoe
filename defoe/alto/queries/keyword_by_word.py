@@ -20,13 +20,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            [<YEAR>, <NUM_WORDS>],
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    [<YEAR>, <NUM_WORDS>],
+                    ...
+                ],
+            <WORD>:
+                ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive
@@ -38,7 +38,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by word
     :rtype: dict
     """
-    keywords = []  # TODO #1: Remove as it is unneccesary?
+
+    # TODO #1: Remove `keywords = []` as it is defined below?
+    keywords = []
 
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]

@@ -44,6 +44,8 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     by date
     :rtype: dict
     """
+
+    # TODO #1: Remove `keywords = []` as it is defined below?
     keywords = []
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]
