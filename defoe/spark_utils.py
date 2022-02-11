@@ -24,6 +24,7 @@ def files_to_rdd(context, num_cores=1, data_file="data.txt"):
     :rtype: pyspark.rdd.RDD
     """
     filenames = [filename.strip() for filename in list(open(data_file))]
+    print(filenames)
     rdd_filenames = context.parallelize(filenames, num_cores)
     return rdd_filenames
 
