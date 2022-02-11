@@ -56,7 +56,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     with open(config_file, "r") as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keysentences = []

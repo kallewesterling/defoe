@@ -65,7 +65,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         and os.path.isfile(config_file)
     ):
         with open(config_file, "r") as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
         start_word = query_utils.normalize(config["start_word"])
         end_word = query_utils.normalize(config["end_word"])
         window = config["window"]

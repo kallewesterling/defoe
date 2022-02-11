@@ -56,7 +56,7 @@ def do_query(df, config_file=None, logger=None, context=None):
     """
 
     with open(config_file, "r") as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
     gazetteer = config["gazetteer"]
     if "bounding_box" in config:
         bounding_box = " -lb " + config["bounding_box"] + " 2"

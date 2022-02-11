@@ -81,7 +81,7 @@ def do_query(df, config_file=None, logger=None, context=None):
     preprocess_type = f_entry[0][10]
 
     with open(config_file, "r") as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
 
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     keysentences = []

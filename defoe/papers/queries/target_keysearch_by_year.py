@@ -65,7 +65,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
     with open(config_file, "r") as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"

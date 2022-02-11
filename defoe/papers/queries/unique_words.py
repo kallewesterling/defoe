@@ -50,7 +50,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         and os.path.isfile(config_file)
     ):
         with open(config_file, "r") as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
         value = config["threshold"]
         threshold = max(threshold, value)
 
