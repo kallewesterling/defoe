@@ -15,10 +15,10 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     Config_file must a yml file that has the following values:
         * preprocess: Treatment to use for preprocessing the words. Options: [normalize|stem|lemmatize|none]
-        * data: TXT file with a list of the keywords to search for, one per line. 
+        * data: TXT file with a list of the keywords to search for, one per line.
                 This should be in the same path at the configuration file.
-        *years_filter: Min and Max years to filter the data. Separeted by "-"
-        *output_path: The path to store the cropped images.
+        * years_filter: Min and Max years to filter the data. Separeted by "-"
+        * output_path: The path to store the cropped images.
 
     Returns result of form:
 
@@ -55,8 +55,10 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by word
     :rtype: dict
     """
+
     with open(config_file, "r") as f:
         config = yaml.load(f)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     year_min, year_max = query_utils.extract_years_filter(config)

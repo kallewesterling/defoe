@@ -148,6 +148,7 @@ def main():
     if (model_name != "hdfs") and (model_name != "psql") and (model_name != "es"):
         # [filename,...]
         rdd_filenames = files_to_rdd(context, num_cores, data_file=data_file)
+
         # [(object, None)|(filename, error_message), ...]
         data = rdd_filenames.map(lambda filename: filename_to_object(filename))
 
@@ -155,10 +156,12 @@ def main():
         ok_data = data.filter(lambda obj_file_err: obj_file_err[1] is None).map(
             lambda obj_file_err: obj_file_err[0]
         )
+
         # [(filename, error_message), ...]
         error_data = data.filter(lambda obj_file_err: obj_file_err[1] is not None).map(
             lambda obj_file_err: (obj_file_err[0], obj_file_err[1])
         )
+
         # Collect and record problematic files before attempting query.
         errors = error_data.collect()
         errors = list(errors)
