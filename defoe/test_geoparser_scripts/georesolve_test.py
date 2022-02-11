@@ -5,7 +5,9 @@ from spacy.vocab import Vocab
 
 
 def get_defoe_home():
-    current_username = input("What is your current username? [rosa_filgueira_vicente]")
+    current_username = input(
+        "What is your current username? [rosa_filgueira_vicente]\n"
+    )
 
     if not current_username:
         current_username = "rosa_filgueira_vicente"

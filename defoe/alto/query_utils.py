@@ -100,7 +100,7 @@ def calculate_words_within_dictionary(
 ):
     """
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
-    Page words are normalized. 
+    Page words are normalized.
     :param page: Page
     :type page: defoe.alto.page.Page
     :param preprocess_type: how words should be preprocessed
@@ -127,7 +127,7 @@ def calculate_words_within_dictionary(
 def calculate_words_confidence_average(page):
     """
     Calculates the average of "words confidence (wc)"  within a page.
-    Page words are normalized. 
+    Page words are normalized.
     :param page: Page
     :type page: defoe.alto.page.Page
     :param preprocess_type: how words should be preprocessed

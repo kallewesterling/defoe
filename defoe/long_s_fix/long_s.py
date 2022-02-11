@@ -1,8 +1,20 @@
 import subprocess
 import re
 
+
+def get_defoe_home():
+    current_username = input(
+        "What is your current username? [rosa_filgueira_vicente]\n"
+    )
+
+    if not current_username:
+        current_username = "rosa_filgueira_vicente"
+
+    return f"/home/{current_username}/defoe/"
+
+
 # change this according to your path
-defoe_path = "/home/rosa_filgueira_vicente/defoe/"
+defoe_path = get_defoe_home()
 os_type = "sys-i386-64"
 # Use the following value for os variable in case you are running this in a MAC
 # os_type= "sys-i386-snow-leopard"

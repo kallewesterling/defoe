@@ -46,7 +46,7 @@ export PATH=$PATH:$JAVA_HOME/jre/bin
 
 # Cloning Defoe and installing its requirements
 
-We will refer to the location in which the defoe repository has be cloned as  *defoe_path* (e.g */home/rosa_filgueira_vicente/defoe/*)
+We will refer to the location in which the defoe repository has be cloned as  *defoe_path* (e.g */home/your-username/defoe/*)
 
 ```
 git clone https://github.com/defoe-code/defoe.git
@@ -77,8 +77,8 @@ zip -r defoe.zip defoe
 
 **Note**: defoe assumes that **geoparser-v1.1** and **georesolve** directories are inside your *defoe_path*:
 
-- /home/rosa_filgueira_vicente/defoe/geoparser-v1.1
-- /home/rosa_filgueira_vicente/defoe//georesolve
+- /home/your-username/defoe/geoparser-v1.1
+- /home/your-username/defoe//georesolve
 
 For testing both tools, we have two tests available [here](https://github.com/defoe-code/defoe/tree/master/defoe/test_geoparser_scripts), that can be run just like this (after changing the *defoe_path* and *os_type* variables according to your needs):
 
@@ -114,7 +114,7 @@ unizp nls-data-encyclopaediaBritannica.zip "*.xml"
 
 ```
 cd $HOME/defoe
-echo /home/rosa_filgueira_vicente/datasets/nls-data-gazetteersOfScotland/97437554 > sg_sample.txt
+echo $HOME/datasets/nls-data-gazetteersOfScotland/97437554 > sg_sample.txt
 ```
 
 Note: You can find an example of sg_sample.txt [here](../others/sg_sample.txt)
@@ -198,7 +198,7 @@ conda activate g-py36
 cd $HOME/defoe
 ```
 
-Change queries/geoparser_sg.yml with according to your needs:
+Change queries/geoparser_sg.yml according to your needs (*ensure that your username and path to defoe is correct*):
 
 ```
      gazetteer: os
@@ -246,13 +246,13 @@ conda activate g-py36
 cd $HOME/defoe
 ```
 
-Change queries/georesolve_sg.yml according to your needs:
+Change queries/georesolve_sg.yml according to your needs (*ensure that your username and path to defoe is correct*):
 
 ```
      lang_model: en_core_web_lg
      gazetteer: os
      bounding_box: -lb -7.54296875 54.689453125 -0.774267578125 60.8318847656 2
-     defoe_path: /home/rosa_filgueira_vicente/defoe/
+     defoe_path: /home/your-username/defoe/
      os_type: linux
 ```
 
@@ -306,7 +306,7 @@ Now, enter in your defoe path and create the datafile necessary for defoe:
 
 ```
 cd $HOME/defoe
-echo /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554/ > sg_one_page.txt
+echo $HOME/datasets/sg_simple_sample/97437554/ > sg_one_page.txt
 zip -r defoe.zip defoe
 ```
 
