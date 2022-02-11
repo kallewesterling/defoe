@@ -74,7 +74,7 @@ lwm.zip
 results.yml
 results*
 log_*
-nls*
+nls*.*
 tda*
 data.*
 defoe.zip
