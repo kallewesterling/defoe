@@ -15,7 +15,7 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
 ```
 wget http://mirror.vorboss.net/apache/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz
-tar -xvf spark-2.4.6-bin-hadoop2.7.tgz 
+tar -xvf spark-2.4.6-bin-hadoop2.7.tgz
 ```
 
 # Installing JAVA 10
@@ -57,7 +57,7 @@ cd $HOME/defoe
 zip -r defoe.zip defoe
 ```
 
-**Note**: Every time you change something inside defoe library, you need to **ZIP the DEFOE code**. If you don't change anything, you dont need to zip it again.  
+**Note**: Every time you change something inside defoe library, you need to **ZIP the DEFOE code**. If you don't change anything, you dont need to zip it again.
 
 # Installing the Geoparser + Georesolve tools inside defoe
 
@@ -85,7 +85,7 @@ For testing both tools, we have two tests available [here](https://github.com/de
 ```
 cd $HOME/defoe/test_geoparser_scripts/
 python geoparser_test.py
-python georesolve_test.py 
+python georesolve_test.py
 ```
 
 # Dowloading some NLS Datasets
@@ -106,7 +106,7 @@ unzip nls-data-gazetteersOfScotland.zip "*.xml"
 ### Encyclopaedia Britannica (EB) - Size: 25GB
 
 ```
-wget https://nlsfoundry.s3.amazonaws.com/data/nls-data-encyclopaediaBritannica.zip 
+wget https://nlsfoundry.s3.amazonaws.com/data/nls-data-encyclopaediaBritannica.zip
 unizp nls-data-encyclopaediaBritannica.zip "*.xml"
 ```
 
@@ -119,7 +119,9 @@ echo /home/rosa_filgueira_vicente/datasets/nls-data-gazetteersOfScotland/9743755
 
 Note: You can find an example of sg_sample.txt [here](../others/sg_sample.txt)
 
-# Testing Spark  
+# Testing Spark
+
+_Note that we use Spark 2.4.6 below. You may need to change the paths depending on your version.
 
 Using an Spark application (SparkPi) included in the Spark source code
 
@@ -135,7 +137,7 @@ See bellow:
 20/07/29 01:39:33 INFO Executor: Finished task 8.0 in stage 0.0 (TID 8). 824 bytes result sent to driver
 20/07/29 01:39:33 INFO TaskSetManager: Finished task 9.0 in stage 0.0 (TID 9) in 83 ms on localhost (executor driver) (9/10)
 20/07/29 01:39:33 INFO TaskSetManager: Finished task 8.0 in stage 0.0 (TID 8) in 87 ms on localhost (executor driver) (10/10)
-20/07/29 01:39:33 INFO TaskSchedulerImpl: Removed TaskSet 0.0, whose tasks have all completed, from pool 
+20/07/29 01:39:33 INFO TaskSchedulerImpl: Removed TaskSet 0.0, whose tasks have all completed, from pool
 20/07/29 01:39:33 INFO DAGScheduler: ResultStage 0 (reduce at SparkPi.scala:38) finished in 0.687 s
 20/07/29 01:39:33 INFO DAGScheduler: Job 0 finished: reduce at SparkPi.scala:38, took 0.734743 s
 Pi is roughly 3.1434151434151434
@@ -252,7 +254,6 @@ Change queries/georesolve_sg.yml according to your needs:
      bounding_box: -lb -7.54296875 54.689453125 -0.774267578125 60.8318847656 2
      defoe_path: /home/rosa_filgueira_vicente/defoe/
      os_type: linux
-     
 ```
 
 - **NOTE**: use *linux* or *macos* for indicating the type of Operating System (os_type) inside the queries/georesolve_sg.yml configuration file.
@@ -291,7 +292,7 @@ mkdir sg_simple_sample
 cd sg_simple_sample/
 mkdir 97437554
 cd 97437554
-cp ../../dataset/nls-data-gazetteersOfScotland/97437554/97437554-mets.xml 
+cp ../../dataset/nls-data-gazetteersOfScotland/97437554/97437554-mets.xml
 mkdir alto
 cd alto
 cp ../../dataset/nls-data-gazetteersOfScotland/97437554/alto/97440572.34.xml
@@ -335,7 +336,7 @@ You need to have JAVA already installed
 
 ```
 wget http://mirror.vorboss.net/apache/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz
-tar -xvzf hadoop-3.3.0.tar.gz 
+tar -xvzf hadoop-3.3.0.tar.gz
 sudo mv hadoop-3.3.0 /usr/local/hadoop
 ```
 
