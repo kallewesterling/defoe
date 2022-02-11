@@ -1,9 +1,9 @@
-import os
-import subprocess
-import re
+from defoe.test.utils import get_defoe_home
 
-# change this according to your path
-defoe_path = "/home/rosa_filgueira_vicente/defoe/"
+import subprocess
+
+
+defoe_path = get_defoe_home()
 os_type = "sys-i386-64"
 # Use the following value for os variable in case you are running this in a MAC
 # os_type= "sys-i386-snow-leopard"

@@ -1,13 +1,13 @@
-import os
+from defoe.test.utils import get_defoe_home
+
 import subprocess
-import re
 import spacy
 from spacy.tokens import Doc
 from spacy.vocab import Vocab
 
 
 # change this according to your path
-defoe_path = "/home/rosa_filgueira_vicente/defoe/"
+defoe_path = get_defoe_home()
 gazetteer = "os"
 bounding_box = " -lb -7.57216793459 49.959999905 1.68153079591 58.6350001085 2 "
 
