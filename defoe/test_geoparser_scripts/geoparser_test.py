@@ -1,4 +1,4 @@
-from defoe.test.utils import get_defoe_home
+from ..test.utils import get_defoe_home
 
 import subprocess
 
