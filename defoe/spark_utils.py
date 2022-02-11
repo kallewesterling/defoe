@@ -23,9 +23,11 @@ def files_to_rdd(context, num_cores=1, data_file="data.txt"):
     :return: RDD
     :rtype: pyspark.rdd.RDD
     """
+
     filenames = [filename.strip() for filename in list(open(data_file))]
-    print(filenames)
+
     rdd_filenames = context.parallelize(filenames, num_cores)
+
     return rdd_filenames
 
 
@@ -45,7 +47,9 @@ def files_to_dataframe(context, num_cores=1, data_file="data.txt"):
     """
 
     filenames = [filename.strip() for filename in list(open(data_file))]
+
     rdd_filenames = context.parallelize(filenames, num_cores)
+
     return rdd_filenames
 
 
@@ -72,6 +76,7 @@ def open_stream(filename):
     :return: open stream
     :rtype: cStringIO.StringI (URL or file system) OR io.BytesIO (blob)
     """
+
     assert filename, "Filename must not be ''"
 
     is_url = filename.lower().startswith(HTTP) or filename.lower().startswith(HTTPS)
@@ -88,6 +93,8 @@ def open_stream(filename):
     elif is_blob:
         import io
         import os
+
+        # TODO: Ensure azure is part of requirements
         from azure.storage.blob import BlobService
 
         sas_token = os.environ["BLOB_SAS_TOKEN"]

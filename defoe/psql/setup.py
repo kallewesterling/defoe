@@ -20,18 +20,25 @@ def filename_to_object(filename, context):
     """
 
     lines = open(filename).readlines()
+
     fields = lines[1].split(",")
-    # host,port,database,user,driver,table
+
+    # host,port,database,user,driver,table # TODO: better destructing available here
     host = fields[0]
     port = fields[1]
     database = fields[2]
     user = fields[3]
     driver = fields[4]
     table = fields[5]
+
     sqlContext = SQLContext(context)
+
     url = "postgresql://%s:%s/%s" % (host, port, database)
+
     properties = {"user": user, "driver": driver}
+
     df = DataFrameReader(sqlContext).jdbc(
         url="jdbc:%s" % url, table=table, properties=properties
     )
+
     return df

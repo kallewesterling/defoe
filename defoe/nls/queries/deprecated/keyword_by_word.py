@@ -20,13 +20,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            [<YEAR>, <NUM_WORDS>],
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    [<YEAR>, <NUM_WORDS>],
+                    ...
+                ],
+            <WORD>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -38,13 +38,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by word
     :rtype: dict
     """
+
+    # TODO: Can remove keywords here as it's defined afterwards
     keywords = []
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]
+
     # [(year, document), ...]
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]
     )
+
     # [((year, word), 1), ...]
     words = documents.flatMap(
         lambda year_document: [
@@ -52,6 +56,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for (_, word) in year_document[1].scan_words()
         ]
     )
+
     # [((year, word), 1), ...]
     matching_words = words.filter(
         lambda yearword_count: yearword_count[0][1] in keywords

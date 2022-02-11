@@ -263,6 +263,7 @@ def clean_text_as_string(text, flag, defoe_path, os_type):
     return text_string_final
 
 
+# TODO: This function will fail as defoe_path and os_type are not defined
 def clean_headers_page_as_string(page):
     """
     Clean a page as a single string,
@@ -273,16 +274,21 @@ def clean_headers_page_as_string(page):
     :return: clean page words as a string
     :rtype: string or unicode
     """
+
     page_words = page.words
+
     page_string_final = clean_text_as_string(page_words, 0, defoe_path, os_type)
+
     header_left_words = page.header_left_words
     header_left_string_final = clean_text_as_string(
         header_left_words, 1, defoe_path, os_type
     )
+
     header_right_words = page.header_right_words
     header_right_string_final = clean_text_as_string(
         header_right_words, 1, defoe_path, os_type
     )
+
     # in case the right header is part of the text E.G. (LELAND,John,aneminentEnglishantiquarian,was)
     if len(header_right_string_final) > 12:
         header_right_string_final = ""
@@ -299,11 +305,15 @@ def filter_terms_page(page, defoe_path, os_type):
     :return: clean page words as a string
     :rtype: string or unicode
     """
+
     page_words = page.words
+
     header_left_words = page.header_left_words
     header_left = clean_text_as_string(header_left_words, 1, defoe_path, os_type)
+
     header_right_words = page.header_right_words
     header_right = clean_text_as_string(header_right_words, 1, defoe_path, os_type)
+
     # in case the right header is part of the text E.G. (LELAND,John,aneminentEnglishantiquarian,was)
     if len(header_right) > 12:
         header_right = ""
@@ -319,6 +329,7 @@ def filter_terms_page(page, defoe_path, os_type):
         else:
             ln = 0
             flag = 0
+
             while ln < len(page_hpos_vpos_font) and flag == 0:
                 if len(page_hpos_vpos_font[ln]) >= 4 or (
                     (len(page_hpos_vpos_font[ln]) == 3)
@@ -565,11 +576,12 @@ def geoparser_page(text):
 
 def geomap_page(doc):
     geomap_html = ""
+
     if doc.ents:
         flag, in_xml = xml_geo_entities(doc)
         if flag == 1:
             geomap_html = geomap_cmd(in_xml)
-    # return str(geomap_html)
+
     return geomap_html
 
 

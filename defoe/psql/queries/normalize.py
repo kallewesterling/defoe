@@ -7,6 +7,9 @@ documents, pages and words change over time, for example.
 """
 
 
+# TODO: This query is broken
+
+
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Iterate through archives and count total number of documents,
@@ -28,12 +31,15 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: total number of documents, pages and words per year
     :rtype: list
     """
+
     newdf = (
         df.filter(df.source_text_clean.isNotNull())
         .filter(df["model"] == "nls")
         .select(df.year, df.archive_filename, df.num_text_unit, df.source_text_clean)
     )
+
     archive_df = newdf.groupby("archive_filename", "year", "num_text_unit").count()
+
     # >>> archive_df.show()
     # +--------------------+----+---------------+-----+
     # |    archive_filename|year|num_text_units |count|

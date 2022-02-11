@@ -18,19 +18,23 @@ def get_sentences_list_matches(text, keysentence):
     :return: Set of sentences
     :rtype: set(str or unicode)
     """
-    matches = []
     text_list = text.split()
+
+    matches = []
     for sentence in keysentence:
         if len(sentence.split()) > 1:
             if sentence in text:
                 count = text.count(sentence)
-                for i in range(0, count):
+
+                for _ in range(0, count):
                     matches.append(sentence)
         else:
             pattern = re.compile(r"^%s$" % sentence)
+
             for word in text_list:
                 if re.search(pattern, word):
                     matches.append(sentence)
+
     return sorted(matches)
 
 

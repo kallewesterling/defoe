@@ -26,10 +26,15 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: total number of documents and pages
     :rtype: dict
     """
+
     # [archive, archive, ...]
     documents = archives.flatMap(lambda archive: list(archive))
+
     print("num documents %s" % documents.count())
+
     # [num_articles, num_articles, ...]
     num_articles = documents.map(lambda document: document.num_articles)
+
     result = [documents.count(), num_articles.reduce(add)]
+
     return {"num_documents": result[0], "num_articles": result[1]}

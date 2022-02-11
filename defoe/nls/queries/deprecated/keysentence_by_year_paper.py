@@ -12,7 +12,6 @@ from defoe.papers.query_utils import get_sentences_list_matches
 
 from operator import add
 import os.path
-import yaml
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
@@ -55,10 +54,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keysentences grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -67,12 +68,16 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
+
+    # TODO: Looks like a bug here, `issues` has not been defined
     # [(year, article_string)
     articles = issues.flatMap(
         lambda issue: [

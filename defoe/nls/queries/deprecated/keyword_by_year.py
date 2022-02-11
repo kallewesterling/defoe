@@ -5,7 +5,6 @@ Counts number of occurrences of keywords and groups by year.
 from defoe import query_utils
 
 from operator import add
-import yaml
 import os
 
 
@@ -18,14 +17,15 @@ def do_query(archives, config_file=None, logger=None, context=None):
     all non-'a-z|A-Z' characters.
     Returns result of form:
         {
-          <YEAR>:
-          [
-            [<WORD>, <NUM_WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<WORD>, <NUM_WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
+
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
@@ -35,19 +35,24 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
+    # TODO: `keywords` can be dropped here, as there's nothing stopping data_file from being read below
     keywords = []
     with open(data_file, "r") as f:
         keywords = [
             query_utils.preprocess_word(word, preprocess_type) for word in list(f)
         ]
+
     # [(year, document), ...]
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]
     )
+
     # [((year, word), 1), ...]
     words = documents.flatMap(
         lambda year_document: [
@@ -56,10 +61,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for word in page.words
         ]
     )
+
     # [((year, word), 1), ...]
     matching_words = words.filter(
         lambda yearword_count: yearword_count[0][1] in keywords
     )
+
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]

@@ -1,49 +1,41 @@
-""" 
-Extracting automatically articles from the EB. 
-The articles are stored in a HDFS CSV file.
+"""
+Extracting automatically articles from the EB. The articles are stored in a HDFS CSV file.
 
 The text is cleaned by using long-S and hyphen fixes.
 
 Note that for running this query, apart from Spark you need to have HADOOP installeld in your computing enviroment.
-
 """
 
 from defoe import query_utils
-from defoe.nlsArticles.query_utils import (
-    clean_headers_page_as_string,
-    get_articles_eb,
-    filter_terms_page,
-)
-from pyspark.sql import Row, SparkSession, SQLContext
-
-import yaml, os
+from defoe.nlsArticles.query_utils import filter_terms_page
+from pyspark.sql import Row, SQLContext
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Ingest NLS pages, clean and extract the articles of each to each page, and save them to HDFS, with some metadata associated with each article.
-    
-    Metadata collected:  "title",  "edition", "year", "place", "archive_filename",  "source_text_filename", "text_unit", 
-    "text_unit_id", "num_text_unit", "type_archive", "model", "type_page", "header", "term", "definition",
-    "num_articles", "num_page_words", "num_article_words",   
 
-    Data is saved as Dataframes into HDFS. 
+    Metadata collected:  "title",  "edition", "year", "place", "archive_filename",  "source_text_filename", "text_unit",
+    "text_unit_id", "num_text_unit", "type_archive", "model", "type_page", "header", "term", "definition",
+    "num_articles", "num_page_words", "num_article_words"
+
+    Data is saved as Dataframes into HDFS.
 
     Example:
     'Encyclopaedia Britannica: or, A dictionary of arts and sciences':
-     - archive_name: /home/tdm/datasets/eb_test/144850366
-       articles:
-       ACQUEST:
-        - or Acquist, in law, signifies goods got by purchase or donation. See CoNtiUEST.
-       ACQUI:
-         - "a town of Italy, in the Dutchy of Montferrat, with a biihop\u2019s see, and\
-          \ commodious baths. It was taken by the Spaniards in 1745, and retaken by the\
-          \ Piedmontese in 1746; but after this, it was taken again and difrcantled by\
-          \ the French, who afterwards forsook it. It is seated on the river Bormio, 25\
-          \ miles N.W. of Genoa, and 30 S. of Cafal, 8. 30. E. long. 44. 40. lat."
-       ACQUIESCENCE:
-         - in commerce, is the consent that a person gives to the determination given either
-           by arbitration, orbyaconful
+        - archive_name: /home/tdm/datasets/eb_test/144850366
+          articles:
+            ACQUEST:
+                - or Acquist, in law, signifies goods got by purchase or donation. See CoNtiUEST.
+            ACQUI:
+                - "a town of Italy, in the Dutchy of Montferrat, with a biihop's see, and \
+                    commodious baths. It was taken by the Spaniards in 1745, and retaken by the \
+                    Piedmontese in 1746; but after this, it was taken again and difrcantled by \
+                    the French, who afterwards forsook it. It is seated on the river Bormio, 25 \
+                    miles N.W. of Genoa, and 30 S. of Cafal, 8. 30. E. long. 44. 40. lat."
+            ACQUIESCENCE:
+                - in commerce, is the consent that a person gives to the determination given either
+                    by arbitration, orbyaconful
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
@@ -54,8 +46,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: "0"
     :rtype: string
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
+    text_unit = "page"
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -68,8 +63,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     else:
         defoe_path = "./"
 
-    text_unit = "page"
-    # [(tittle, edition, year, place, archive filename,
+    # [(title, edition, year, place, archive filename,
     #   num pages, type of archive, type of disribution, model)]
     documents = archives.flatMap(
         lambda archive: [
@@ -88,7 +82,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
         ]
     )
 
-    # [(tittle, edition, year, place, archive filename, page filename, text_unit, tex_unit_id, num_pages,
+    # [(title, edition, year, place, archive filename, page filename, text_unit, tex_unit_id, num_pages,
     #   type of archive, type of disribution, model, page_type, header, articles_page_dictionary, num_articles_page, num_page_words)]
     pages_clean = documents.flatMap(
         lambda year_document: [
@@ -111,9 +105,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
         ]
     )
 
-    # [(tittle, edition, year, place, archive filename, page filename , text_unit, tex_unit_id, num_pages,
+    # [(title, edition, year, place, archive filename, page filename , text_unit, tex_unit_id, num_pages,
     #   type of archive, type of disribution, model, page_type, header, term, definition, num_articles_per_page, num_page_words, num_artciles_words)]
-
     pages_articles = pages_clean.flatMap(
         lambda articles_page: [
             (
@@ -141,7 +134,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
     )
 
     # [Encyclopaedia Britannica; or, A dictionary of arts and sciences, compiled upon a new plan, First edition, 1771, Volume 1, A-B, 1771, Edinburgh, /lustre/home/sc048/rosaf4/datasets/nls-data-encyclopaediaBritannica/144133901, alto/188083401.34.xml, page, Page53, 832, book, nlsArticles, Articles, AFFAFR, AFFIANCE, in law, denotes the mutual plighting of troth between a man and a woman to marry each, 32, 887, 17]
-
     nlsRow = Row(
         "title",
         "edition",
@@ -162,7 +154,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
         "num_page_words",
         "num_article_words",
     )
+
     sqlContext = SQLContext(context)
     df = sqlContext.createDataFrame(pages_articles, nlsRow)
     df.write.mode("overwrite").option("header", "true").csv("eb_total_articles.csv")
+
     return "0"

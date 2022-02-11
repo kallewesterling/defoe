@@ -5,7 +5,6 @@ Gets colocated words and groups by year.
 from defoe import query_utils
 
 import os
-import yaml
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
@@ -29,27 +28,27 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {
-              "document_id": <DOCUMENT_ID>,
-              "place": <PLACE>,
-              "publisher": <PUBLISHER>,
-              "filename": <FILENAME>
-              "matches":
-              [
-                {
-                  "start_page": <PAGE_ID>,
-                  "end_page": <PAGE_ID>,
-                  "span": [<WORD>, ..., <WORD>]
-                },
+            <YEAR>:
+                [
+                    {
+                        "document_id": <DOCUMENT_ID>,
+                        "place": <PLACE>,
+                        "publisher": <PUBLISHER>,
+                        "filename": <FILENAME>
+                        "matches":
+                            [
+                                {
+                                    "start_page": <PAGE_ID>,
+                                    "end_page": <PAGE_ID>,
+                                    "span": [<WORD>, ..., <WORD>]
+                                },
+                                ...
+                            ]
+                    },
+                    ...
+                ],
+            <YEAR>:
                 ...
-              ]
-            },
-            ...
-          ],
-          <YEAR>:
-          ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive
@@ -62,14 +61,15 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by year
     :rtype: dict
     """
+
     window = 0
+
     if (
         config_file is not None
         and os.path.exists(config_file)
         and os.path.isfile(config_file)
     ):
-        with open(config_file, "r") as f:
-            config = yaml.safe_load(f)
+        config = query_utils.get_config(config_file)
         start_word = query_utils.normalize(config["start_word"])
         end_word = query_utils.normalize(config["end_word"])
         window = config["window"]
@@ -88,6 +88,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             get_colocates_matches(document, start_word, end_word, window),
         )
     )
+    
     # [(document, matches), ...]
     colocated_words = colocated_words.filter(
         lambda document_matches: len(document_matches[1]) > 0

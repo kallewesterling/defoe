@@ -6,39 +6,37 @@ It uses the Original Edinburgh geoparser pipeline for identifying all the posibl
 from defoe import query_utils
 from defoe.nls.query_utils import clean_page_as_string
 
-import yaml
-
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
-    It ingests NLS pages, applies the original geoparser for identifying the possible locations of each page. 
+    It ingests NLS pages, applies the original geoparser for identifying the possible locations of each page.
     And also for getting the latituted and longitude of each location.
-    
-    Before applying the geoparser, two clean steps are applied - long-S and hyphen words. 
-    
-    A config_file should be indicated to specify the gazetteer to use, 
-    the defoe_path, the bounding box (optional), as well as the operating system. 
-    
+
+    Before applying the geoparser, two clean steps are applied - long-S and hyphen words.
+
+    A config_file should be indicated to specify the gazetteer to use,
+    the defoe_path, the bounding box (optional), as well as the operating system.
+
     Example:
     - 1842:
         - archive: /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554
         - edition: 1842, Volume 1
         - georesolution_page:
             - Annan-rb17:
-              - in-cc: ''
-              - lat: '54.98656134974328'
-              - long: '-3.259540348679'
-              - pop: ''
-              - snippet: is 8 miles north-west of Annan , and commands a fine
-              - type: ppl
+                - in-cc: ''
+                - lat: '54.98656134974328'
+                - long: '-3.259540348679'
+                - pop: ''
+                - snippet: is 8 miles north-west of Annan , and commands a fine
+                - type: ppl
             - Annan-rb18:
-              - in-cc: ''
-              - lat: '54.98656134974328'
-              - long: '-3.259540348679'
-              - pop: ''
-              - snippet: valley is washed by the Annan , and lies open from
-              - type: ppl
-            ....   
+                - in-cc: ''
+                - lat: '54.98656134974328'
+                - long: '-3.259540348679'
+                - pop: ''
+                - snippet: valley is washed by the Annan , and lies open from
+                - type: ppl
+            ...
         - lang_model: geoparser_original
         - page_filename: alto/97440572.34.xml
         - text_unit id: Page252
@@ -53,13 +51,16 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: "0"
     :rtype: string
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
     gazetteer = config["gazetteer"]
+
     if "bounding_box" in config:
         bounding_box = " -lb " + config["bounding_box"] + " 2"
     else:
         bounding_box = ""
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -67,6 +68,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             os_type = "sys-i386-snow-leopard"
     else:
         os_type = "sys-i386-64"
+
     if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:
@@ -85,9 +87,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
         ]
     )
 
-    # [(tittle, edition, year, archive name, page filename, text_unit, text_unit_id,
+    # [(title, edition, year, archive name, page filename, text_unit, text_unit_id,
     #   num_text_unit, type of archive, type of disribution, model, clean_page)]
-
     pages_clean = documents.flatMap(
         lambda year_document: [
             (

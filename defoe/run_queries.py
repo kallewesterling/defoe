@@ -7,61 +7,60 @@ Run Spark several text queries jobs.
     Run Spark text analysis job
 
     positional arguments:
-      data_file             Data file listing data files to query
-      model_name            Data model to which data files conform:
-      ['books', 'papers', 'fmp','nzpp', 'generic_xml', 'nls', 'hdfs', 'psql', 'es']
-      query_list            A file with the queries to run. For each query
-                            we have to indicate: query_module [query_configuration_file] [-r results_file]
-       Example:
-       defoe.nls.queries.normalize -r results.txt
-       defoe.nls.queries.keysearch_by_year queries/sport.yml -r results_sc_sports
+        data_file             Data file listing data files to query
+        model_name            Data model to which data files conform:
+        ['books', 'papers', 'fmp','nzpp', 'generic_xml', 'nls', 'hdfs', 'psql', 'es']
+        query_list            A file with the queries to run. For each query
+                                we have to indicate: query_module [query_configuration_file] [-r results_file]
+        Example:
+            defoe.nls.queries.normalize -r results.txt
+            defoe.nls.queries.keysearch_by_year queries/sport.yml -r results_sc_sports
 
 
     optional arguments:
-      -h, --help            show this help message and exit
-      -n [NUM_CORES], --num_cores [NUM_CORES]
-                            Number of cores
-      -e [ERRORS_FILE], --errors_file [ERRORS_FILE]
-                            Errors file
+        -h, --help            show this help message and exit
+        -n [NUM_CORES], --num_cores [NUM_CORES]
+                                Number of cores
+        -e [ERRORS_FILE], --errors_file [ERRORS_FILE]
+                                Errors file
 
-* data_file: lists either URLs or paths to files on the file system.
-* model_name: text model to be used. The model determines the modules
-  loaded. Given a "model_name" value of "<MODEL_NAME>" then a module
-  "defoe.<MODEL_NAME>.setup" must exist and support a function:
-
+    * data_file: lists either URLs or paths to files on the file system.
+    * model_name: text model to be used. The model determines the modules
+                    loaded. Given a "model_name" value of "<MODEL_NAME>" then a module
+                    "defoe.<MODEL_NAME>.setup" must exist and support a function:
     tuple(Object | str or unicode, str or unicode)
     filename_to_object(str or unicode: filename)
 
-  - tuple(Object, None) is returned where Object is an instance of the
-  - object model representing the data, if the file was successfully
-  - read and parsed into an object
-  - tuple(str or unicode, filename) is returned with the filename and
-  - an error message, if the file was not successfully read and parsed
-  - into an object
-* query_name: name of Python module implementing the query to run
-  e.g. "defoe.alto.queries.find_words_group_by_word" or
-  "defoe.papers.queries.articles_containing_words". The query must be
-  compatible with the chosen model in "model_name". The module
-  must support a function
+        - tuple(Object, None) is returned where Object is an instance of the
+        - object model representing the data, if the file was successfully
+        - read and parsed into an object
+        - tuple(str or unicode, filename) is returned with the filename and
+        - an error message, if the file was not successfully read and parsed
+        - into an object
+    * query_name: name of Python module implementing the query to run
+        e.g. "defoe.alto.queries.find_words_group_by_word" or
+        "defoe.papers.queries.articles_containing_words". The query must be
+        compatible with the chosen model in "model_name". The module
+        must support a function
 
-    list do_query(pyspark.rdd.PipelinedRDD rdd,
-                  str|unicode config_file,
-                  py4j.java_gateway.JavaObject logger)
+        list do_query(pyspark.rdd.PipelinedRDD rdd,
+                    str|unicode config_file,
+                    py4j.java_gateway.JavaObject logger)
 
-* "query_config_file": query-specific configuration file. This is
-  optional and depends on the chosen query module above.
-* results_file": name of file to hold query results in YAML
-  format. Default: "results_NUM_QUERY.yml".
+    * "query_config_file": query-specific configuration file. This is
+        optional and depends on the chosen query module above.
+    * results_file": name of file to hold query results in YAML
+        format. Default: "results_NUM_QUERY.yml".
 """
+
+from pyspark import SparkContext, SparkConf
+
+from defoe.spark_utils import files_to_rdd
 
 from argparse import ArgumentParser
 import importlib
 import os.path
 import yaml
-
-from pyspark import SparkContext, SparkConf
-
-from defoe.spark_utils import files_to_rdd
 
 
 def main():

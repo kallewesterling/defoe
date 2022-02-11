@@ -1,4 +1,4 @@
-""" 
+"""
 Pages as string to ElasticSearch (ES) using dataframes, and some metadata associated with each document.
 The text is cleaned using the long-S and hyphen fixes.
 """
@@ -9,15 +9,13 @@ from defoe.nls.query_utils import (
     clean_page_as_string,
     preprocess_clean_page,
 )
-from pyspark.sql import Row, SparkSession, SQLContext
-
-import yaml, os
+from pyspark.sql import Row, SQLContext
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Ingest NLS pages, applies all 4 preprocess treatments (none, normalize, lemmatize, stem) to each page, and save them to ES, with some metadata associated with each page.
-    Metadata collected: tittle, edition, year, place, archive filename, page filename, page id, num pages, 
+    Metadata collected: title, edition, year, place, archive filename, page filename, page id, num pages,
     type of archive, model, source_text_raw, source_text_norm, source_text_lemmatize, source_text_stem, source_text_spacy_nlp, num_page_words
 
     Data is saved as Dataframes into ElasticSearch: Index:'nls'  Type:'Encyclopaedia_Britannica'
@@ -35,8 +33,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: string
     """
 
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+    config = query_utils.get_config(config_file)
+
+    text_unit = "page"
+
+    # TODO: I don't think any of the below are used?
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -53,8 +54,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
     preprocess_normalize = query_utils.parse_preprocess_word_type("normalize")
     preprocess_lemmatize = query_utils.parse_preprocess_word_type("lemmatize")
     preprocess_stem = query_utils.parse_preprocess_word_type("stem")
-    text_unit = "page"
-    # [(tittle, edition, year, place, archive filename, page filename,
+
+    # [(title, edition, year, place, archive filename, page filename,
     #   page id, num pages, type of archive, type of disribution, model)]
     documents = archives.flatMap(
         lambda archive: [
@@ -72,7 +73,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for document in list(archive)
         ]
     )
-    # [(tittle, edition, year, place, archive filename, page filename, text_unit, text_unit_id,
+
+    # [(title, edition, year, place, archive filename, page filename, text_unit, text_unit_id,
     #   num_text_unit, type of archive, type of disribution, model, raw_page, clean_page, num_words)]
     pages_clean = documents.flatMap(
         lambda year_document: [
@@ -95,7 +97,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for page in year_document[8]
         ]
     )
-    # [(tittle, edition, year, place, archive filename, page filename, text_unit, text_unit_id,
+
+    # [(title, edition, year, place, archive filename, page filename, text_unit, text_unit_id,
     #   num_text_unit, type of archive, type of disribution, model, raw_page, clean_page, clean_norm_page, clean_lemma_page, clean_stemm_page, num_words)]
     pages = pages_clean.flatMap(
         lambda clean_page: [
@@ -140,6 +143,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
         "source_text_stem",
         "num_words",
     )
+
     sqlContext = SQLContext(context)
     df = sqlContext.createDataFrame(pages, nlsRow)
     df = df.drop("_id")

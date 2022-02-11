@@ -38,6 +38,8 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
+
+    # TODO: `keywords` can be removed here as it's defined below
     keywords = []
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]
@@ -62,6 +64,7 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     matching_words = words.filter(
         lambda yearword_count: yearword_count[0][1] in keywords
     )
+
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]

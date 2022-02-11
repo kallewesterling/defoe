@@ -11,7 +11,6 @@ from defoe.papers.query_utils import article_contains_word
 
 from operator import add
 import os.path
-import yaml
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -55,9 +54,12 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
+
     config = query_utils.get_config(config_file)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
+    # Remove keywords here as data_file provides the list below.
     keywords = []
     with open(data_file, "r") as f:
         keywords = [
@@ -65,10 +67,12 @@ def do_query(issues, config_file=None, logger=None, context=None):
         ]
 
     target_word = keywords[0]
+
     # [(year, article), ...]
     articles = issues.flatMap(
         lambda issue: [(issue.date.year, article) for article in issue.articles]
     )
+
     # [(year, article), ...]
     target_articles = articles.filter(
         lambda year_article: article_contains_word(
@@ -88,6 +92,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     matching_words = words.filter(
         lambda yearword_count: yearword_count[0][1] in keywords
     )
+
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]

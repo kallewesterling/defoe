@@ -7,7 +7,6 @@ from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_sentences_list_matches
 
 from operator import add
-import yaml
 import os
 
 
@@ -15,23 +14,22 @@ def do_query(archives, config_file=None, logger=None, context=None):
     """
     Counts number of occurrences of keywords or keysentences and groups by words.
 
-    The config_file must indicate the path to a lexicon file with a list of the keywords 
+    The config_file must indicate the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
+
     Also the config_file can indicate the preprocess treatment, along with the defoe
     path, and the type of operating system.
 
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            [<YEAR>, <NUM_WORDS>],
-            ...
-          ],
-          <WORD>:
-          ...
-
+            <WORD>:
+                [
+                    [<YEAR>, <NUM_WORDS>],
+                    ...
+                ],
+            <WORD>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -43,8 +41,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -52,6 +51,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             os_type = "sys-i386-snow-leopard"
     else:
         os_type = "sys-i386-64"
+
     if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:
@@ -59,6 +59,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -67,30 +68,34 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
+
     # [(year, document), ...]
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]
     )
-    # [(year, page_string)
 
+    # [(year, page_string)
     clean_pages = documents.flatMap(
         lambda year_document: [
             (year_document[0], clean_page_as_string(page, defoe_path, os_type))
             for page in year_document[1]
         ]
     )
+
     pages = clean_pages.flatMap(
         lambda cl_page: [
             (cl_page[0], preprocess_clean_page(cl_page[1], preprocess_type))
         ]
     )
-    # [(year, page_string)
+
     # [(year, page_string)
     filter_pages = pages.filter(
         lambda year_page: any(

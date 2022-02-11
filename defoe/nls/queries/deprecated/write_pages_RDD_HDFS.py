@@ -5,14 +5,12 @@ Pages as string to HDFS textfiles (using RDDs), and some metadata associated wit
 from defoe import query_utils
 from defoe.nls.query_utils import get_page_as_string
 
-import yaml
-
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Writes pages (preprocessed or not) as string to HDFS textfiles, and some metadata associated with each document.
     If we have a config_file indiciating the preprocess treament, it will be to the words extracted from pages. Otherwise, non preprocess treatment will be applied.
-    Metadata collected: tittle, edition, year, place, archive filename, page filename, page id, num pages, type of archive, model, type of preprocess treatment, prep_page_string
+    Metadata collected: title, edition, year, place, archive filename, page filename, page id, num pages, type of archive, model, type of preprocess treatment, prep_page_string
 
     Data is saved as RDD into HDFS textfiles.
 
@@ -29,12 +27,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: "0"
     :rtype: string
     """
+
     if config_file is not None:
-        with open(config_file, "r") as f:
-            config = yaml.load(f)
+        config = query_utils.get_config(config_file)
         preprocess_type = query_utils.extract_preprocess_word_type(config)
     else:
         preprocess_type = query_utils.parse_preprocess_word_type("none")
+
     documents = archives.flatMap(
         lambda archive: [
             (
@@ -51,7 +50,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for document in list(archive)
         ]
     )
-    # [(tittle, edition, year, place, archive filename, page filename,
+
+    # [(title, edition, year, place, archive filename, page filename,
     #   page id, num pages, type of archive, type of disribution, model, type of preprocess treatment, page_as_string)]
     pages = documents.flatMap(
         lambda year_document: [

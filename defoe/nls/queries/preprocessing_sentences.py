@@ -2,24 +2,22 @@
 Gets concordance and collocation for keywords selecting only the pages which have occurences of the target word,  and groups the results by date.
 This query detects also the sentences in which keywords appear, and preprocess each word of each sentence with different methods. 
 """
-import os.path
-import yaml
+
 from defoe import query_utils
 from defoe.nls.query_utils import extract_sentences, total_preprocessed
-from defoe.nls.query_utils import PreprocessWordType
-from defoe.query_utils import PreprocessWordType
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Gets concordance and collocation analysis for keywords giving a target word,  and it groups the results by date.
-    The window variable can be used for specifying the number of words to the right and left to take. 
-  
- 
+    The window variable can be used for specifying the number of words to the right and left to take.
+
     config_file must be the path to a configuration file with a list
     of the keywords to search for, one per line.
+
     Keywords and words in documents are preprocessed, using one of the above options.
-     Returns result of form:
+
+    Returns result of form:
         <YEAR>:
         - [<WORD>, <CONCORDANCE>]
         - [<WORD>, <CONCORDANCE>]
@@ -34,9 +32,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
+    # TODO: Remove, seems like this variable is not used?
     preprocess_type = query_utils.extract_preprocess_word_type(config)
+
     # [document, ...]
     documents = archives.flatMap(
         lambda archive: [document for document in list(archive)]

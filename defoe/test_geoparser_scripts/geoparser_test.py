@@ -21,7 +21,7 @@ bounding_box = ""
 
 
 def geoparser_cmd(text):
-    atempt = 0
+    attempt = 0
     flag = 1
     geoparser_xml = ""
     if "'" in text:
@@ -51,7 +51,7 @@ def geoparser_cmd(text):
 
     print("CMD is %s" % cmd)
 
-    while (len(geoparser_xml) < 5) and (atempt < 10) and (flag == 1):
+    while (len(geoparser_xml) < 5) and (attempt < 10) and (flag == 1):
         proc = subprocess.Popen(
             cmd.encode("utf-8"),
             shell=True,
@@ -65,8 +65,8 @@ def geoparser_cmd(text):
             print("err: '{}'".format(stderr))
         else:
             geoparser_xml = stdout
-        print(atempt, stdout, stderr)
-        atempt += 1
+        print(attempt, stdout, stderr)
+        attempt += 1
     print("--->Geoparser %s" % geoparser_xml)
     return geoparser_xml
 

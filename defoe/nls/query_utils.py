@@ -390,11 +390,13 @@ def geoparser_page(text, defoe_path, os_type, gazetteer, bounding_box):
 
 def geomap_page(doc):
     geomap_html = ""
+
     if doc.ents:
         flag, in_xml = xml_geo_entities(doc)
+
         if flag == 1:
             geomap_html = geomap_cmd(in_xml)
-    # return str(geomap_html)
+
     return geomap_html
 
 

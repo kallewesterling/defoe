@@ -5,7 +5,6 @@ Gets colocated words and groups by year.
 from defoe import query_utils
 
 import os
-import yaml
 
 
 def do_query(archives, config_file=None, logger=None):
@@ -62,14 +61,15 @@ def do_query(archives, config_file=None, logger=None):
     by year
     :rtype: dict
     """
+
     window = 0
+
     if (
         config_file is not None
         and os.path.exists(config_file)
         and os.path.isfile(config_file)
     ):
-        with open(config_file, "r") as f:
-            config = yaml.load(f)
+        config = query_utils.get_config(config_file)
         start_word = query_utils.normalize(config["start_word"])
         end_word = query_utils.normalize(config["end_word"])
         window = config["window"]
@@ -88,6 +88,7 @@ def do_query(archives, config_file=None, logger=None):
             get_colocates_matches(document, start_word, end_word, window),
         )
     )
+
     # [(document, matches), ...]
     colocated_words = colocated_words.filter(
         lambda document_matches: len(document_matches[1]) > 0

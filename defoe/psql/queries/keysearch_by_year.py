@@ -6,7 +6,6 @@ from defoe import query_utils
 from defoe.psql.query_utils import get_sentences_list_matches, blank_as_null
 
 from operator import add
-import yaml
 import os
 
 

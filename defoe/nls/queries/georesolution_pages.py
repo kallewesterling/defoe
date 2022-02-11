@@ -6,8 +6,6 @@ It uses the Edinburgh georesolve for getting the latituted and longitude of each
 
 from defoe.nls.query_utils import clean_page_as_string, georesolve_page_2
 
-import yaml
-
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
@@ -23,30 +21,29 @@ def do_query(archives, config_file=None, logger=None, context=None):
     the defoe_path, the bounding box (optional), as well as the operating system.
 
     Example:
-      - 1842:
-        - archive: /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554
-        - edition: 1842, Volume 1
-        - georesolution_page:
-            - Aberdeenshire-19:
-              - in-cc: ''
-              - lat: '57.21923117162595'
-              - long: '-2.801013003249016'
-              - pop: ''
-              - snippet: 'BUCHAN , a district of Aberdeenshire , extending along the coast '
-              - type: civila
-            - Cumberland-12:
-              - in-cc: ''
-              - lat: '51.4342921249674'
-              - long: '-0.6131610294930387'
-              - pop: ''
-              - snippet: 'all the low country of Cumberland lies full before you , '
-              - type: fac
-             ....
-        - lang_model: en_core_web_lg
-        - page_filename: alto/97440572.34.xml
-        - text_unit id: Page252
-        - title: topographical, statistical, and historical gazetteer of Scotland
-    
+        - 1842:
+            - archive: /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554
+            - edition: 1842, Volume 1
+            - georesolution_page:
+                - Aberdeenshire-19:
+                - in-cc: ''
+                - lat: '57.21923117162595'
+                - long: '-2.801013003249016'
+                - pop: ''
+                - snippet: 'BUCHAN , a district of Aberdeenshire , extending along the coast '
+                - type: civila
+                - Cumberland-12:
+                - in-cc: ''
+                - lat: '51.4342921249674'
+                - long: '-0.6131610294930387'
+                - pop: ''
+                - snippet: 'all the low country of Cumberland lies full before you , '
+                - type: fac
+                ....
+            - lang_model: en_core_web_lg
+            - page_filename: alto/97440572.34.xml
+            - text_unit id: Page252
+            - title: topographical, statistical, and historical gazetteer of Scotland
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
@@ -57,15 +54,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: "0"
     :rtype: string
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
 
     lang_model = config["lang_model"]
     gazetteer = config["gazetteer"]
+
     if "bounding_box" in config:
         bounding_box = " -lb " + config["bounding_box"] + " 2"
     else:
         bounding_box = ""
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -73,10 +72,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
             os_type = "sys-i386-snow-leopard"
     else:
         os_type = "sys-i386-64"
+
     if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:
         defoe_path = "./"
+
     documents = archives.flatMap(
         lambda archive: [
             (

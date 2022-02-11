@@ -70,6 +70,7 @@ def find_words(
     :return: list of tuples
     :rtype: list(tuple)
     """
+
     matches = []
     document_articles = document.articles
     for article in document_articles:
@@ -77,6 +78,7 @@ def find_words(
             keys = defaultdict(lambda: [])
             targets = []
             preprocessed_words = []
+
             for pos, word in enumerate(tb.words):
                 preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
                 loc = WordLocation(
@@ -91,14 +93,17 @@ def find_words(
                     textblock_page_name=tb.page_name,
                 )
                 preprocessed_words.append(preprocessed_word)
+
                 if preprocessed_word in keywords:
                     keys[preprocessed_word].append(loc)
                 if preprocessed_word in target_words:
                     targets.append(loc)
+
             for k, l in keys.items():
                 min_distance, target_loc, keyword_loc = get_min_distance_to_target(
                     l, targets
                 )
+
                 if min_distance:
                     matches.append(
                         MatchedWords(

@@ -7,13 +7,11 @@ from defoe import query_utils
 from defoe.nls.query_utils import get_page_as_string
 from pyspark.sql import Row, SQLContext
 
-import yaml
-
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Ingest NLS pages, applies all 4 preprocess treatments (none, normalize, lemmatize, stem) to each page, and save them to HDFS CSV files, with some metadata associated with each page.
-    Metadata collected: tittle, edition, year, place, archive filename, page filename, page id, num pages,
+    Metadata collected: title, edition, year, place, archive filename, page filename, page id, num pages,
     type of archive, model, page_string_raw, page_string_norm, page_string_lemmatize, page_string_stem, num_page_words
 
     Data is saved as Dataframes into HDFS CSV files.
@@ -33,10 +31,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: string
     """
 
+    config = query_utils.get_config(config_file)
+
     preprocess_none = query_utils.parse_preprocess_word_type("none")
     preprocess_normalize = query_utils.parse_preprocess_word_type("normalize")
     preprocess_lemmatize = query_utils.parse_preprocess_word_type("lemmatize")
     preprocess_stem = query_utils.parse_preprocess_word_type("stem")
+
     documents = archives.flatMap(
         lambda archive: [
             (
@@ -53,7 +54,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for document in list(archive)
         ]
     )
-    # [(tittle, edition, year, place, archive filename, page filename,
+
+    # [(title, edition, year, place, archive filename, page filename,
     #   page id, num pages, type of archive, type of disribution, model, page_string_raw, page_string_norm,
     #   page_string_lemmatize, page_string_stem, num_page_words )]
     pages = documents.flatMap(
@@ -96,11 +98,10 @@ def do_query(archives, config_file=None, logger=None, context=None):
         "page_string_stem",
         "num_page_words",
     )
+
     sqlContext = SQLContext(context)
     df = sqlContext.createDataFrame(pages, nlsRow)
 
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
     url = "jdbc:postgresql://%s:%s/%s" % (
         config["host"],
         config["port"],

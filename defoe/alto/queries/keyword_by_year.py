@@ -45,6 +45,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]
     )
+
     # [((year, word), 1), ...]
     words = documents.flatMap(
         lambda year_document: [
@@ -52,10 +53,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for (_, word) in year_document[1].scan_words()
         ]
     )
+
     # [((year, word), 1), ...]
     matching_words = words.filter(
         lambda yearword_count: yearword_count[0][1] in keywords
     )
+
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]

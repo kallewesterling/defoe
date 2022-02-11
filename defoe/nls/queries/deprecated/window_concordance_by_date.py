@@ -3,10 +3,13 @@ Gets concordance of window for keysentence and groups by date.
 """
 
 from defoe import query_utils
-from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
-from defoe.nls.query_utils import get_text_keyword_idx, get_concordance_string
+from defoe.nls.query_utils import (
+    preprocess_clean_page,
+    clean_page_as_string,
+    get_text_keyword_idx,
+    get_concordance_string,
+)
 
-import yaml
 import os
 
 
@@ -16,9 +19,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     Data in ES have the following colums:
 
-    "title",  "edition", "year", "place", "archive_filename", 
-    "source_text_filename", "text_unit", "text_unit_id", 
-    "num_text_unit", "type_archive", "model", "source_text_raw", 
+    "title",  "edition", "year", "place", "archive_filename",
+    "source_text_filename", "text_unit", "text_unit_id",
+    "num_text_unit", "type_archive", "model", "source_text_raw",
     "source_text_clean", "source_text_norm", "source_text_lemmatize", "source_text_stem",
     "num_words"
 
@@ -29,9 +32,14 @@ def do_query(archives, config_file=None, logger=None, context=None):
     all non-'a-z|A-Z' characters.
 
     Returns result of form:
-          [(year, [(title, edition, archive_filename, filename, word,corcondance),
-              (title, edition, archive_filename, filename, word, concordance ), ...]), ...]
-
+        [
+            (year, [
+                (title, edition, archive_filename, filename, word,corcondance),
+                (title, edition, archive_filename, filename, word, concordance ),
+                ...
+            ]),
+            ...
+        ]
 
     :param issues: RDD of defoe.alto.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
@@ -43,8 +51,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by date
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
+    window = 20
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -52,17 +63,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
             os_type = "sys-i386-snow-leopard"
     else:
         os_type = "sys-i386-64"
+
     if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:
         defoe_path = "./"
 
-    window = 20
-    preprocess_type = query_utils.extract_preprocess_word_type(config)
+    # TODO: drop this variable as it is not used...? Or this whole deprecated file?
     preprocess_config = config["preprocess"]
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
-    # newdf=fdf.filter(fdf.source_text_clean.isNotNull()).filter(fdf["model"]=="nls").select(fdf.year, fdf.title, fdf.edition, fdf.archive_filename, fdf.source_text_filename, fdf.source_text_clean)
+    preprocess_type = query_utils.extract_preprocess_word_type(config)
+    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
     keysentences = []
     with open(data_file, "r") as f:
@@ -72,11 +83,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
 
     # [(year, document, title, edition, archive_filename), ...]
@@ -92,7 +105,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for document in list(archive)
         ]
     )
-    # [(year, page_string)
 
     # (year, title, edition, archive_filename, page_code, clean_page_string)
     clean_pages = documents.flatMap(
@@ -122,6 +134,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             )
         ]
     )
+
     # (year, title, edition, archive_filename, page_code, preprocess_clean_page)
     filter_pages = pages.filter(
         lambda year_page: any(
@@ -171,4 +184,3 @@ def do_query(archives, config_file=None, logger=None, context=None):
     )
 
     return result
-

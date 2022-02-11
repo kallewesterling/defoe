@@ -63,8 +63,10 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     # Filter out the pages that are null, which model is nls, and select only 2 columns: year and the page as string (either raw or preprocessed).
     fdf = df.withColumn("definition", blank_as_null("definition"))
+
     # (year, title, edition, archive_filename, page_filename, page_number, type of page, header, term, article_text)
     newdf = (
         fdf.filter(fdf.definition.isNotNull())
@@ -82,6 +84,7 @@ def do_query(df, config_file=None, logger=None, context=None):
             fdf.definition,
         )
     )
+
     articles = newdf.rdd.map(tuple)
 
     keysentences = []
@@ -92,15 +95,16 @@ def do_query(df, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
 
     # (year, title, edition, archive_filename, page_filename, page_number, type of page, header, article, preprocess_article, clean_article)
-
     preprocess_articles = articles.flatMap(
         lambda t_articles: [
             (
@@ -182,7 +186,6 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     # [(date, {"title": title, ...}), ...]
     # =>
-
     result = (
         matching_data.groupByKey()
         .map(lambda date_context: (date_context[0], list(date_context[1])))

@@ -20,13 +20,13 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<WORD>, <NUM_WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<WORD>, <NUM_WORDS>],
+                    ...
+                ]
+            <YEAR>:
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -38,13 +38,17 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
+
+    # TODO: `keyword` can be removed here as it's defined below
     keywords = []
     with open(config_file, "r") as f:
         keywords = [query_utils.normalize(word) for word in list(f)]
+
     # [(year, article), ...]
     articles = issues.flatMap(
         lambda issue: [(issue.date.year, article) for article in issue.articles]
     )
+
     # [((year, word), 1), ...]
     words = articles.flatMap(
         lambda year_article: [
@@ -57,6 +61,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     matching_words = words.filter(
         lambda yearword_count: yearword_count[0][1] in keywords
     )
+
     # [((year, word), num_words), ...]
     # =>
     # [(year, (word, num_words)), ...]

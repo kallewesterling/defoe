@@ -55,6 +55,7 @@ def parse_preprocess_word_type(type_str):
                 type_str,
             )
         )
+
     return preprocess_type
 
 
@@ -76,6 +77,7 @@ def extract_preprocess_word_type(config, default=PreprocessWordType.LEMMATIZE):
         preprocess_type = default
     else:
         preprocess_type = parse_preprocess_word_type(config["preprocess"])
+
     return preprocess_type
 
 
@@ -94,8 +96,10 @@ def extract_data_file(config, default_path):
     :raises: KeyError if "data" is not in config
     """
     data_file = config["data"]
+
     if not os.path.isabs(data_file):
         data_file = os.path.join(default_path, data_file)
+
     return data_file
 
 
@@ -112,12 +116,15 @@ def extract_window_size(config, default=10):
     :rtype: int
     :raises: ValueError if "window" is >= 1
     """
+
     if "window" not in config:
         window = default
     else:
         window = config["window"]
+
     if window < 1:
         raise ValueError("window must be at least 1")
+
     return window
 
 
@@ -345,7 +352,6 @@ def display_spacy(doc):
 
 
 def spacy_entities(doc):
-    output_total = []
     entities = [(i, i.label_, i.label) for i in doc.ents]
     return entities
 
@@ -404,7 +410,7 @@ def xml_geo_entities_snippet(doc):
 
 def georesolve_cmd(in_xml, defoe_path, gazetteer, bounding_box):
     georesolve_xml = ""
-    atempt = 0
+    attempt = 0
     flag = 1
     if "'" in in_xml:
         in_xml = in_xml.replace("'", "'\\''")
@@ -420,7 +426,7 @@ def georesolve_cmd(in_xml, defoe_path, gazetteer, bounding_box):
         + bounding_box
         + " -top"
     )
-    while (len(georesolve_xml) < 5) and (atempt < 1000) and (flag == 1):
+    while (len(georesolve_xml) < 5) and (attempt < 1000) and (flag == 1):
         proc = subprocess.Popen(
             cmd.encode("utf-8"),
             shell=True,
@@ -438,7 +444,7 @@ def georesolve_cmd(in_xml, defoe_path, gazetteer, bounding_box):
                 georesolve_xml = ""
             else:
                 georesolve_xml = stdout
-        atempt += 1
+        attempt += 1
     return georesolve_xml
 
 
@@ -537,7 +543,7 @@ def coord_xml_snippet(geo_xml, snippet):
 
 def geomap_cmd(in_xml, defoe_path, os_type, gazetteer, bounding_box):
     geomap_html = ""
-    atempt = 0
+    attempt = 0
     if "'" in in_xml:
         in_xml = in_xml.replace("'", "'\\''")
     cmd = (
@@ -558,7 +564,7 @@ def geomap_cmd(in_xml, defoe_path, os_type, gazetteer, bounding_box):
         + "georesolve/lib/georesolve/gazmap-leaflet.xsl"
     )
 
-    while (len(geomap_html) < 5) and (atempt < 1000):
+    while (len(geomap_html) < 5) and (attempt < 1000):
         proc = subprocess.Popen(
             cmd.encode("utf-8"),
             shell=True,
@@ -567,12 +573,12 @@ def geomap_cmd(in_xml, defoe_path, os_type, gazetteer, bounding_box):
             stderr=subprocess.PIPE,
         )
         geomap_html = proc.communicate(timeout=100)[0]
-        atempt += 1
+        attempt += 1
     return geomap_html.decode("utf-8")
 
 
 def geoparser_cmd(text, defoe_path, os_type, gazetteer, bounding_box):
-    atempt = 0
+    attempt = 0
     flag = 1
     geoparser_xml = ""
     if "'" in text:
@@ -600,7 +606,7 @@ def geoparser_cmd(text, defoe_path, os_type, gazetteer, bounding_box):
         + "geoparser-v1.1/lib/georesolve/addfivewsnippet.xsl"
     )
 
-    while (len(geoparser_xml) < 5) and (atempt < 1000) and (flag == 1):
+    while (len(geoparser_xml) < 5) and (attempt < 1000) and (flag == 1):
         proc = subprocess.Popen(
             cmd.encode("utf-8"),
             shell=True,
@@ -614,7 +620,7 @@ def geoparser_cmd(text, defoe_path, os_type, gazetteer, bounding_box):
             print("err: '{}'".format(stderr))
         else:
             geoparser_xml = stdout
-        atempt += 1
+        attempt += 1
     return geoparser_xml
 
 

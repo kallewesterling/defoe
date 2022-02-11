@@ -28,23 +28,23 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {
-              "article_id": <ARTICLE_ID>,
-              "issue_id": <ISSUE_ID>,
-              "page_ids": <PAGE_IDS>,
-              "filename": <FILENAME>,
-              "matches":
-              [
-                [<WORD>, ..., <WORD>],
+            <YEAR>:
+                [
+                    {
+                        "article_id": <ARTICLE_ID>,
+                        "issue_id": <ISSUE_ID>,
+                        "page_ids": <PAGE_IDS>,
+                        "filename": <FILENAME>,
+                        "matches":
+                            [
+                                [<WORD>, ..., <WORD>],
+                                ...
+                            ]
+                    },
+                    ...
+                ],
+            <YEAR>:
                 ...
-              ]
-            },
-            ...
-          ],
-          <YEAR>:
-          ...
         }
 
     :param issues: RDD of defoe.alto.issue.Issue
@@ -57,11 +57,14 @@ def do_query(issues, config_file=None, logger=None, context=None):
     by year
     :rtype: dict
     """
+
     window = 0
+
     """
     TODO: I believe the if statement here should be in the get_config function
     - and raise an error if something happens?
     """
+
     if (
         config_file is not None
         and os.path.exists(config_file)
@@ -88,6 +91,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
             get_colocates_matches(issue_article[1], start_word, end_word, window),
         )
     )
+
     # [(issue, article, matches), ...]
     colocated_words = colocated_words.filter(
         lambda issue_article_matches: len(issue_article_matches[2]) > 0
@@ -139,30 +143,38 @@ def get_colocates_matches(article, start_word, end_word, window=0):
     :return: list of lists of words
     :rtype: list(list(str or unicode))
     """
+
+    window_plus_colocates = window + 2
+
     in_span = False
     span = []
     span_length = 0
     matches = []
-    window_plus_colocates = window + 2
     for word in article.words:
         normalized_word = query_utils.normalize(word)
+
         if not normalized_word:
             continue
+
         if normalized_word == start_word:
             in_span = True
             span = []
             span_length = 0
+
         if in_span:
             span.append(normalized_word)
             span_length += 1
+
             if span_length > window_plus_colocates:
                 in_span = False
                 span = []
                 span_length = 0
                 continue
+
             if normalized_word == end_word:
                 matches.append(span)
                 in_span = False
                 span = []
                 span_length = 0
+
     return matches

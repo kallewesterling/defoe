@@ -6,7 +6,6 @@ from defoe import query_utils
 from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_sentences_list_matches
 
-import yaml
 import os
 
 
@@ -23,23 +22,23 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            - [title:
-             place:
-             publisher:
-             snippet:
-             term:
-             document_id:
-             filenanme]
-            - []
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [
+                        title:
+                        place:
+                        publisher:
+                        snippet:
+                        term:
+                        document_id:
+                        filenanme
+                    ],
+                    ...
+                ]
+                ...
+            <YEAR>:
+                ...
         }
-        
-       
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
@@ -50,8 +49,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
-    with open(config_file, "r") as f:
-        config = yaml.load(f)
+
+    config = query_utils.get_config(config_file)
+
     if "os_type" in config:
         if config["os_type"] == "linux":
             os_type = "sys-i386-64"
@@ -66,6 +66,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -74,18 +75,21 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
+
     # [(year, document), ...]
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]
     )
-    # [(year, page_string)
 
+    # [(year, page_string)
     clean_pages = documents.flatMap(
         lambda year_document: [
             (
@@ -107,7 +111,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             )
         ]
     )
-    # [(year, page_string)
+
     # [(year, page_string)
     filter_pages = pages.filter(
         lambda year_page: any(

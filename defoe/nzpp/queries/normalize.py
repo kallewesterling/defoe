@@ -13,8 +13,12 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<NUM_ALL_ARTICLES>, <NUM_ARTICLES>, <NUM_WORDS>],
-          ...
+            <YEAR>:
+                [
+                    <NUM_ALL_ARTICLES>, <NUM_ARTICLES>, <NUM_WORDS>
+                ],
+            <YEAR>:
+                ...
         }
 
     :param all_articles RDD of defoe.nzpp.articles.Articles
@@ -26,12 +30,15 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :return: total number of articles and words per year
     :rtype: list
     """
+
     # [(article, ...)]
     articles = all_articles.flatMap(
         lambda articles: [article for article in articles.articles]
     )
+
     # [(year, 1, num_words)]
     counts = articles.map(lambda article: (article.date.year, (1, len(article.words))))
+
     result = (
         counts.reduceByKey(lambda x, y: tuple(i + j for i, j in zip(x, y)))
         .map(lambda year_data: (year_data[0], list(year_data[1])))

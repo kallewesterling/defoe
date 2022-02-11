@@ -20,11 +20,14 @@ def filename_to_object(filename, context):
 
     lines = open(filename).readlines()
     fields = lines[1].split(",")
-    # index,host,port
+
+    # index,host,port = TODO: This could be a better destructuring
     es_index = fields[0]
     es_host = fields[1]
     es_port = fields[2].rstrip("\n")
+
     print("es_index %s, es_host %s, es_port %s" % (es_index, es_host, es_port))
+
     sqlContext = SQLContext(context)
     reader = (
         sqlContext.read.format("org.elasticsearch.spark.sql")
@@ -35,4 +38,5 @@ def filename_to_object(filename, context):
         .option("es.nodes", "http://" + es_host)
     )
     df = reader.load(es_index)
+
     return df

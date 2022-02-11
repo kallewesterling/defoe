@@ -41,6 +41,7 @@ def xml_geo_entities_snippet(doc):
     xml_doc = "<placenames> "
     flag = 0
     index = 0
+
     for token in doc:
         if token.ent_type_ == "LOC" or token.ent_type_ == "GPE":
             id = id + 1
@@ -74,8 +75,9 @@ def xml_geo_entities_snippet(doc):
 
 def georesolve_cmd(in_xml):
     georesolve_xml = ""
-    atempt = 0
+    attempt = 0
     flag = 1
+
     if "'" in in_xml:
         in_xml = in_xml.replace("'", "'\\''")
 
@@ -90,8 +92,10 @@ def georesolve_cmd(in_xml):
         + bounding_box
         + " -top"
     )
+
     print("CMD is %s" % cmd)
-    while (len(georesolve_xml) < 5) and (atempt < 10) and (flag == 1):
+
+    while (len(georesolve_xml) < 5) and (attempt < 10) and (flag == 1):
         proc = subprocess.Popen(
             cmd.encode("utf-8"),
             shell=True,
@@ -99,17 +103,22 @@ def georesolve_cmd(in_xml):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        atempt = atempt + 1
+
+        attempt = attempt + 1
         stdout, stderr = proc.communicate()
+
         if "Error" in str(stderr):
             flag = 0
             print("err: '{}'".format(stderr))
             georesolve_xml = ""
         else:
             georesolve_xml = stdout
-        atempt += 1
-        print(atempt, stdout, stderr)
+
+        attempt += 1
+        print(attempt, stdout, stderr)
+
     print("----> Georesolve %s" % georesolve_xml)
+
     return georesolve_xml
 
 

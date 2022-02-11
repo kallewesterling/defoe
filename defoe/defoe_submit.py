@@ -1,5 +1,5 @@
 """
-defoe submission programme. 
+defoe submission programme.
 From the commandline, run the following command::
     defoe-submit <type> <collection> <query> [-h] [-f inputfile]\
                                   [-r result_file] [-n num_proc] [-c config_file] [-l log_file] [...]
@@ -18,7 +18,6 @@ number of processes if running in a parallel environment.
 
 import argparse
 import os
-import sys
 
 
 def create_arg_parser():  # pragma: no cover
@@ -51,6 +50,7 @@ def create_arg_parser():  # pragma: no cover
     parser.add_argument(
         "-l", "--log_file", metavar="logt_file", help="log_file", default="log.txt"
     )
+
     return parser
 
 
@@ -60,28 +60,34 @@ def parse_common_args():  # pragma: no cover
 
 
 def load_inputs(args):
-    inputs = {}
-    err = 0
     inputs["collection"] = args.collection
     inputs["query"] = args.query
+
+    inputs = {}
+    err = 0
     if not args.file:
         err = 1
     else:
         inputs["data_file"] = args.file
+
         if args.config_file:
             inputs["config_file"] = args.config_file
         else:
             inputs["config_file"] = ""
+
         inputs["result_file"] = args.result
         inputs["num_proc"] = args.num
         inputs["log_file"] = args.log_file
+
         if args.type == "simple":
             inputs["process_type"] = "defoe/run_query.py"
         else:
             inputs["process_type"] = "defoe/run_queries.py"
+
         inputs["query_name"] = (
             "defoe." + inputs["collection"] + ".queries." + inputs["query"]
         )
+
     return inputs, err
 
 

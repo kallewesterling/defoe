@@ -42,13 +42,17 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
     """
+
+    # TODO: `keywords` can be dropped here as it's defined below
     keywords = []
     with open(config_file, "r") as f:
         keywords = [normalize(word) for word in list(f)]
+
     # [(year, article), ...]
     articles = issues.flatMap(
         lambda issue: [(issue.date.year, article) for article in issue.articles]
     )
+
     # [((year, [word, word, ...]), 1), ...]
     words = articles.map(
         lambda year_article: (
@@ -61,8 +65,10 @@ def do_query(issues, config_file=None, logger=None, context=None):
             1,
         )
     )
+
     # [((year, [word, word, ...]), 1), ...]
     match_words = words.filter(lambda yearword_count: len(yearword_count[0][1]) > 1)
+
     # [((year, "word, word, ..."), 1), ...]
     # Convert word list to string so can serve as a key.
     multi_words = match_words.map(
@@ -71,6 +77,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
             yearword_count[1],
         )
     )
+
     # [((year, "word, word, ..."), 1), ...]
     # =>
     # [((year, "word, word, ..."), count), ...]
@@ -109,13 +116,17 @@ def word_article_count_list_to_dict(word_counts):
 
     List is of form:
 
-       [("word, word, ...", count), ...]
+        [
+            ("word, word, ...", count),
+            ...
+        ]
 
     Dictionary is of form:
 
         {
-          "words": [<WORD>, <WORD>, ...],
-          "count": <COUNT>
+            "words":
+                [<WORD>, <WORD>, ...],
+            "count": <COUNT>
         }
 
     :param word_counts: words and counts
@@ -123,7 +134,9 @@ def word_article_count_list_to_dict(word_counts):
     :return: dict
     :rtype: dict
     """
+
     result = []
+
     for word_count in word_counts:
         result.append({"words": word_count[0].split(","), "count": word_count[1]})
 

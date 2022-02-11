@@ -62,12 +62,15 @@ def get_document_keywords(
     :return: sorted list of keywords that occur within article
     :rtype: list(str or unicode)
     """
+
     matches = set()
+
     for page in document:
         for word in page.words:
             preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
             if preprocessed_word in keywords:
                 matches.add(preprocessed_word)
+
     return sorted(list(matches))
 
 
@@ -87,11 +90,14 @@ def document_contains_word(
     :return: True if the article contains the word, false otherwise
     :rtype: bool
     """
+
     for page in document:
         for word in page.words:
             preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
             if keyword == preprocessed_word:
                 return True
+
     return False
 
 
@@ -108,15 +114,21 @@ def calculate_words_within_dictionary(
     :return: matches
     :rtype: list(str or unicode)
     """
+
     dictionary = words.words()
+
     counter = 0
     total_words = 0
+
     for word in page.words:
         preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
         if preprocessed_word != "":
             total_words += 1
+
             if preprocessed_word in dictionary:
                 counter += 1
+
     try:
         calculate_pc = str(counter * 100 / total_words)
     except:
@@ -135,14 +147,14 @@ def calculate_words_confidence_average(page):
     :return: matches
     :rtype: list(str or unicode)
     """
-    dictionary = words.words()
-    counter = 0
+
     total_wc = 0
     for wc in page.wc:
         total_wc += float(wc)
+
     try:
         calculate_wc = str(total_wc / len(page.wc))
     except:
         calculate_wc = "0"
-    return calculate_wc
 
+    return calculate_wc
