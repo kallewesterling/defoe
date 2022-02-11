@@ -1,4 +1,4 @@
-from defoe.test.utils import get_defoe_home
+from .utils import get_defoe_home
 
 import subprocess
 import spacy
