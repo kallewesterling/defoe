@@ -4,6 +4,7 @@ Query-related utility functions.
 
 from defoe import query_utils
 from defoe.query_utils import PreprocessWordType
+
 from nltk.corpus import words
 
 

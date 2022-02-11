@@ -3,26 +3,26 @@ The query counts as a “hit” every time that finds a page with a particular t
 and it groups the results by books.
 """
 
-from operator import add
-
 from defoe import query_utils
 from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_sentences_list_matches
 
-import yaml, os
+from operator import add
+import yaml
+import os
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
-    The query counts as a “hit” every time that finds a page with a particular 
+    The query counts as a “hit” every time that finds a page with a particular
     term from a lexicon and it groups the results by years.
-    
-    config_file must be the path to a lexicon file with a list of the keywords 
+
+    config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
+
     Also the config_file can indicate the preprocess treatment, along with the defoe
     path, and the type of operating system.
-    
+
     If a term appears several times in the same page, it will be still counted as “1”.
 
     Example:
@@ -31,7 +31,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                  - 1
             - - blaw
                  - 4
-    That means that neu appears in one page of the book 'Twas on the morn of sweet May Day'. 
+    That means that neu appears in one page of the book 'Twas on the morn of sweet May Day'.
     And blaw appears in 4 pages of the same book.
 
 

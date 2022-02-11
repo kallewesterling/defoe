@@ -1,9 +1,10 @@
 """
 Query-related utility functions.
 """
-import re
-from defoe import query_utils
+
 from pyspark.sql.functions import col, when
+
+import re
 
 
 def get_sentences_list_matches(text, keysentence):
@@ -17,19 +18,24 @@ def get_sentences_list_matches(text, keysentence):
     :return: Set of sentences
     :rtype: set(str or unicode)
     """
-    matches = []
+
     text_list = text.split()
+
+    matches = []
     for sentence in keysentence:
         if len(sentence.split()) > 1:
             if sentence in text:
                 count = text.count(sentence)
+
                 for i in range(0, count):
                     matches.append(sentence)
         else:
             pattern = re.compile(r"^%s$" % sentence)
+
             for word in text_list:
                 if re.search(pattern, word):
                     matches.append(sentence)
+
     return sorted(matches)
 
 
@@ -47,18 +53,20 @@ def get_articles_list_matches(text, keysentence):
     :rtype: set(str or unicode)
     """
 
-    matches = []
     text_list = text.split()
+
+    matches = []
     for sentence in keysentence:
         if len(sentence.split()) > 1:
             if sentence in text:
                 matches.append(sentence)
-
         else:
             pattern = re.compile(r"^%s$" % sentence)
+
             for word in text_list:
                 if re.search(pattern, word) and (sentence not in matches):
                     matches.append(sentence)
+
     return sorted(matches)
 
 
@@ -75,6 +83,7 @@ def get_articles_text_matches(text, keysentence):
     :return: Set of sentences
     :rtype: set(str or unicode)
     """
+
     match_text = {}
     for sentence in keysentence:
         if len(sentence.split()) > 1:
@@ -84,9 +93,11 @@ def get_articles_text_matches(text, keysentence):
         else:
             text_list = text.split()
             pattern = re.compile(r"^%s$" % sentence)
+
             for word in text_list:
                 if re.search(pattern, word) and (sentence not in match_text):
                     match_text[sentence] = text
+
     return match_text
 
 

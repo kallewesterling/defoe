@@ -4,6 +4,7 @@ Segementation of images for keywords and groups by word.
 
 from defoe import query_utils
 from defoe.fmp.query_utils import get_article_matches, segment_image
+
 import yaml
 import os
 
@@ -25,17 +26,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
           <WORD>:
           [
             { "article_id": <ARTICLE ID>,
-              "issue_filename": <ISSUE.ZIP>, 
+              "issue_filename": <ISSUE.ZIP>,
               "issue_id": <ISSUE ID>
               "coord": <COORDENATES>,
-              "cropped_image": <IMAGE.JPG> 
+              "cropped_image": <IMAGE.JPG>
               "page_area": <PAGE AREA>,
               "page_filename": < PAGE FILENAME>,
               "place": <PLACE>,
               "textblock_id": <TEXTBLOCK ID>,
               "title": <TITLER>,
               "words": <WORDS>,
-              "preprocessed_words": <PREPROCESSED WORDS> 
+              "preprocessed_words": <PREPROCESSED WORDS>,
               "year": <YEAR>,
               "date": <DATE>
             },

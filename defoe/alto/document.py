@@ -2,11 +2,11 @@
 Object model representation of a document represented as a collection
 of XML files in METS/MODS format.
 """
-import re
-
-from lxml import etree
 
 from defoe.alto.page import Page
+
+from lxml import etree
+import re
 
 
 class Document(object):

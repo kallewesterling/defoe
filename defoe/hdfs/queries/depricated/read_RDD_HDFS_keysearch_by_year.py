@@ -2,11 +2,12 @@
 Read from HDFS file, and counts number of occurrences of keywords or keysentences and groups by year.
 """
 
-from operator import add
 from defoe import query_utils
 from defoe.hdfs.query_utils import get_sentences_list_matches
 
-import yaml, os
+from operator import add
+import yaml
+import os
 
 
 def do_query(df, config_file=None, logger=None, context=None):

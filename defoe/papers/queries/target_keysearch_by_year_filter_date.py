@@ -11,7 +11,8 @@ from defoe.papers.query_utils import (
     get_articles_list_matches,
 )
 
-import yaml, os
+import yaml
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):

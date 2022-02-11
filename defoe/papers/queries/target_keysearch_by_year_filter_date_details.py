@@ -3,51 +3,50 @@ Get concordance (also called details) of articles in which we have keywords or k
 Filter those by target words and dates, and group results by year.
 """
 
-from operator import add
-
 from defoe import query_utils
-from defoe.papers.query_utils import preprocess_clean_article, clean_article_as_string
 from defoe.papers.query_utils import (
-    get_sentences_list_matches,
+    preprocess_clean_article,
+    clean_article_as_string,
     get_articles_list_matches,
 )
 
-import yaml, os
+import yaml
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
     """
-    Select the articles text along with metadata by using a list of 
+    Select the articles text along with metadata by using a list of
     keywords or keysentences and filter those by date. Results are grouped by year.
 
-    config_file must be the path to a lexicon file with a list of the keywords 
+    config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
+
     Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system. We can also configure how many target words 
-    we want to use, and in which position the lexicon words starts. 
-    
-    For indicating the number of target words to use from the lexicon file, we can indicate it 
+    path, and the type of operating system. We can also configure how many target words
+    we want to use, and in which position the lexicon words starts.
+
+    For indicating the number of target words to use from the lexicon file, we can indicate it
     in the configuration file as, num_target: 1. That means, that we have only one word/sentence
-    as the target word (the first one). 
-    
-    If we want to include the target words in the lexicon, we should indicate in 
+    as the target word (the first one).
+
+    If we want to include the target words in the lexicon, we should indicate in
     the configuration file as, lexicon_start: 0.
-    
-    If we do not want to include the target words (lets image that we have just one target word) 
+
+    If we do not want to include the target words (lets image that we have just one target word)
     in the lexicon, we should indicate in the configuration file as, lexicon_start: 1.
-    
+
     Finally, to select the dates that we want to use in this query, we have to indicate them
     in the configuration file as follows:
-    
-      start_year: YEAR_START (including that year)
-      end_year: YEAR_FINISH (including that year)
+
+        start_year: YEAR_START (including that year)
+        end_year: YEAR_FINISH (including that year)
 
     Returns result of form:
         {
           <YEAR>:
           [
-            [- article_id: 
+            [- article_id:
              - authors:
              - filename:
              - issue_id:

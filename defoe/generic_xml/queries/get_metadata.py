@@ -45,4 +45,5 @@ def do_query(documents, config_file=None, logger=None, context=None):
         )
     )
     metadata = metadata.collect()
+
     return metadata

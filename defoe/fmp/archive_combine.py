@@ -3,14 +3,14 @@ Abstract base class for object model representation of an archive
 of files in ALTO format.
 """
 
+from defoe.fmp.document import Document
+from defoe.spark_utils import open_stream
+
+from os import listdir
+from os.path import isfile, join
 import abc
 import re
 import zipfile
-
-from defoe.fmp.document import Document
-from defoe.spark_utils import open_stream
-from os import listdir
-from os.path import isfile, join
 
 
 class AltoArchive(abc.ABCMeta("ABC", (object,), {})):

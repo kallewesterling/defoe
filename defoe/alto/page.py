@@ -3,7 +3,6 @@ Object model representation of a page represented as an XML file in
 METS/MODS format.
 """
 
-
 from lxml import etree
 
 
@@ -24,7 +23,7 @@ class Page(object):
     WC_XPATH = etree.XPath("//String/@WC")
     """ XPath query for Word Confidence  content """
     CC_XPATH = etree.XPath("//String/@CC")
-    """ XPath query for Caracther Confidence content """
+    """ XPath query for Character Confidence content """
 
     def __init__(self, document, code, source=None):
         """

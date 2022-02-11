@@ -2,11 +2,11 @@
 Finds every unique word and its frequency.
 """
 
+from defoe import query_utils
+
 from operator import add
 import os.path
 import yaml
-
-from defoe import query_utils
 
 
 def do_query(issues, config_file=None, logger=None, context=None):

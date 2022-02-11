@@ -3,15 +3,12 @@ Gets concordance of window for keysentence and groups by date.
 It uses the data previously stored in ES
 """
 
-from operator import add
 from defoe import query_utils
 from defoe.nls.query_utils import get_text_keyword_idx, get_concordance
 from defoe.hdfs.query_utils import blank_as_null
-from pyspark.sql import SQLContext
-from pyspark.sql.functions import col, when
 
-
-import yaml, os
+import yaml
+import os
 
 
 def do_query(df, config_file=None, logger=None, context=None):

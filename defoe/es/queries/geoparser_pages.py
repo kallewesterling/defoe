@@ -1,28 +1,24 @@
-""" 
-It uses ES stored data. 
-Identify the locations per page and geo-resolve them. 
+"""
+It uses ES stored data.
+Identify the locations per page and geo-resolve them.
 It uses the Original Edinburgh geoparser pipeline for identifying all the posible locations within a page and georesolve them.
 """
 
-
-from operator import add
 from defoe import query_utils
 from defoe.hdfs.query_utils import blank_as_null
-from pyspark.sql import SQLContext
-from pyspark.sql.functions import col, when
 
-import yaml, os
+import yaml
 
 
 def do_query(df, config_file=None, logger=None, context=None):
-    """ 
-    It ingests NLS pages, applies the original geoparser for identifying the possible locations of each page. 
+    """
+    It ingests NLS pages, applies the original geoparser for identifying the possible locations of each page.
     And also for getting the latituted and longitude of each location.
     
-    Before applying the geoparser, two clean steps are applied - long-S and hyphen words. 
+    Before applying the geoparser, two clean steps are applied - long-S and hyphen words.
     
-    A config_file should be indicated to specify the gazetteer to use, 
-    the defoe_path, the bounding box (optional), as well as the operating system. 
+    A config_file should be indicated to specify the gazetteer to use,
+    the defoe_path, the bounding box (optional), as well as the operating system.
     
     Example:
     - 1842:

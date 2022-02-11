@@ -2,18 +2,16 @@
 Query-related utility functions and types.
 """
 
+import spacy
+from spacy.tokens import Doc
+from spacy.vocab import Vocab
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from lxml import etree
 import os
-import time
 import subprocess
 import re
 import enum
-from lxml import etree
-from nltk.stem import PorterStemmer, WordNetLemmatizer
-import spacy
-from spacy import displacy
-import time
-from spacy.tokens import Doc
-from spacy.vocab import Vocab
+
 
 NON_AZ_REGEXP = re.compile("[^a-z]")
 NON_AZ_19_REGEXP = re.compile("[^a-z0-9]")
@@ -341,7 +339,7 @@ def deserialize_doc(serialized_bytes):
 def display_spacy(doc):
     disp_ent = ""
     if doc.ents:
-        disp_ent = displacy.render(doc, style="ent")
+        disp_ent = spacy.displacy.render(doc, style="ent")
     return disp_ent
 
 

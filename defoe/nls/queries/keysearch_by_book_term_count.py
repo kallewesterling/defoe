@@ -1,15 +1,15 @@
 """
 The query counts as a “hint” every time that finds a term from our lexicon
-and group the results by books. 
+and group the results by books.
 """
-
-from operator import add
 
 from defoe import query_utils
 from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_sentences_list_matches_per_page
 
-import yaml, os
+from operator import add
+import yaml
+import os
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
@@ -17,19 +17,19 @@ def do_query(archives, config_file=None, logger=None, context=None):
     The query counts as a “hint” every time that finds a term from our lexicon
     and group the results by books.
 
-    config_file must be the path to a lexicon file with a list of the keywords 
+    config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
+
     Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system. 
+    path, and the type of operating system.
 
          -  '''Twas on the morn of sweet May Day':
                 - - neu
                      - 1
                 - - blaw
                      - 5
-     That means that neu appears in once of the book 'Twas on the morn of sweet May Day'. 
-     And blaw appears 5 times in the same book. 
+     That means that neu appears in once of the book 'Twas on the morn of sweet May Day'.
+     And blaw appears 5 times in the same book.
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD

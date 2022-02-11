@@ -3,12 +3,12 @@ Abstract base class for object model representation of ZIP archive
 of files in ALTO format.
 """
 
+from defoe.alto.document import Document
+from defoe.spark_utils import open_stream
+
 import abc
 import re
 import zipfile
-
-from defoe.alto.document import Document
-from defoe.spark_utils import open_stream
 
 
 class AltoArchive(abc.ABCMeta("ABC", (object,), {})):

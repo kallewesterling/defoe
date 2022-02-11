@@ -1,11 +1,11 @@
-""" 
+"""
 Pages as string to HDFS textfiles (using RDDs), and some metadata associated with each document.
 """
 
 from defoe import query_utils
 from defoe.nls.query_utils import get_page_as_string
 
-import yaml, os
+import yaml
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
@@ -14,11 +14,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
     If we have a config_file indiciating the preprocess treament, it will be to the words extracted from pages. Otherwise, non preprocess treatment will be applied.
     Metadata collected: tittle, edition, year, place, archive filename, page filename, page id, num pages, type of archive, model, type of preprocess treatment, prep_page_string
 
-    Data is saved as RDD into HDFS textfiles 
+    Data is saved as RDD into HDFS textfiles.
 
     Example:
-    ('Encyclopaedia Britannica; or, A dictionary of arts, sciences, and miscellaneous literature', 'Fourth edition ...', 
-      1810, 'Edinburgh', '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/191253839', 
+    ('Encyclopaedia Britannica; or, A dictionary of arts, sciences, and miscellaneous literature', 'Fourth edition ...',
+      1810, 'Edinburgh', '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/191253839',
       'alto/192209952.34.xml', 'Page5', 446, 'book', 'nls', <PreprocessWordType.NONE:4>, u"Part III. MORAL PHILOSOPHY.....)
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD

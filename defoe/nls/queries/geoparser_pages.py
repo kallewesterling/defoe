@@ -1,13 +1,12 @@
-""" 
-Identify the locations per page and geo-resolve them. 
+"""
+Identify the locations per page and geo-resolve them.
 It uses the Original Edinburgh geoparser pipeline for identifying all the posible locations within a page and georesolve them.
 """
 
 from defoe import query_utils
 from defoe.nls.query_utils import clean_page_as_string
-from pyspark.sql import Row, SparkSession, SQLContext
 
-import yaml, os
+import yaml
 
 
 def do_query(archives, config_file=None, logger=None, context=None):

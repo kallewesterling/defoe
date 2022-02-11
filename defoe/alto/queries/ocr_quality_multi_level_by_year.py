@@ -3,7 +3,6 @@ Gets page and the average of all words confidences for each page and groups by y
 
 """
 
-from operator import concat, add
 from defoe.alto.query_utils import calculate_words_confidence_average
 
 

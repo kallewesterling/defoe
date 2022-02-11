@@ -2,20 +2,18 @@
 Read from PostgreSQL table, and counts number of occurrences of keywords or keysentences and groups by year.
 """
 
-from operator import add
 from defoe import query_utils
 from defoe.psql.query_utils import get_sentences_list_matches, blank_as_null
-from pyspark.sql import SQLContext
-from pyspark.sql.functions import col, when
 
-
-import yaml, os
+from operator import add
+import yaml
+import os
 
 
 def do_query(df, config_file=None, logger=None, context=None):
     """
     Read from PSQL, and counts number of occurrences of keywords or keysentences and groups by year.
-    We have an entry in the HFDS file with the following information: 
+    We have an entry in the HFDS file with the following information:
 
     nlsRow=Row("title",  "edition", "year", "place", "archive_filename",  "source_text_filename", "text_unit", "text_unit_id", "num_text_unit", "type_archive", "model", "source_text_raw", "source_text_clean", "source_text_norm", "source_text_lemmatize", "source_text_stem", "num_words")
 

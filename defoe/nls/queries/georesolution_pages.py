@@ -1,29 +1,27 @@
-""" 
-Identify the locations per page and geo-resolve them. 
+"""
+Identify the locations per page and geo-resolve them.
 It uses spaCy for identifying all posible locations within a page.
 It uses the Edinburgh georesolve for getting the latituted and longitude of each location.
 """
 
-from defoe import query_utils
 from defoe.nls.query_utils import clean_page_as_string, georesolve_page_2
-from pyspark.sql import Row, SparkSession, SQLContext
 
-import yaml, os
+import yaml
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
-    It ingest NLS pages, applies scpaCy NLP pipeline for identifying the possible locations of each page. 
+    It ingest NLS pages, applies spaCy NLP pipeline for identifying the possible locations of each page.
     And it applies the edinburgh geoparser (just the georesolver) for getting the latituted and longitude of each of them.
-    
-    Before applying the spaCy NLP, two clean steps are applied - long-S and hyphen words. 
-    
-    A config_file must be the path to a lexicon file with a list of the keywords 
+
+    Before applying the spaCy NLP, two clean steps are applied - long-S and hyphen words.
+
+    A config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
-    A config_file should be indicated to specify the lang_model, gazetteer to use, 
-    the defoe_path, the bounding box (optional), as well as the operating system. 
-    
+
+    A config_file should be indicated to specify the lang_model, gazetteer to use,
+    the defoe_path, the bounding box (optional), as well as the operating system.
+
     Example:
       - 1842:
         - archive: /home/rosa_filgueira_vicente/datasets/sg_simple_sample/97437554

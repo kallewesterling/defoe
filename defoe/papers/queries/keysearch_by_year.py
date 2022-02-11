@@ -10,7 +10,8 @@ from defoe import query_utils
 from defoe.papers.query_utils import preprocess_clean_article, clean_article_as_string
 from defoe.papers.query_utils import get_sentences_list_matches
 
-import yaml, os
+import yaml
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):

@@ -4,6 +4,7 @@ Query-related utility functions.
 
 from defoe import query_utils
 from defoe.query_utils import PreprocessWordType
+
 from nltk.corpus import words
 from PIL import Image
 from pathlib import Path

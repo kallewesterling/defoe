@@ -2,9 +2,11 @@
 Object model representation of a document represented as a collection
 of XML files in METS/MODS format.
 """
-import re
-from lxml import etree
+
 from defoe.fmp.page import Page
+
+from lxml import etree
+import re
 
 
 class Document(object):
@@ -400,7 +402,7 @@ class Document(object):
         """
         Parse the strucLink information
         :return: 1) A dictionary with articles IDs as keys. And per article ID, we have a list of parts/textblokcs ids that conform each article. 
-                 2) A dictionary with parts/texblocks ids as keys, and page and area as values. 
+                 2) A dictionary with parts/textblocks ids as keys, and page and area as values. 
         :rtype: two dictionaries
         {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
         {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}

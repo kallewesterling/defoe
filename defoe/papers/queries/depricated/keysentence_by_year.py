@@ -6,13 +6,13 @@ Words in articles and keysentences can be normalized, normalized and
 stemmed, or normalized and lemmatized (default).
 """
 
-from operator import add
-import os.path
-import yaml
-
 from defoe import query_utils
 from defoe.papers.query_utils import get_article_as_string
 from defoe.papers.query_utils import get_sentences_list_matches
+
+from operator import add
+import os.path
+import yaml
 
 
 def do_query(issues, config_file=None, logger=None, context=None):

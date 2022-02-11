@@ -2,12 +2,12 @@
 Gets concordance of window for keysentence and groups by date.
 """
 
-from operator import add
 from defoe import query_utils
 from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_text_keyword_idx, get_concordance_string
 
-import yaml, os
+import yaml
+import os
 
 
 def do_query(archives, config_file=None, logger=None, context=None):

@@ -2,13 +2,12 @@
 Count concordance (also called details) occurrences of keywords or keysentences (by page) and group by year
 """
 
-from operator import add
-
 from defoe import query_utils
 from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_sentences_list_matches
 
-import yaml, os
+import yaml
+import os
 
 
 def do_query(archives, config_file=None, logger=None, context=None):

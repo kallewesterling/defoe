@@ -3,7 +3,6 @@ Gets concordance for keywords and groups by word.
 """
 
 from defoe import query_utils
-from defoe.nls.query_utils import get_page_matches
 
 
 def do_query(archives, config_file=None, logger=None, context=None):

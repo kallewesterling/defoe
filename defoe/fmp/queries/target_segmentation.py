@@ -1,10 +1,12 @@
 """
-This query filters articles’ textblocks by selecting the ones that have one of the target word(s) AND any the keywords.
-Later it produces the segmentation/crop or the filtered texblocks. 
+This query filters articles’ textblocks by selecting the ones that have one of
+the target word(s) AND any the keywords. Later it produces the segmentation/
+crop or the filtered textblocks.
 """
 
 from defoe import query_utils
 from defoe.fmp.query_utils import get_article_matches, segment_image, get_tb_matches
+
 import yaml
 import os
 
@@ -77,7 +79,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     keywords = keywords[2:]
     # [document, ...]
 
-    # We will select/filter the texblocks that follows this rule: The text contains at least one target words AND one keyword.
+    # We will select/filter the textblocks that follows this rule: The text contains at least one target words AND one keyword.
 
     documents = archives.flatMap(
         lambda archive: [

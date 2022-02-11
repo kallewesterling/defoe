@@ -1,13 +1,15 @@
 """
-This query filters articles’ textblocks by selecting the ones that have one of the target word(s) AND any the keywords.
-Later it produces the segmentation/crop or the filtered texblocks. 
+This query filters articles’ textblocks by selecting the ones that have one of
+the target word(s) AND any the keywords. Later it produces the segmentation/
+crop or the filtered textblocks.
 """
 
 from defoe import query_utils
 from defoe.fmp.query_utils import segment_image
+
+from collections import namedtuple, defaultdict
 import yaml
 import os
-from collections import namedtuple, defaultdict
 
 WordLocation = namedtuple(
     "WordLocation",

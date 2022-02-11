@@ -2,11 +2,11 @@
 Counts number of occurrences of keywords and groups by year.
 """
 
-from operator import add
-
 from defoe import query_utils
 
-import yaml, os
+from operator import add
+import yaml
+import os
 
 
 def do_query(archives, config_file=None, logger=None, context=None):

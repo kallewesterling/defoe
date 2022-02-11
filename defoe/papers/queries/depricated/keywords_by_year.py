@@ -2,11 +2,10 @@
 Counts number of articles containing two or more keywords and groups by year.
 """
 
-from operator import add
 
-from defoe import query_utils
-from defoe.papers.query_utils import get_article_keywords
-from defoe.papers.query_utils import PreprocessWordType
+from defoe.papers.query_utils import get_article_keywords, normalize, PreprocessWordType
+
+from operator import add
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -45,7 +44,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     """
     keywords = []
     with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+        keywords = [normalize(word) for word in list(f)]
     # [(year, article), ...]
     articles = issues.flatMap(
         lambda issue: [(issue.date.year, article) for article in issue.articles]

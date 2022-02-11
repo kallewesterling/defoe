@@ -1,24 +1,20 @@
-""" 
+"""
 It uses ES stored data
 Identify the locations per page and geo-resolve them. 
 It uses spaCy for identifying all posible locations within a page.
 It uses the Edinburgh georesolve for getting the latituted and longitude of each location.
 """
 
-from operator import add
-from defoe import query_utils
 from defoe.hdfs.query_utils import blank_as_null
 from defoe.nls.query_utils import georesolve_page_2
-from pyspark.sql import SQLContext
-from pyspark.sql.functions import col, when
 
-import yaml, os
+import yaml
 
 
 def do_query(df, config_file=None, logger=None, context=None):
     """
     Retrieves NLS pages from ES, which have been previously clean and stored. 
-    Applies scpaCy NLP pipeline for identifying the possible locations of each page. And applies the edinburgh geoparser for getting the latituted and longitude of each of them.
+    Applies spaCy NLP pipeline for identifying the possible locations of each page. And applies the edinburgh geoparser for getting the latituted and longitude of each of them.
     
     A config_file must be the path to a lexicon file with a list of the keywords 
     to search for, one per line.

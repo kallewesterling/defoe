@@ -2,12 +2,11 @@
 Gets concordance and collocation for keywords selecting only the pages which have occurences of the target word,  and groups the results by date.
 This query detects also the sentences in which keywords appear, and preprocess each word of each sentence with different methods. 
 """
-import os.path
-import yaml
+
 from defoe import query_utils
 from defoe.alto.query_utils import extract_sentences, total_preprocessed
-from defoe.alto.query_utils import PreprocessWordType
-from defoe.query_utils import PreprocessWordType
+
+import yaml
 
 
 def do_query(archives, config_file=None, logger=None, context=None):

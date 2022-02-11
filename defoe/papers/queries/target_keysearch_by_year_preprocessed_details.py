@@ -5,39 +5,38 @@ This query is the recommended to use when there are target words and we want to 
 
 """
 
-from operator import add
-
 from defoe import query_utils
-from defoe.papers.query_utils import preprocess_clean_article, clean_article_as_string
 from defoe.papers.query_utils import (
-    get_sentences_list_matches,
+    preprocess_clean_article,
+    clean_article_as_string,
     get_articles_list_matches,
 )
 
-import yaml, os
+import yaml
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
     """
-    Select the articles text along with metadata by using a list of 
+    Select the articles text along with metadata by using a list of
     keywords or keysentences and groups by year. In the result file we
-    store the preproessed text instead of the original text. 
-    
-    config_file must be the path to a lexicon file with a list of the keywords 
+    store the preproessed text instead of the original text.
+
+    config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
-    
+
     Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system. We can also configure how many target words 
-    we want to use, and in which position the lexicon words starts. 
-    
-    For indicating the number of target words to use from the lexicon file, we can indicate it 
+    path, and the type of operating system. We can also configure how many target words
+    we want to use, and in which position the lexicon words starts.
+
+    For indicating the number of target words to use from the lexicon file, we can indicate it
     in the configuration file as, num_target: 1. That means, that we have only one word/sentence
-    as the target word (the first one). 
-    
-    If we want to include the target words in the lexicon, we should indicate in 
+    as the target word (the first one).
+
+    If we want to include the target words in the lexicon, we should indicate in
     the configuration file as, lexicon_start: 0.
-    
-    If we do not want to include the target words (lets image that we have just one target word) 
+
+    If we do not want to include the target words (lets image that we have just one target word)
     in the lexicon, we should indicate in the configuration file as, lexicon_start: 1.
 
     Returns result of form:
@@ -45,7 +44,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         {
           <YEAR>:
           [
-            [- article_id: 
+            [- article_id:
              - authors:
              - filename:
              - issue_id:

@@ -1,26 +1,25 @@
-""" 
-Pages as string to HDFS CSv files (using dataframes), and some metadata associated with each document.
+"""
+Pages as string to HDFS CSv files (using dataframes), and some metadata
+associated with each document.
 """
 
 from defoe import query_utils
 from defoe.nls.query_utils import get_page_as_string, clean_page_as_string
-from pyspark.sql import Row, SparkSession, SQLContext
-
-import yaml, os
+from pyspark.sql import Row, SQLContext
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
     Ingest NLS pages, applies all 4 preprocess treatments (none, normalize, lemmatize, stem) to each page, and save them to HDFS CSV files, with some metadata associated with each page.
-    Metadata collected: tittle, edition, year, place, archive filename, page filename, page id, num pages, 
+    Metadata collected: tittle, edition, year, place, archive filename, page filename, page id, num pages,
     type of archive, model, source_text_raw, source_text_norm, source_text_lemmatize, source_text_stem, num_page_words
 
-    Data is saved as Dataframes into HDFS CSV files 
+    Data is saved as Dataframes into HDFS CSV files.
 
 
     Example:
-    ('Encyclopaedia Britannica; or, A dictionary of arts, sciences, and miscellaneous literature', 'Fourth edition ...', 
-      1810, 'Edinburgh', '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/191253839', 
+    ('Encyclopaedia Britannica; or, A dictionary of arts, sciences, and miscellaneous literature', 'Fourth edition ...',
+      1810, 'Edinburgh', '/mnt/lustre/at003/at003/rfilguei2/nls-data-encyclopaediaBritannica/191253839',
       'alto/192209952.34.xml', 'Page5', 446, 'book', 'nls',  u"Part III. MORAL PHILOSOPHY....., u"part iii moral ...", u"part iii moral ...", u"part iii moral...",'46')
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD

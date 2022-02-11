@@ -6,12 +6,12 @@ Words in articles, target words and keywords can be normalized,
 normalized and stemmed, or normalized and lemmatized (default).
 """
 
-import os.path
-from operator import add
-import yaml
-
 from defoe import query_utils
 from defoe.papers.query_utils import article_contains_word
+
+from operator import add
+import os.path
+import yaml
 
 
 def do_query(issues, config_file=None, logger=None, context=None):

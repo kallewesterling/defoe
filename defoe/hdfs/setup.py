@@ -21,4 +21,5 @@ def filename_to_object(filename, context):
     data = open(filename).readline().rstrip()
     sqlContext = SQLContext(context)
     df = sqlContext.read.csv(data, header="true")
+
     return df

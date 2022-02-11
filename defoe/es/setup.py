@@ -36,4 +36,3 @@ def filename_to_object(filename, context):
     )
     df = reader.load(es_index)
     return df
-

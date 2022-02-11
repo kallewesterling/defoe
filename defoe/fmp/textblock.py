@@ -4,23 +4,17 @@ METS/MODS format.
 """
 
 
-from lxml import etree
-
-
 class TextBlock(object):
     """
     Object model representation of a textblock represented as an XML file
     in METS/MODS format.
     """
 
-    STRINGS_XPATH = "TextLine/String"
-    """ Query for String elements """
-    WC_XPATH = "TextLine/String/@WC"
-    """ Query for Word Confidence  content """
-    CC_XPATH = "TextLine/String/@CC"
-    """ query for Caracther Confidence content """
-    WORDS_XPATH = "TextLine/String/@CONTENT"
-    """ query for word content """
+    # XPath Queries
+    STRINGS_XPATH = "TextLine/String"  # String elements
+    WC_XPATH = "TextLine/String/@WC"  # Word confidence content
+    CC_XPATH = "TextLine/String/@CC"  # Character confidence content
+    WORDS_XPATH = "TextLine/String/@CONTENT"  # Word content
 
     def __init__(self, textblock_tree, document_code, page_code):
         """

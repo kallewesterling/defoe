@@ -2,7 +2,6 @@
 Gets measure of OCR quality for each page and groups by year.
 """
 
-from operator import concat
 from defoe.alto.query_utils import calculate_words_within_dictionary
 
 

@@ -2,10 +2,10 @@
 Gets colocated words and groups by year.
 """
 
+from defoe import query_utils
+
 import os
 import yaml
-
-from defoe import query_utils
 
 
 def do_query(archives, config_file=None, logger=None):
