@@ -3,9 +3,9 @@ Query-related utility functions.
 """
 
 from defoe.query_utils import PreprocessWordType, preprocess_word
-
 from nltk.corpus import words
 from PIL import Image
+
 from pathlib import Path
 import os
 
@@ -54,11 +54,15 @@ def get_article_matches(
     document, keywords, preprocess_type=PreprocessWordType.LEMMATIZE
 ):
     """
+    TODO #3: Incomplete docstring
         (<YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDENATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <KEYWORDS> )
+
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
+
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
+
     :param document: document
     :type document: defoe.alto.document.Document
     :param keywords: keywords
@@ -108,7 +112,10 @@ def get_article_matches(
 
 def get_tb_matches(target_match, keywords):
     """
+    TODO #3: Incomplete docstring
+
     (target_match=><YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDENATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <TARGETWORD>)
+
     :param document: target_match
     :type document: list
     :param keywords: keywords
@@ -161,6 +168,7 @@ def get_tb_matches(target_match, keywords):
 def segment_image(coords, page_name, issue_path, keyword, output_path, target=""):
     """
     Segments texblock articles given coordenates and page path
+
     :param coords: coordenates of an image
     :type coords: string
     :param page_name: name of the page XML which the texblock has been extracted from.
@@ -298,8 +306,9 @@ def calculate_words_within_dictionary(
 
 def calculate_words_confidence_average(page):
     """
-    Calculates the average of "words confidence (wc)"  within a page.
+    Calculates the average of "words confidence (wc)" within a page.
     Page words are normalized.
+
     :param page: Page
     :type page: defoe.alto.page.Page
     :param preprocess_type: how words should be preprocessed

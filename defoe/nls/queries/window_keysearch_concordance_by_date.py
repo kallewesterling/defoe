@@ -69,9 +69,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
     else:
         defoe_path = "./"
 
-    # TODO: Variable is not used - remove?
-    preprocess_config = config["preprocess"]
-
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 

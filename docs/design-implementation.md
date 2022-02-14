@@ -31,7 +31,7 @@ This is an abstract object model representing ALTO documents.
 
 The list of files to run the query over is expected to be a list of ZIP files.
 
-<!-- TODO: Do these ZIP files need to follow any p articular format? -->
+<!-- TODO: Do these ZIP files need to follow any particular format? -->
 A ZIP file is expected to contain one or more documents in ALTO format. Each ZIP file should contain:
 
 - an associated XML metadata file.

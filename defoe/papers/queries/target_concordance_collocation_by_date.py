@@ -13,7 +13,7 @@ from defoe.papers.query_utils import (
     get_concordance,
 )
 
-import os.path
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):

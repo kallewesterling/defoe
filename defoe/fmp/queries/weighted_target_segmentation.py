@@ -8,7 +8,6 @@ from defoe import query_utils
 from defoe.fmp.query_utils import segment_image
 
 from collections import namedtuple, defaultdict
-import yaml
 import os
 
 WordLocation = namedtuple(
@@ -177,8 +176,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
 
-    with open(data_file, "r") as f:
-        input_words = yaml.safe_load(f)
+    input_words = query_utils.get_config(data_file)
 
     target_words = set(
         [

@@ -101,7 +101,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
-            
+
             keysentences.append(sentence_norm)
 
     # [(year, article_string), ...]

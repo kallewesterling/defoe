@@ -2,7 +2,7 @@
 Run Spark several text queries jobs.
 
     usage: run_queries.py [-h] [-n [NUM_CORES]]  [-e [ERRORS_FILE]]
-                      data_file model_name -l query_list [query_config_file]
+                        data_file model_name -l query_list [query_config_file]
 
     Run Spark text analysis job
 
@@ -59,7 +59,7 @@ from defoe.spark_utils import files_to_rdd
 
 from argparse import ArgumentParser
 import importlib
-import os.path
+import os
 import yaml
 
 

@@ -16,7 +16,6 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     nlsRow=Row("title",  "edition", "year", "place", "archive_filename",  "source_text_filename", "text_unit", "text_unit_id", "num_text_unit", "type_archive", "model", "source_text_raw", "source_text_clean", "source_text_norm", "source_text_lemmatize", "source_text_stem", "num_words")
 
-
     config_file must be used to indicate the list of words/sentences (lexicon) to use,
     as well the preprocess treatment to select from PSQL database.
 
@@ -24,13 +23,13 @@ def do_query(df, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
-            ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    [<SENTENCE|WORD>, <NUM_SENTENCES|WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive

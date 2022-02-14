@@ -4,8 +4,6 @@ Gets colocated words and groups by year.
 
 from defoe import query_utils
 
-import os
-
 
 def do_query(archives, config_file=None, logger=None):
     """
@@ -62,19 +60,12 @@ def do_query(archives, config_file=None, logger=None):
     :rtype: dict
     """
 
-    window = 0
-
-    if (
-        config_file is not None
-        and os.path.exists(config_file)
-        and os.path.isfile(config_file)
-    ):
-        config = query_utils.get_config(config_file)
-        start_word = query_utils.normalize(config["start_word"])
-        end_word = query_utils.normalize(config["end_word"])
-        window = config["window"]
-        if window < 0:
-            raise ValueError("window must be at least 0")
+    config = query_utils.get_config(config_file)
+    start_word = query_utils.normalize(config["start_word"])
+    end_word = query_utils.normalize(config["end_word"])
+    window = config["window"]
+    if window < 0:
+        raise ValueError("window must be at least 0")
 
     # [document, ...]
     documents = archives.flatMap(

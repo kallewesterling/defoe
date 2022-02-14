@@ -59,7 +59,7 @@ from defoe.spark_utils import files_to_rdd
 
 from argparse import ArgumentParser
 import importlib
-import os.path
+import os
 import yaml
 
 

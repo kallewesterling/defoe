@@ -58,25 +58,13 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    window = 0
+    config = query_utils.get_config(config_file)
 
-    """
-    TODO: I believe the if statement here should be in the get_config function
-    - and raise an error if something happens?
-    """
-
-    if (
-        config_file is not None
-        and os.path.exists(config_file)
-        and os.path.isfile(config_file)
-    ):
-        config = query_utils.get_config(config_file)
-
-        start_word = query_utils.normalize(config["start_word"])
-        end_word = query_utils.normalize(config["end_word"])
-        window = config["window"]
-        if window < 0:
-            raise ValueError("window must be at least 0")
+    start_word = query_utils.normalize(config["start_word"])
+    end_word = query_utils.normalize(config["end_word"])
+    window = config["window"]
+    if window < 0:
+        raise ValueError("window must be at least 0")
 
     # [(issue, article), ...]
     issue_articles = issues.flatMap(

@@ -2,6 +2,10 @@
 Spark-related file-handling utilities.
 """
 
+import requests
+import io
+import os
+
 HTTP = "http://"
 HTTPS = "https://"
 BLOB = "blob:"
@@ -83,17 +87,11 @@ def open_stream(filename):
     is_blob = filename.lower().startswith(BLOB)
 
     if is_url:
-        import requests
-        from io import StringIO
-
         stream = requests.get(filename, stream=True).raw
         stream.decode_content = True
-        stream = StringIO(stream.read())
+        stream = io.StringIO(stream.read())
 
     elif is_blob:
-        import io
-        import os
-
         # TODO: Ensure azure is part of requirements
         from azure.storage.blob import BlobService
 

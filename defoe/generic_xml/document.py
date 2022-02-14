@@ -4,8 +4,8 @@ Object model representation of an XML document.
 
 from defoe.spark_utils import open_stream
 
-import os.path
 from lxml import etree
+import os
 
 
 XSI_NS = "http://www.w3.org/2001/XMLSchema-instance"
