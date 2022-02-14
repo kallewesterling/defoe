@@ -31,6 +31,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :return: metadata about the document
     :rtype: dict
     """
+
     metadata = documents.map(
         lambda document: (
             document.filename,
@@ -44,6 +45,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
             },
         )
     )
+
     metadata = metadata.collect()
 
     return metadata

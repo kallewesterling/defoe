@@ -17,9 +17,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Keywords and words in documents are preprocessed, using one of the above options.
 
     Returns result of form:
-        <YEAR>:
-        - [<WORD>, <CONCORDANCE>]
-        - [<WORD>, <CONCORDANCE>]
+
+        {
+            <YEAR>:
+                [
+                    [<WORD>, <CONCORDANCE>],
+                    [<WORD>, <CONCORDANCE>],
+                    ...
+                ],
+            <YEAR>:
+                ...
+        }
 
     :param archives: RDD of defoe.alto.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD

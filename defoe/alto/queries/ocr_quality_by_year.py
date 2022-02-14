@@ -12,8 +12,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<QUALITY>, ...],
-          ...
+            <YEAR>: [<QUALITY>, ...],
+            ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive

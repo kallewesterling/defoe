@@ -10,7 +10,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     { <YEAR>: [ (title, edition), (title, edition)] }
 
-
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file (unused)
@@ -20,6 +19,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: Title and editions per year
     :rtype: dict
     """
+
     # [(year, title, edition)]
     documents = archives.flatMap(
         lambda archive: [

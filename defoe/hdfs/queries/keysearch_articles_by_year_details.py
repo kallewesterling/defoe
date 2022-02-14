@@ -28,6 +28,7 @@ def do_query(df, config_file=None, logger=None, context=None):
     path, and the type of operating system.
 
     Returns result of form:
+    
         {
             <YEAR>:
                 [

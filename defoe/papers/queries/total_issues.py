@@ -19,5 +19,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: total number of issues
     :rtype: dict
     """
+
     num_issues = issues.count()
+
     return {"num_issues": num_issues}

@@ -81,6 +81,7 @@ def do_query(df, config_file=None, logger=None, context=None):
         )
 
     pages = newdf.rdd.map(tuple)
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
@@ -89,11 +90,13 @@ def do_query(df, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
 
     filter_pages = pages.filter(

@@ -13,9 +13,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Counts number of occurrences of keywords and groups by year.
     config_file must be the path to a configuration file with a list
     of the keywords to search for, one per line.
+
     Both keywords and words in documents are normalized, by removing
     all non-'a-z|A-Z' characters.
+
     Returns result of form:
+
         {
             <YEAR>:
                 [
@@ -41,8 +44,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
     with open(data_file, "r") as f:
         keywords = [
             query_utils.preprocess_word(word, preprocess_type) for word in list(f)

@@ -8,7 +8,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Iterate through archives and count total number of documents.
     Returns result of form:
 
-        {"num_documents": num_documents}
+        {
+            "num_documents": num_documents
+        }
 
     :param archives: RDD of defoe.alto.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD

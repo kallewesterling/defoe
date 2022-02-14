@@ -25,8 +25,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Also the config_file can indicate the preprocess treatment, along with the defoe
     path, and the type of operating system.
 
-
     Returns result of form:
+
         {
             <YEAR>:
                 [
@@ -65,6 +65,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
             os_type = "sys-i386-snow-leopard"
     else:
         os_type = "sys-i386-64"
+
     if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:
@@ -72,6 +73,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):

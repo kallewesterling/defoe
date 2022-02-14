@@ -39,10 +39,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
-    with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+    keywords = query_utils.get_normalized_keywords(config_file)
 
     # [(year, document), ...]
     documents = archives.flatMap(

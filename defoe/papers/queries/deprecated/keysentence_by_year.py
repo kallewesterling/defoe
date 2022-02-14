@@ -35,13 +35,13 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
         {
             <YEAR>:
-            [
-                [<SENTENCE>, <NUM_ARTICLES>],
-                [<SENTENCE>, <NUM_ARTICLES>],
-                ...
-            ],
+                [
+                    [<SENTENCE>, <NUM_ARTICLES>],
+                    [<SENTENCE>, <NUM_ARTICLES>],
+                    ...
+                ],
             <YEAR>:
-            ...
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -67,11 +67,13 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 query_utils.preprocess_word(word, preprocess_type) for word in k_split
             ]
             sentence_norm = ""
+
             for word in sentence_word:
                 if sentence_norm == "":
                     sentence_norm = word
                 else:
                     sentence_norm += " " + word
+
             keysentences.append(sentence_norm)
 
     # [(year, article_string)

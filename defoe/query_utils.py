@@ -6,6 +6,7 @@ import spacy
 from spacy.tokens import Doc
 from spacy.vocab import Vocab
 from nltk.stem import PorterStemmer, WordNetLemmatizer
+
 from lxml import etree
 import enum
 import os
@@ -793,6 +794,19 @@ def create_es_index(es_index, force_creation):
         return created
 
 
-def get_config(config_file):
+def get_config(config_file, optional=False):
+    try:
+        with open(config_file, "r") as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError as e:
+        if optional:
+            return {}
+
+        raise FileNotFoundError(e)
+
+
+def get_normalized_keywords(config_file):
     with open(config_file, "r") as f:
-        return yaml.safe_load(f)
+        keywords = [normalize(word) for word in list(f)]
+
+    return keywords

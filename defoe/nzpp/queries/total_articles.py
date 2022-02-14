@@ -22,7 +22,10 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :return: total number of articles
     :rtype: dict
     """
+
     # [num_articles, num_articles, ...]
     num_articles = all_articles.map(lambda articles: len(articles.articles))
+
     result = num_articles.reduce(add)
+
     return {"num_articles": result}

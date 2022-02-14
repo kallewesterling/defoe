@@ -22,28 +22,30 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            { "article_id": <ARTICLE ID>,
-              "issue_filename": <ISSUE.ZIP>,
-              "issue_id": <ISSUE ID>
-              "coord": <COORDENATES>,
-              "cropped_image": <IMAGE.JPG>
-              "page_area": <PAGE AREA>,
-              "page_filename": < PAGE FILENAME>,
-              "place": <PLACE>,
-              "textblock_id": <TEXTBLOCK ID>,
-              "title": <TITLER>,
-              "words": <WORDS>,
-              "preprocessed_words": <PREPROCESSED WORDS>,
-              "year": <YEAR>,
-              "date": <DATE>
-            },
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    {
+                        "article_id": <ARTICLE ID>,
+                        "issue_filename": <ISSUE.ZIP>,
+                        "issue_id": <ISSUE ID>
+                        "coord": <COORDENATES>,
+                        "cropped_image": <IMAGE.JPG>
+                        "page_area": <PAGE AREA>,
+                        "page_filename": < PAGE FILENAME>,
+                        "place": <PLACE>,
+                        "textblock_id": <TEXTBLOCK ID>,
+                        "title": <TITLER>,
+                        "words": <WORDS>,
+                        "preprocessed_words": <PREPROCESSED WORDS>,
+                        "year": <YEAR>,
+                        "date": <DATE>
+                    },
+                    ...
+                ],
+            <WORD>:
+                ...
         }
+
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
@@ -62,8 +64,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
     with open(data_file, "r") as f:
         keywords = [
             query_utils.preprocess_word(word, preprocess_type) for word in list(f)

@@ -69,12 +69,11 @@ def do_query(issues, config_file=None, logger=None, context=None):
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     window = query_utils.extract_window_size(config)
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
     with open(data_file, "r") as f:
         keywords = [
             query_utils.preprocess_word(word, preprocess_type) for word in list(f)
         ]
+
     target_word = keywords[0]
 
     # [(year, article, filename, ocr), ...]

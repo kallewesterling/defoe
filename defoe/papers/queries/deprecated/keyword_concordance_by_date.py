@@ -20,21 +20,21 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <DATE>:
-          [
-            {
-              "title": <TITLE>,
-              "page_ids": <PAGE_IDS>,
-              "content": <PAGE_CONTENT>,
-              "word": <WORD>,
-              "article_id": <ARTICLE_ID>,
-              "issue_id": <ISSUE_ID>,
-              "filename": <FILENAME>
-            },
-            ...
-          ],
-          <DATE>:
-          ...
+            <DATE>:
+                [
+                    {
+                        "title": <TITLE>,
+                        "page_ids": <PAGE_IDS>,
+                        "content": <PAGE_CONTENT>,
+                        "word": <WORD>,
+                        "article_id": <ARTICLE_ID>,
+                        "issue_id": <ISSUE_ID>,
+                        "filename": <FILENAME>
+                    },
+                    ...
+                ],
+            <DATE>:
+                ...
         }
 
     :param issues: RDD of defoe.alto.issue.Issue
@@ -48,10 +48,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
-    with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+    keywords = query_utils.get_normalized_keywords(config_file)
 
     # [(date, issue, article, word), ...]
     filtered_words = issues.flatMap(

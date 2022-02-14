@@ -25,12 +25,12 @@ def do_query(df, config_file=None, logger=None, context=None):
     config_file must be indicated with the list of words/sentences (lexicon) to search, and
     the preprocess treatment to select from ES.
 
-
     Returns result of form:
+
         [
-            (year, [
-                (title, edition, archive_filename, filename, word,corcondance),
-                (title, edition, archive_filename, filename, word, concordance ),
+            (<YEAR>, [
+                (<TITLE>, <EDITION>, <ARCHIVE_FILENAME>, <FILENAME>, <WORD>, <CONCORDANCE>),
+                (<TITLE>, <EDITION>, <ARCHIVE_FILENAME>, <FILENAME>, <WORD>, <CONCORDANCE>),
                 ...
             ]),
             ...
@@ -46,6 +46,7 @@ def do_query(df, config_file=None, logger=None, context=None):
     by date
     :rtype: dict
     """
+
     window = 10
 
     config = query_utils.get_config(config_file)

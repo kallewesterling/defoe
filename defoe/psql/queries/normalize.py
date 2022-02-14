@@ -1,6 +1,6 @@
 """
 Counts total number of documents, pages and words per year.
-It uses PSQL pre-stored data. 
+It uses PSQL pre-stored data.
 
 This can be useful if wanting to see how the average number of
 documents, pages and words change over time, for example.
@@ -18,8 +18,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>],
-          ...
+            <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>],
+            ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive

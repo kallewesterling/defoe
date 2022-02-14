@@ -9,6 +9,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     """
     Iterate through documents and count total size of document files
     in bytes.
+
     Returns result of form:
 
         {"total_size": total_size}
@@ -22,5 +23,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :return: total size of document files in bytes
     :rtype: dict
     """
+
     file_sizes = documents.map(lambda document: document.filesize)
+
     return {"total_size": file_sizes.reduce(add)}

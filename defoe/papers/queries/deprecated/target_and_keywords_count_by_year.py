@@ -36,13 +36,13 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
         {
             <YEAR>:
-            [
-                [<WORD>, <NUM_WORDS>],
-                [<WORD>, <NUM_WORDS>],
-                ...
-            ],
+                [
+                    [<WORD>, <NUM_WORDS>],
+                    [<WORD>, <NUM_WORDS>],
+                    ...
+                ],
             <YEAR>:
-            ...
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -59,8 +59,6 @@ def do_query(issues, config_file=None, logger=None, context=None):
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
     with open(data_file, "r") as f:
         keywords = [
             query_utils.preprocess_word(word, preprocess_type) for word in list(f)

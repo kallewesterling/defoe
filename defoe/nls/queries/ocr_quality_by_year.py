@@ -13,8 +13,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<QUALITY>, ...],
-          ...
+            <YEAR>: [<QUALITY>, ...],
+            ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -26,6 +26,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: OCR quality and percentage of words found  of article grouped by year
     :rtype: dict
     """
+
     # [(year, document), ...]
     documents = archives.flatMap(
         lambda archive: [(document.year, document) for document in list(archive)]
@@ -38,6 +39,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             for page in document[1]
         ]
     )
+
     result = (
         qualities.groupByKey()
         .map(lambda year_q: (year_q[0], list(year_q[1])))

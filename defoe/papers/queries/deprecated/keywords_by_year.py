@@ -2,7 +2,7 @@
 Counts number of articles containing two or more keywords and groups by year.
 """
 
-
+from defoe import query_utils
 from defoe.papers.query_utils import get_article_keywords, normalize, PreprocessWordType
 
 from operator import add
@@ -22,15 +22,16 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {
-              "words": [<WORD>, <WORD>, ...],
-              "count": <COUNT>
-            },
-            ...
-          ],
-          ...
+            <YEAR>:
+                [
+                    {
+                        "words": [<WORD>, <WORD>, ...],
+                        "count": <COUNT>
+                    },
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -43,10 +44,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
-    with open(config_file, "r") as f:
-        keywords = [normalize(word) for word in list(f)]
+    keywords = query_utils.get_normalized_keywords(config_file)
 
     # [(year, article), ...]
     articles = issues.flatMap(
@@ -136,7 +134,6 @@ def word_article_count_list_to_dict(word_counts):
     """
 
     result = []
-
     for word_count in word_counts:
         result.append({"words": word_count[0].split(","), "count": word_count[1]})
 

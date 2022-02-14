@@ -19,22 +19,22 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {
-              "title": <TITLE>,
-              "place": <PLACE>,
-              "publisher": <PUBLISHER>,
-              "page_number": <PAGE_NUMBER>,
-              "content": <PAGE_CONTENT>,
-              "word": <WORD>,
-              "document_id": <DOCUMENT_ID>,
-              "filename": <FILENAME>
-             },
-             ...
-          ],
-          <YEAR>:
-          ...
+            <YEAR>:
+                [
+                    {
+                        "title": <TITLE>,
+                        "place": <PLACE>,
+                        "publisher": <PUBLISHER>,
+                        "page_number": <PAGE_NUMBER>,
+                        "content": <PAGE_CONTENT>,
+                        "word": <WORD>,
+                        "document_id": <DOCUMENT_ID>,
+                        "filename": <FILENAME>
+                    },
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive
@@ -48,10 +48,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
-    with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+    keywords = query_utils.get_normalized_keywords(config_file)
 
     # [document, ...]
     documents = archives.flatMap(

@@ -23,6 +23,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     path, and the type of operating system.
 
     Returns result of form:
+
         {
             <YEAR>:
                 [

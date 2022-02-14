@@ -15,7 +15,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     The config_file must indicate the path to a lexicon file with a list of the keywords 
     to search for, one per line.
-    
+
     Also the config_file can indicate the preprocess treatment, along with the defoe
     path, and the type of operating system.
 
@@ -59,6 +59,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
             os_type = "sys-i386-snow-leopard"
     else:
         os_type = "sys-i386-64"
+
     if "defoe_path" in config:
         defoe_path = config["defoe_path"]
     else:

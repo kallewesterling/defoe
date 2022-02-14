@@ -2,12 +2,12 @@
 Count number of pages in which appear keywords or keysentences and group by year
 """
 
-from operator import add
 
 from defoe import query_utils
 from defoe.nls.query_utils import preprocess_clean_page, clean_page_as_string
 from defoe.nls.query_utils import get_sentences_list_matches
 
+from operator import add
 import os
 
 

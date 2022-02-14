@@ -19,19 +19,19 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <DATE>:
-          [
-            {
-              "title": <TITLE>,
-              "paper_name": <NAME>,
-              "content": <PAGE_CONTENT>,
-              "word": <WORD>,
-              "filename": <FILENAME>
-            },
-            ...
-          ],
-          <DATE>:
-          ...
+            <DATE>:
+                [
+                    {
+                        "title": <TITLE>,
+                        "paper_name": <NAME>,
+                        "content": <PAGE_CONTENT>,
+                        "word": <WORD>,
+                        "filename": <FILENAME>
+                    },
+                    ...
+                ],
+            <DATE>:
+                ...
         }
 
     :param all_articles: RDD of defoe.npzz.articles.Articles
@@ -45,10 +45,7 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
-    with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+    keywords = query_utils.get_normalized_keywords(config_file)
 
     # [(article, ...)]
     articles = all_articles.flatMap(

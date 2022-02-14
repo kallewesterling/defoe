@@ -177,8 +177,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
 
-    # TODO #1: Remove `keywords = []` as it is defined below?
-    keywords = []
     with open(data_file, "r") as f:
         input_words = yaml.safe_load(f)
 
