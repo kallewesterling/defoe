@@ -17,3 +17,5 @@ bruise
 death
 perish
 die
+fatal
+amputate
