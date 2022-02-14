@@ -12,7 +12,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     """
     Crops articles' images for keywords and groups by word.
 
-    config_file must a yml file that has the following values:
+    config_file must be a yml file that has the following values:
         * preprocess: Treatment to use for preprocessing the words. Options: [normalize|stem|lemmatize|none]
         * data: TXT file with a list of the keywords to search for, one per line.
                 This should be in the same path at the configuration file.
@@ -66,6 +66,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     keywords = query_utils.get_normalized_keywords(data_file, preprocess_type)
 
+    # Spark: List all documents in archive, filtered by (year_min, year_max)
     # [document, ...]
     documents = archives.flatMap(
         lambda archive: [
@@ -75,6 +76,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
         ]
     )
 
+    # Spark: apply get_article_matches to each document
+    # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword), ....]
     filtered_words = documents.flatMap(
         lambda document: get_article_matches(document, keywords, preprocess_type)
     )

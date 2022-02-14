@@ -122,7 +122,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     """
     Crops articles' images for keywords and groups by word.
 
-    config_file must a yml file that has the following values:
+    config_file must be a yml file that has the following values:
         * preprocess: Treatment to use for preprocessing the words. Options: [normalize|stem|lemmatize|none]
         * data: yaml file with a list of the target words and a list of keywords to search for.
                 This should be in the same path at the configuration file.

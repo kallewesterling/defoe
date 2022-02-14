@@ -133,7 +133,7 @@ def extract_years_filter(config):
     """
     Extract min and max years to filter data from "years_filter" dictionary value the query
     configuration. The years will be splited by the "-" character.
-    
+
     years_filter: 1780-1918
 
     :param config: config
@@ -154,8 +154,8 @@ def extract_years_filter(config):
 def extract_output_path(config):
     """
     Extract output path from "output_path" dictionary value the query
-    configuration. 
-    
+    configuration.
+
     output_path: /home/users/rfilguei2/LwM/defoe/OUTPUT/
 
     :param config: config
@@ -204,11 +204,11 @@ def stem(word):
     Reducing word to its word stem, base or root form (for example,
     books - book, looked - look). The main two algorithms are:
 
-    - Porter stemming algorithm: removes common morphological and
-      inflexional endings from words, used here
-      (nltk.stem.PorterStemmer).
-    - Lancaster stemming algorithm: a more aggressive stemming
-      algorithm.
+    Porter stemming algorithm: removes common morphological and
+        inflexional endings from words, used here
+        (nltk.stem.PorterStemmer).
+    Lancaster stemming algorithm: a more aggressive stemming
+        algorithm.
 
     Like lemmatization, stemming reduces inflectional forms to a
     common base form. As opposed to lemmatization, stemming simply
@@ -803,6 +803,10 @@ def get_config(config_file, optional=False):
             return {}
 
         raise FileNotFoundError(e)
+    except TypeError as e:
+        raise RuntimeError(
+            f"The name of the configuration file must be provided as a string. (Current value: {config_file}.)"
+        )
 
 
 def get_normalized_keywords(config_file, preprocess_type=PreprocessWordType.NONE):

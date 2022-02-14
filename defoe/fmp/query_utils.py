@@ -3,6 +3,8 @@ Query-related utility functions.
 """
 
 from defoe.query_utils import PreprocessWordType, preprocess_word
+from defoe.fmp.document import Document
+
 from nltk.corpus import words
 from PIL import Image
 
@@ -21,7 +23,7 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
     :param document: document
-    :type document: defoe.alto.document.Document
+    :type document: defoe.fmp.document.Document
     :param keywords: keywords
     :type keywords: list(str or unicode:
     :param preprocess_type: how words should be preprocessed
@@ -51,7 +53,7 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
 
 
 def get_article_matches(
-    document, keywords, preprocess_type=PreprocessWordType.LEMMATIZE
+    document: Document, keywords: list, preprocess_type=PreprocessWordType.LEMMATIZE
 ):
     """
     TODO #3: Incomplete docstring
@@ -64,7 +66,7 @@ def get_article_matches(
     per keyword.
 
     :param document: document
-    :type document: defoe.alto.document.Document
+    :type document: defoe.fmp.document.Document
     :param keywords: keywords
     :type keywords: list(str or unicode:
     :param preprocess_type: how words should be preprocessed
@@ -167,11 +169,11 @@ def get_tb_matches(target_match, keywords):
 
 def segment_image(coords, page_name, issue_path, keyword, output_path, target=""):
     """
-    Segments texblock articles given coordinates and page path
+    Segments textblock articles given coordinates and page path
 
     :param coords: coordinates of an image
     :type coords: string
-    :param page_name: name of the page XML which the texblock has been extracted from.
+    :param page_name: name of the page XML which the textblock has been extracted from.
     :type page_name: string
     :param issue_path: path of the ZIPPED archive/issue
     :type issue_path: string
@@ -184,32 +186,38 @@ def segment_image(coords, page_name, issue_path, keyword, output_path, target=""
     :return: list of images cropped/segmented
     """
 
+    # Get image_in (the image we want to crop)
     if ".zip" in issue_path:
-        image_path = os.path.split(issue_path)[0]
+        image_in = os.path.split(issue_path)[0]
     else:
-        image_path = issue_path
+        image_in = issue_path
 
     image_name = Path(page_name).stem
-    image = Path(image_path, image_name + ".jp2")
+    image_in = Path(image_in, image_name + ".jp2")
 
     coords_list = coords.split(",")
     c_set = tuple([int(s) for s in coords_list])
     coords_name = coords.replace(",", "_")
 
-    fname = Path(image).stem
+    # Setup image_out (the image we want to save)
+    fname = Path(image_in).stem
     if target:
         filename = f"crop_{fname}_{target}_{keyword}_{coords_name}.jpg"
     else:
         filename = f"crop_{fname}_{keyword}_{coords_name}.jpg"
 
-    out_file = os.path.join(output_path, filename)
+    image_out = os.path.join(output_path, filename)
 
-    im = Image.open(image)
+    # Open image (using PIL)
+    im = Image.open(image_in)
 
+    # Crop image (using PIL)
     crop = im.crop(c_set)
-    crop.save(out_file, quality=80, optimize=True)
 
-    return out_file
+    # Save image (using PIL)
+    crop.save(image_out, quality=80, optimize=True)
+
+    return image_out
 
 
 def get_document_keywords(
@@ -275,7 +283,7 @@ def calculate_words_within_dictionary(
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
     Page words are normalized.
     :param page: Page
-    :type page: defoe.alto.page.Page
+    :type page: defoe.fmp.page.Page
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
@@ -310,7 +318,7 @@ def calculate_words_confidence_average(page):
     Page words are normalized.
 
     :param page: Page
-    :type page: defoe.alto.page.Page
+    :type page: defoe.fmp.page.Page
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
