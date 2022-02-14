@@ -4,6 +4,7 @@ Query-related utility functions.
 
 from defoe.query_utils import PreprocessWordType, preprocess_word
 from defoe.fmp.document import Document
+from defoe.fmp.page import Page
 
 from nltk.corpus import words
 from PIL import Image
@@ -12,7 +13,9 @@ from pathlib import Path
 import os
 
 
-def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORMALIZE):
+def get_page_matches(
+    document: Document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
+):
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
@@ -48,65 +51,6 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
             if match:
                 matches.append(match)
                 continue  # move to next page
-
-    return matches
-
-
-def get_article_matches(
-    document: Document, keywords: list, preprocess_type=PreprocessWordType.LEMMATIZE
-):
-    """
-    TODO #3: Incomplete docstring
-        (<YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>, <PREPROCESSED_WORDS>, <PAGE_NAME>, <KEYWORDS> )
-
-    If a keyword occurs more than once on a page, there will be only
-    one tuple for the page for that keyword.
-
-    If more than one keyword occurs on a page, there will be one tuple
-    per keyword.
-
-    :param document: document
-    :type document: defoe.fmp.document.Document
-    :param keywords: keywords
-    :type keywords: list(str or unicode:
-    :param preprocess_type: how words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
-    :rtype: list(tuple)
-    """
-
-    matches = []
-    for keyword in keywords:
-        for article_id, article in document.articles.items():
-            for tb in article:
-                preprocessed_words = [
-                    preprocess_word(word, preprocess_type) for word in tb.words
-                ]
-
-                match = None
-                for preprocessed_word in preprocessed_words:
-                    if (
-                        preprocessed_word == keyword
-                    ):  # TODO: No fuzzy matching here. Could be == / in
-                        match = (
-                            document.year,
-                            document,
-                            article_id,
-                            tb.textblock_id,
-                            tb.textblock_coords,
-                            tb.textblock_page_area,
-                            tb.words,
-                            preprocessed_words,
-                            tb.page_name,
-                            keyword,
-                        )
-                        break
-
-                if match:
-                    # append and move to next article
-                    matches.append(match)
-                    continue
 
     return matches
 
@@ -160,13 +104,100 @@ def get_tb_matches(target_match, keywords):
                 break
 
         if match:
+            # move to next article
             matches.append(match)
-            continue  # move to next article
+            continue
 
     return matches
 
 
-def segment_image(coords, page_name, issue_path, keyword, output_path, target=""):
+def get_article_matches(
+    document: Document, keywords: list, preprocess_type=PreprocessWordType.LEMMATIZE
+):
+    """
+    Takes a document and a list of keywords and a type of preprocessing,
+    loops through each keyword and looks in each textblock inside each
+    article for the first occurring match of the keyword in the textblock.
+
+    If a keyword occurs more than once on a page, there will be only
+    one tuple for the page for that keyword.
+
+    If more than one keyword occurs on a page, there will be one tuple
+    per keyword.
+
+    Returns a list of tuples of the following format:
+
+        (
+            <YEAR>,
+            <DOCUMENT>,
+            <ARTICLE>,
+            <BLOCK_ID>,
+            <COORDINATES>,
+            <PAGE_AREA>,
+            <ORIGINAL_WORDS>,
+            <PREPROCESSED_DATA>,
+            <PAGE_NAME>,
+            <MATCHED_KEYWORD>
+        )
+
+    :param document: document
+    :type document: defoe.fmp.document.Document
+    :param keywords: keywords
+    :type keywords: list(str)
+    :param preprocess_type: how words should be preprocessed
+    (normalize, normalize and stem, normalize and lemmatize, none)
+    :type preprocess_type: defoe.query_utils.PreprocessWordType
+    :return: list of tuples
+    :rtype: list(tuple)
+    """
+
+    matches = []
+    for keyword in keywords:
+        for article_id, article in document.articles.items():
+            for tb in article:
+                # TODO #7: We will need to switch here from `tb.words` to `tb.locations`,
+                # an attribute which contains x, y, width, height for each word
+                preprocessed_data = [
+                    (x[0], x[1], x[2], x[3], preprocess_word(x[4], preprocess_type))
+                    for x in tb.locations
+                ]
+
+                match = None
+                for *_, word in preprocessed_data:
+                    # TODO: This if clause could have fuzzy matching: == / in
+                    if word == keyword:
+                        match = (
+                            document.year,
+                            document,
+                            article_id,
+                            tb.textblock_id,
+                            tb.textblock_coords,
+                            tb.textblock_page_area,
+                            tb.words,
+                            preprocessed_data,
+                            tb.page_name,
+                            keyword,
+                        )
+                        break
+
+                if match:
+                    # append and move to next article
+                    matches.append(match)
+                    continue
+
+    return matches
+
+
+# TODO #7: This function will accept x, y, width, and height for highlighting
+def segment_image(
+    coords: str,
+    page_name: str,
+    issue_path: str,
+    keyword: str,
+    output_path: str,
+    target="",
+    preprocessed_data=None,
+) -> list:
     """
     Segments textblock articles given coordinates and page path
 
@@ -182,8 +213,12 @@ def segment_image(coords, page_name, issue_path, keyword, output_path, target=""
     :type keyword: string
     :param output_path: path to store the cropped image
     :type output_path: string
+    :param target # TODO
+    :type target # TODO
     :return: list of images cropped/segmented
     """
+
+    print(preprocessed_data)
 
     # Get image_in (the image we want to crop)
     if ".zip" in issue_path:
@@ -196,22 +231,38 @@ def segment_image(coords, page_name, issue_path, keyword, output_path, target=""
 
     coords_list = coords.split(",")
     c_set = tuple([int(s) for s in coords_list])
-    coords_name = coords.replace(",", "_")
 
     # Setup image_out (the image we want to save)
-    fname = Path(image_in).stem
+    filename = f"crop_{Path(image_in).stem}_"
+    coords_name = coords.replace(",", "_")
     if target:
-        filename = f"crop_{fname}_{target}_{keyword}_{coords_name}.jpg"
+        filename += f"{target}_{keyword}"
     else:
-        filename = f"crop_{fname}_{keyword}_{coords_name}.jpg"
+        filename += f"{keyword}"
+    filename += f"_{coords_name}.jpg"
 
     image_out = os.path.join(output_path, filename)
 
     # Open image (using PIL)
     im = Image.open(image_in)
 
+    # TODO #7: From `improcess`/`crop_images.py`, we get:
+    # draw = ImageDraw.Draw(im)
+    # for coords in draw_coords:
+    #    draw.rectangle(coords, fill=None, outline=colour, width=3)
+
     # Crop image (using PIL)
     crop = im.crop(c_set)
+
+    # TODO #7: This is also where we should adopt the resizing from `improcess`/`crop_images.py`
+    # Resize image if >1200px tall:
+    # width, height = crop.size
+    # if height > max_height:
+    #   Calculate aspect ratio
+    #   ratio = max_height / height
+    #   new_width = int(floor(ratio * width))
+    #   new_height = int(floor(ratio * height))
+    #   crop = crop.resize((new_width, new_height))
 
     # Save image (using PIL)
     crop.save(image_out, quality=80, optimize=True)

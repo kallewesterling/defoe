@@ -36,7 +36,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                         "textblock_id": <TEXTBLOCK ID>,
                         "title": <TITLER>,
                         "words": <WORDS>,
-                        "preprocessed_words": <PREPROCESSED WORDS>,
+                        "preprocessed_DATA": <PREPROCESSED DATA>,
                         "year": <YEAR>,
                         "date": <DATE>
                     },
@@ -79,17 +79,19 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     # Spark: apply get_article_matches to each document
     # filtered_words = [
-    #    (year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword),
+    #    (year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_data, page_name, keyword),
     #       ...
     # ]
-    filtered_words = documents.flatMap(
+    # TODO #7: resulting list's tuples will include x, y, width, and height
+    article_matches = documents.flatMap(
         lambda document: get_article_matches(document, keywords, preprocess_type)
     )
 
-    # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword), ....]
+    # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_data, page_name, keyword), ....]
     # =>
     # [(word, {"article_id": article_id, ...}), ...]
-    matching_docs = filtered_words.map(
+    # TODO #7: each `document_article_word` below will include x, y, width, and height (part of preprocessed_data), which can be passed to `segment_image`
+    matching_docs = article_matches.map(
         lambda document_article_word: (
             document_article_word[9],
             {
@@ -102,7 +104,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 "year": document_article_word[0],
                 "words": document_article_word[6],
                 "date": document_article_word[1].date,
-                "preprocessed_words": document_article_word[7],
+                "preprocessed_data": document_article_word[7],
                 "page_filename": document_article_word[8],
                 "issue_id": document_article_word[1].documentId,
                 "issue_dirname": document_article_word[1].archive.filename,
@@ -112,6 +114,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                     document_article_word[1].archive.filename,
                     document_article_word[9],
                     output_path,
+                    document_article_word[7],
                 ),
             },
         )
