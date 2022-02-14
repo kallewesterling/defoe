@@ -19,7 +19,6 @@ class TextBlock(object):
     def __init__(self, textblock_tree, document_code, page_code):
         """
         Constructor.
-
         """
         self.textblock_tree = textblock_tree
         self.textblock_words = None
@@ -98,4 +97,18 @@ class TextBlock(object):
         :rtype: str or unicode
         """
         return " ".join(self.words)
+
+    @property
+    def locations(self):
+        """
+        Gets all strings in textblock and returns them as a list of tuples:
+            [
+                (x, y, width, height, content)
+            ]
+        """
+        attribs = [string.attrib for string in self.strings]
+        return [
+            (x["HPOS"], x["VPOS"], x["WIDTH"], x["HEIGHT"], x["CONTENT"])
+            for x in attribs
+        ]
 
