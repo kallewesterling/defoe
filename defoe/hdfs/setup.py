@@ -18,7 +18,8 @@ def filename_to_object(filename, context):
     :rtype: tuple(defoe.books.archive.Archive | str or unicode, str or unicode)
     """
 
-    data=open(filename).readline().rstrip()
+    data = open(filename).readline().rstrip()
     sqlContext = SQLContext(context)
-    df= sqlContext.read.csv(data, header="true")
+    df = sqlContext.read.csv(data, header="true")
+
     return df

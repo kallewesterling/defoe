@@ -21,8 +21,7 @@ class TestDocument(TestCase):
         fixtures/000000037_0_1-42pgs__944211_dat_modified.zip then
         retrieves first Document.
         """
-        source = get_path(fixtures,
-                          '000000037_0_1-42pgs__944211_dat_modified.zip')
+        source = get_path(fixtures, "000000037_0_1-42pgs__944211_dat_modified.zip")
         self.archive = Archive(source)
         self.document = self.archive[0]
 
@@ -48,10 +47,9 @@ class TestDocument(TestCase):
         documents, and that an expected page code is in the
         archive's record of pages.
         """
-        self.assertEqual('000000218', self.document.code)
+        self.assertEqual("000000218", self.document.code)
         self.assertTrue(self.document.code in self.archive.document_codes)
-        self.assertTrue('03_000002' in
-                        self.archive.document_codes[self.document.code])
+        self.assertTrue("03_000002" in self.archive.document_codes[self.document.code])
 
     def test_page_codes(self):
         """
@@ -60,7 +58,7 @@ class TestDocument(TestCase):
         """
         page_codes = self.document.page_codes
         self.assertEqual(306, len(page_codes))
-        self.assertTrue('03_000002' in page_codes)
+        self.assertTrue("03_000002" in page_codes)
 
     def test_num_pages(self):
         """
@@ -74,5 +72,4 @@ class TestDocument(TestCase):
         Tests Document holds a page which includes an expected
         phrase.
         """
-        self.assertTrue(("the great Avorld of Paris" in
-                         self.document[25].content))
+        self.assertTrue(("the great Avorld of Paris" in self.document[25].content))

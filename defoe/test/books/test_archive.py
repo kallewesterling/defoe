@@ -20,8 +20,8 @@ class TestArchive(TestCase):
         fixtures/000000037_0_1-42pgs__944211_dat_modified.zip.
         """
         self.filename = get_path(
-            fixtures,
-            '000000037_0_1-42pgs__944211_dat_modified.zip')
+            fixtures, "000000037_0_1-42pgs__944211_dat_modified.zip"
+        )
         self.archive = Archive(self.filename)
 
     def test_filename(self):
@@ -37,7 +37,7 @@ class TestArchive(TestCase):
         """
         codes = list(self.archive.document_codes.keys())
         self.assertEqual(2, len(codes))
-        for code in ['000000218', '000000037']:
+        for code in ["000000218", "000000037"]:
             self.assertTrue(code in codes)
 
     def test_document_codes_pages(self):
@@ -46,7 +46,7 @@ class TestArchive(TestCase):
         number of pages and expected page codes for each document.
         """
         codes = self.archive.document_codes
-        self.assertEqual(42, len(codes['000000037']))
-        self.assertTrue('000001' in codes['000000037'])
-        self.assertEqual(306, len(codes['000000218']))
-        self.assertTrue('03_000002' in codes['000000218'])
+        self.assertEqual(42, len(codes["000000037"]))
+        self.assertTrue("000001" in codes["000000037"])
+        self.assertEqual(306, len(codes["000000218"]))
+        self.assertTrue("03_000002" in codes["000000218"])

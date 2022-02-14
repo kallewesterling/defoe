@@ -48,7 +48,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str or unicode
         """
-        return '([0-9]*?_[0-9]*?)_mets\.xml'  # pylint: disable=anomalous-backslash-in-string
+        return "([0-9]*?_[0-9]*?)_mets\.xml"  # pylint: disable=anomalous-backslash-in-string
 
     def get_page_pattern(self):
         """
@@ -57,7 +57,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str or unicode
         """
-        return '([0-9]*?_[0-9]*?)_([0-9_]*)\.xml'  # pylint: disable=anomalous-backslash-in-string
+        return "([0-9]*?_[0-9]*?)_([0-9_]*)\.xml"  # pylint: disable=anomalous-backslash-in-string
 
     def get_document_info(self, document_code):
         """
@@ -69,7 +69,7 @@ class Archive(AltoArchive):
         :rtype: zipfile.ZipInfo
         """
         if ".zip" in self.filename:
-            return self.zip.getinfo(document_code + '_mets.xml')
+            return self.zip.getinfo(document_code + "_mets.xml")
         else:
             return
 
@@ -85,7 +85,7 @@ class Archive(AltoArchive):
         :rtype: zipfile.ZipInfo
         """
         if ".zip" in self.filename:
-            return self.zip.getinfo(document_code + '_' + page_code + '.xml')
+            return self.zip.getinfo(document_code + "_" + page_code + ".xml")
         else:
             return
 
@@ -98,9 +98,9 @@ class Archive(AltoArchive):
         :return: stream
         """
         if ".zip" in self.filename:
-            return self.zip.open(document_code + '_mets.xml')
+            return self.zip.open(document_code + "_mets.xml")
         else:
-            return open_stream(self.filename+"/"+document_code + '_mets.xml')
+            return open_stream(self.filename + "/" + document_code + "_mets.xml")
 
     def open_page(self, document_code, page_code):
         """
@@ -114,6 +114,8 @@ class Archive(AltoArchive):
         :rtype: zipfile.ZipExt
         """
         if ".zip" in self.filename:
-            return self.zip.open(document_code + '_' + page_code + '.xml')
+            return self.zip.open(document_code + "_" + page_code + ".xml")
         else:
-            return open_stream(self.filename+"/"+document_code + '_' + page_code + '.xml')
+            return open_stream(
+                self.filename + "/" + document_code + "_" + page_code + ".xml"
+            )

@@ -25,9 +25,9 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :return: unique root elements and frequencies
     :rtype: dict
     """
-    elements = documents.map(lambda document:
-                             (document.root_element_tag, 1))
-    element_counts = elements. \
-        reduceByKey(add). \
-        collect()
+
+    elements = documents.map(lambda document: (document.root_element_tag, 1))
+
+    element_counts = elements.reduceByKey(add).collect()
+
     return element_counts

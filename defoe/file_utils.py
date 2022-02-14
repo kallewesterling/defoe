@@ -48,4 +48,5 @@ def load_content(module, *name):
     """
     with open_file(module, *name) as f:
         result = f.read()
+
     return result

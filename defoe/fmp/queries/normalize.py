@@ -14,8 +14,13 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>],
-          ...
+            <YEAR>:
+                [
+                    <NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>],
+                    ...
+                ],
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.fmp.archive.Archive
@@ -27,18 +32,25 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: total number of documents, pages and words per year
     :rtype: list
     """
+
     # [archive, archive, ...]
     documents = archives.flatMap(lambda archive: list(archive))
+
     # [(year, (1, num_pages, num_words)), ...]
-    counts = documents.map(lambda document:
-                           (document.year,
-                            (1, document.num_pages, len(list(document.words())))))
+    counts = documents.map(
+        lambda document: (
+            document.year,
+            (1, document.num_pages, len(list(document.words()))),
+        )
+    )
+
     # [(year, (num_documents, num_pages, num_words)), ...]
     # =>
     # [(year, [num_documents, num_pages, num_words]), ...]
-    result = counts \
-        .reduceByKey(lambda x, y:
-                     tuple(i + j for i, j in zip(x, y))) \
-        .map(lambda year_data: (year_data[0], list(year_data[1]))) \
+    result = (
+        counts.reduceByKey(lambda x, y: tuple(i + j for i, j in zip(x, y)))
+        .map(lambda year_data: (year_data[0], list(year_data[1])))
         .collect()
+    )
+
     return result

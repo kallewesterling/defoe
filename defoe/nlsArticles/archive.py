@@ -22,6 +22,7 @@ where:
 from defoe.nlsArticles.archive_combine import AltoArchive
 from defoe.spark_utils import open_stream
 
+
 class Archive(AltoArchive):
     """
     Object model representation of [ZIP] archive of files in
@@ -43,7 +44,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str or unicode
         """
-        return '([0-9]*)[-_]met([[a-zA-Z]*)\.xml'
+        return "([0-9]*)[-_]met([[a-zA-Z]*)\.xml"
 
     def get_page_pattern(self):
         """
@@ -51,7 +52,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str or unicode
         """
-        return'(?i)alto\/([0-9]*)[^a-zA-Z0-9]([0-9]*)\.xml'
+        return "(?i)alto\/([0-9]*)[^a-zA-Z0-9]([0-9]*)\.xml"
 
     def get_document_info(self, document_code):
         """
@@ -61,7 +62,7 @@ class Archive(AltoArchive):
         :return: information
         :rtype: zipfile.ZipInfo
         """
-        return self.zip.getinfo(document_code + '-mets.xml')
+        return self.zip.getinfo(document_code + "-mets.xml")
 
     def get_page_info(self, document_code, page_code):
         """
@@ -84,9 +85,10 @@ class Archive(AltoArchive):
         :return: stream
         """
         if ".zip" in self.filename:
-            return self.zip.open(document_code + '-mets.xml')
+            return self.zip.open(document_code + "-mets.xml")
         else:
-            return open_stream(self.filename+"/"+document_code + '-mets.xml')
+            return open_stream(self.filename + "/" + document_code + "-mets.xml")
+
     def open_page(self, document_code, page_code):
         """
         Opens page file.
@@ -97,6 +99,6 @@ class Archive(AltoArchive):
         :return: stream
         """
         if ".zip" in self.filename:
-             return self.zip.open(page_code)
+            return self.zip.open(page_code)
         else:
-            return open_stream(self.filename+"/"+page_code)
+            return open_stream(self.filename + "/" + page_code)

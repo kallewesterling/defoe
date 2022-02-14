@@ -13,8 +13,8 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          "num_articles": num_articles,
-          "num_words": num_words
+            "num_articles": num_articles,
+            "num_words": num_words
         }
 
     :param all_articles: RDD of defoe.nzpp.articles.Articles
@@ -26,11 +26,15 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :return: total number of articles and words
     :rtype: dict
     """
+
     # [article, article, ...]
-    articles = all_articles.flatMap(lambda articles:
-                                    [article for article in articles.articles])
+    articles = all_articles.flatMap(
+        lambda articles: [article for article in articles.articles]
+    )
+
     # [num_words, num_words, ...]
     num_words = articles.map(lambda article: len(list(article.words)))
+
     result = [articles.count(), num_words.reduce(add)]
-    return {"num_articles": result[0],
-            "num_words": result[1]}
+
+    return {"num_articles": result[0], "num_words": result[1]}

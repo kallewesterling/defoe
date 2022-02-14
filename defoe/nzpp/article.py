@@ -26,17 +26,17 @@ class Article(object):
         # <title> tag is present twice in each article record as a
         # duplicate of a kind. findtext() returns only the
         # occurrence.
-        self.title = self.article_tree.findtext('title').split(' ')
+        self.title = self.article_tree.findtext("title").split(" ")
         # Article text is a single element, split on space.
-        self.content = self.article_tree.findtext('fulltext').split(' ')
+        self.content = self.article_tree.findtext("fulltext").split(" ")
 
-        raw_date = self.article_tree.findtext('display-date')
-        self.date = datetime.strptime(raw_date, '%d-%m-%Y')
+        raw_date = self.article_tree.findtext("display-date")
+        self.date = datetime.strptime(raw_date, "%d-%m-%Y")
 
         # Newspaper name is analogous to publisher.
-        self.paper_name = self.article_tree.findtext('publisher/publisher')
+        self.paper_name = self.article_tree.findtext("publisher/publisher")
         # Article type.
-        self.article_type = self.article_tree.findtext('dnz-type')
+        self.article_type = self.article_tree.findtext("dnz-type")
 
     @property
     def words(self):
@@ -63,7 +63,7 @@ class Article(object):
         :return: full text
         :rtype: str or unicode
         """
-        return ' '.join(self.words).replace(' - ', '')
+        return " ".join(self.words).replace(" - ", "")
 
     @property
     def title_string(self):
@@ -78,4 +78,4 @@ class Article(object):
         :return: full text
         :rtype: str or unicode
         """
-        return ' '.join(self.title).replace(' - ', '')
+        return " ".join(self.title).replace(" - ", "")

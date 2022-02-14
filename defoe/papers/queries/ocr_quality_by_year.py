@@ -12,8 +12,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<QUALITY>, ...],
-          ...
+            <YEAR>: [<QUALITY>, ...],
+            ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -25,11 +25,14 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: OCR quality of article grouped by year
     :rtype: dict
     """
+
     # [(year, [quality]), ...]
     qualities = issues.flatMap(
-        lambda issue: [(issue.date.year, [article.quality]) for article in issue.articles])
+        lambda issue: [
+            (issue.date.year, [article.quality]) for article in issue.articles
+        ]
+    )
 
-    result = qualities \
-        .reduceByKey(concat) \
-        .collect()
+    result = qualities.reduceByKey(concat).collect()
+
     return result

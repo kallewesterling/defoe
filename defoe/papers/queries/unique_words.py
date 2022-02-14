@@ -2,11 +2,9 @@
 Finds every unique word and its frequency.
 """
 
-from operator import add
-import os.path
-import yaml
-
 from defoe import query_utils
+
+from operator import add
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -30,8 +28,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>: <COUNT>,
-          ...
+            <WORD>: <COUNT>,
+            ...
         }
 
     :param issues: RDD of defoe.papers.issue.Issue
@@ -43,28 +41,26 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: total number of issues and words
     :rtype: dict
     """
-    threshold = 1
-    if config_file is not None and\
-       os.path.exists(config_file) and\
-       os.path.isfile(config_file):
-        with open(config_file, "r") as f:
-            config = yaml.load(f)
-        value = config["threshold"]
-        threshold = max(threshold, value)
+
+    config = query_utils.get_config(config_file, optional=True)
+    value = config.get("threshold", 1)
+    threshold = max(1, value)
 
     # [article, article, ...]
-    articles = issues.flatMap(lambda issue:
-                              [article for article in issue.articles])
+    articles = issues.flatMap(lambda issue: [article for article in issue.articles])
 
     # [(word, 1), (word, 1), ...]
-    words = articles.flatMap(lambda article:
-                             [(query_utils.normalize(word), 1) for word in article.words])
+    words = articles.flatMap(
+        lambda article: [(query_utils.normalize(word), 1) for word in article.words]
+    )
 
     # [(word, 1), (word, 1), ...]
     # =>
     # [(word, count), (word, count), ...]
-    word_counts = words. \
-        reduceByKey(add). \
-        filter(lambda word_year: word_year[1] > threshold). \
-        collect()
+    word_counts = (
+        words.reduceByKey(add)
+        .filter(lambda word_year: word_year[1] > threshold)
+        .collect()
+    )
+
     return word_counts

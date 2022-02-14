@@ -19,5 +19,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :return: total number of documents
     :rtype: dict
     """
+
     num_documents = documents.count()
+
     return {"num_documents": num_documents}

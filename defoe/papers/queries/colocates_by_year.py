@@ -2,10 +2,9 @@
 Gets colocated words and groups by year.
 """
 
-import os
-import yaml
-
 from defoe import query_utils
+
+import os
 
 
 def do_query(issues, config_file=None, logger=None, context=None):
@@ -29,23 +28,23 @@ def do_query(issues, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>:
-          [
-            {
-              "article_id": <ARTICLE_ID>,
-              "issue_id": <ISSUE_ID>,
-              "page_ids": <PAGE_IDS>,
-              "filename": <FILENAME>,
-              "matches":
-              [
-                [<WORD>, ..., <WORD>],
+            <YEAR>:
+                [
+                    {
+                        "article_id": <ARTICLE_ID>,
+                        "issue_id": <ISSUE_ID>,
+                        "page_ids": <PAGE_IDS>,
+                        "filename": <FILENAME>,
+                        "matches":
+                            [
+                                [<WORD>, ..., <WORD>],
+                                ...
+                            ]
+                    },
+                    ...
+                ],
+            <YEAR>:
                 ...
-              ]
-            },
-            ...
-          ],
-          <YEAR>:
-          ...
         }
 
     :param issues: RDD of defoe.alto.issue.Issue
@@ -58,40 +57,39 @@ def do_query(issues, config_file=None, logger=None, context=None):
     by year
     :rtype: dict
     """
-    window = 0
-    if config_file is not None and\
-       os.path.exists(config_file) and\
-       os.path.isfile(config_file):
-        with open(config_file, "r") as f:
-            config = yaml.load(f)
-        start_word = query_utils.normalize(config["start_word"])
-        end_word = query_utils.normalize(config["end_word"])
-        window = config["window"]
-        if window < 0:
-            raise ValueError('window must be at least 0')
+
+    config = query_utils.get_config(config_file)
+
+    start_word = query_utils.normalize(config["start_word"])
+    end_word = query_utils.normalize(config["end_word"])
+    window = config["window"]
+    if window < 0:
+        raise ValueError("window must be at least 0")
 
     # [(issue, article), ...]
     issue_articles = issues.flatMap(
-        lambda issue: [(issue, article) for article in issue.articles])
+        lambda issue: [(issue, article) for article in issue.articles]
+    )
 
     # [(issue, article, matches), ...]
     colocated_words = issue_articles.map(
-        lambda issue_article: (issue_article[0],
-                               issue_article[1],
-                               get_colocates_matches(issue_article[1],
-                                                     start_word,
-                                                     end_word,
-                                                     window)))
+        lambda issue_article: (
+            issue_article[0],
+            issue_article[1],
+            get_colocates_matches(issue_article[1], start_word, end_word, window),
+        )
+    )
+
     # [(issue, article, matches), ...]
     colocated_words = colocated_words.filter(
-        lambda issue_article_matches: len(issue_article_matches[2]) > 0)
+        lambda issue_article_matches: len(issue_article_matches[2]) > 0
+    )
 
     # [(issue, article, matches), ...]
     # =>
     # [(year, {"title": title, ...}), ...]
     matching_articles = colocated_words.map(
-        lambda issue_article_matches:
-        (
+        lambda issue_article_matches: (
             issue_article_matches[0].date.year,
             {
                 "title": issue_article_matches[1].title_string,
@@ -99,19 +97,20 @@ def do_query(issues, config_file=None, logger=None, context=None):
                 "page_ids": list(issue_article_matches[1].page_ids),
                 "issue_id": issue_article_matches[0].newspaper_id,
                 "filename": issue_article_matches[0].filename,
-                "matches": issue_article_matches[2]
-            }
+                "matches": issue_article_matches[2],
+            },
         )
     )
 
     # [(year, {"title": title, ...}), ...]
     # =>
     # [(year, [{"title": title, ...], {...}), ...)]
-    result = matching_articles \
-        .groupByKey() \
-        .map(lambda year_context:
-             (year_context[0], list(year_context[1]))) \
+    result = (
+        matching_articles.groupByKey()
+        .map(lambda year_context: (year_context[0], list(year_context[1])))
         .collect()
+    )
+
     return result
 
 
@@ -132,30 +131,38 @@ def get_colocates_matches(article, start_word, end_word, window=0):
     :return: list of lists of words
     :rtype: list(list(str or unicode))
     """
+
+    window_plus_colocates = window + 2
+
     in_span = False
     span = []
     span_length = 0
     matches = []
-    window_plus_colocates = window + 2
     for word in article.words:
         normalized_word = query_utils.normalize(word)
+
         if not normalized_word:
             continue
+
         if normalized_word == start_word:
             in_span = True
             span = []
             span_length = 0
+
         if in_span:
             span.append(normalized_word)
             span_length += 1
+
             if span_length > window_plus_colocates:
                 in_span = False
                 span = []
                 span_length = 0
                 continue
+
             if normalized_word == end_word:
                 matches.append(span)
                 in_span = False
                 span = []
                 span_length = 0
+
     return matches

@@ -31,9 +31,9 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :return: metadata about the document
     :rtype: dict
     """
+
     metadata = documents.map(
-        lambda document:
-        (
+        lambda document: (
             document.filename,
             {
                 "size": document.filesize,
@@ -41,9 +41,11 @@ def do_query(documents, config_file=None, logger=None, context=None):
                 "root": document.root_element_tag,
                 "namespaces": document.namespaces,
                 "schema_locations": document.schema_locations,
-                "no_ns_schema_location": document.no_ns_schema_location
-            }
+                "no_ns_schema_location": document.no_ns_schema_location,
+            },
         )
     )
+
     metadata = metadata.collect()
+
     return metadata

@@ -22,4 +22,5 @@ def filename_to_object(filename):
         result = (Articles(filename), None)
     except Exception as exception:
         result = (filename, str(exception))
+
     return result

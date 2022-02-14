@@ -2,10 +2,10 @@
 Object model representation of an XML document.
 """
 
-import os.path
-from lxml import etree
-
 from defoe.spark_utils import open_stream
+
+from lxml import etree
+import os
 
 
 XSI_NS = "http://www.w3.org/2001/XMLSchema-instance"
@@ -36,14 +36,12 @@ class Document(object):
         self.root_element_tag = str(self.root_element.tag)
         self.doc_type = str(self.document_tree.docinfo.doctype)
         self.namespaces = self.root_element.nsmap
-        self.schema_locations = self.root_element.get(
-            SCHEMA_LOCATION.text)
+        self.schema_locations = self.root_element.get(SCHEMA_LOCATION.text)
         if self.schema_locations is not None:
             self.schema_locations = self.schema_locations.split(" ")
         else:
             self.schema_locations = []
-        self.no_ns_schema_location = self.root_element.get(
-            NO_NS_SCHEMA_LOCATION.text)
+        self.no_ns_schema_location = self.root_element.get(NO_NS_SCHEMA_LOCATION.text)
 
     def query(self, query):
         """

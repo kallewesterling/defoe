@@ -3,15 +3,15 @@ Abstract base class for object model representation of ZIP archive
 of files in ALTO format.
 """
 
+from defoe.alto.document import Document
+from defoe.spark_utils import open_stream
+
 import abc
 import re
 import zipfile
 
-from defoe.alto.document import Document
-from defoe.spark_utils import open_stream
 
-
-class AltoArchive(abc.ABCMeta('ABC', (object,), {})):
+class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
     """
     Abstract base class for object model representation of ZIP archive
     of files in ALTO format.
@@ -31,9 +31,11 @@ class AltoArchive(abc.ABCMeta('ABC', (object,), {})):
         document_pattern = re.compile(self.get_document_pattern())
         page_pattern = re.compile(self.get_page_pattern())
         document_matches = [
-            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f]
+            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f
+        ]
         page_matches = [
-            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f]
+            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f
+        ]
         self.document_codes = {match.group(1): [] for match in document_matches}
         for match in page_matches:
             self.document_codes[match.group(1)].append(match.group(2))

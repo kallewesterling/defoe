@@ -32,21 +32,23 @@ class AltoArchive(object, metaclass=abc.ABCMeta):
             self.zip = zipfile.ZipFile(stream)
             self.filenames = [entry.filename for entry in self.zip.infolist()]
         else:
-             self.filenames= []
-             for entry in listdir(self.filename):
-                  if not isfile(join(self.filename, entry)):
-                      for i in listdir(join(self.filename,entry)):
-                          self.filenames.append(entry+"/"+i)
-                  else:
-                      self.filenames.append(entry)
+            self.filenames = []
+            for entry in listdir(self.filename):
+                if not isfile(join(self.filename, entry)):
+                    for i in listdir(join(self.filename, entry)):
+                        self.filenames.append(entry + "/" + i)
+                else:
+                    self.filenames.append(entry)
         document_pattern = re.compile(self.get_document_pattern())
         page_pattern = re.compile(self.get_page_pattern())
         document_matches = [
-            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f]
+            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f
+        ]
         page_matches = [
-            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f]
+            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f
+        ]
         self.document_codes = {match.group(1): [] for match in document_matches}
-        document_name=list(self.document_codes.keys())[0]
+        document_name = list(self.document_codes.keys())[0]
         for match in page_matches:
             self.document_codes[document_name].append(match.group(0))
 

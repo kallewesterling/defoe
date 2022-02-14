@@ -19,21 +19,22 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <WORD>:
-          [
-            { "title": <TITLE>,
-              "place": <PLACE>,
-              "publisher": <PUBLISHER>,
-              "page_number": <PAGE_NUMBER>,
-              "content": <CONTENT>,
-              "year": <YEAR>,
-              "document_id": <DOCUMENT_ID>,
-              "filename": <FILENAME>
-            },
-            ...
-          ],
-          <WORD>:
-          ...
+            <WORD>:
+                [
+                    {
+                        "title": <TITLE>,
+                        "place": <PLACE>,
+                        "publisher": <PUBLISHER>,
+                        "page_number": <PAGE_NUMBER>,
+                        "content": <CONTENT>,
+                        "year": <YEAR>,
+                        "document_id": <DOCUMENT_ID>,
+                        "filename": <FILENAME>
+                    },
+                    ...
+                ],
+            <WORD>:
+                ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive
@@ -46,39 +47,45 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by word
     :rtype: dict
     """
-    keywords = []
-    with open(config_file, "r") as f:
-        keywords = [query_utils.normalize(word) for word in list(f)]
+
+    keywords = query_utils.get_normalized_keywords(config_file)
+
     # [document, ...]
     documents = archives.flatMap(
-        lambda archive: [document for document in list(archive)])
+        lambda archive: [document for document in list(archive)]
+    )
 
     # [(year, document, page, word), ...]
     filtered_words = documents.flatMap(
-        lambda document: get_page_matches(document,
-                                          keywords))
+        lambda document: get_page_matches(document, keywords)
+    )
 
     # [(year, document, page, word), ...]
     # =>
     # [(word, {"title": title, ...}), ...]
     matching_docs = filtered_words.map(
-        lambda year_document_page_word:
-        (year_document_page_word[3],
-         {"title": year_document_page_word[1].title,
-          "place": year_document_page_word[1].place,
-          "publisher": year_document_page_word[1].publisher,
-          "page_number": year_document_page_word[2].code,
-          "content": year_document_page_word[2].content,
-          "year": year_document_page_word[0],
-          "document_id": year_document_page_word[1].code,
-          "filename": year_document_page_word[1].archive.filename}))
+        lambda year_document_page_word: (
+            year_document_page_word[3],
+            {
+                "title": year_document_page_word[1].title,
+                "place": year_document_page_word[1].place,
+                "publisher": year_document_page_word[1].publisher,
+                "page_number": year_document_page_word[2].code,
+                "content": year_document_page_word[2].content,
+                "year": year_document_page_word[0],
+                "document_id": year_document_page_word[1].code,
+                "filename": year_document_page_word[1].archive.filename,
+            },
+        )
+    )
 
     # [(word, {"title": title, ...}), ...]
     # =>
     # [(word, [{"title": title, ...], {...}), ...)]
-    result = matching_docs \
-        .groupByKey() \
-        .map(lambda year_context:
-             (year_context[0], list(year_context[1]))) \
+    result = (
+        matching_docs.groupByKey()
+        .map(lambda year_context: (year_context[0], list(year_context[1])))
         .collect()
+    )
+
     return result

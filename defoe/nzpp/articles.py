@@ -26,8 +26,9 @@ class Articles(object):
         stream = open_stream(self.filename)
         parser = etree.XMLParser(recover=True)
         self.xml_tree = etree.parse(stream, parser)
-        self.articles = [Article(article, self.filename)
-                         for article in self.query('.//result')]
+        self.articles = [
+            Article(article, self.filename) for article in self.query(".//result")
+        ]
         self.document_type = "newspaper"
         self.model = "nzpp"
 

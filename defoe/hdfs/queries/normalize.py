@@ -1,10 +1,12 @@
 """
 Counts total number of documents, pages and words per year.
-It uses HDFS pre-stored data. 
+It uses HDFS pre-stored data.
 
 This can be useful if wanting to see how the average number of
 documents, pages and words change over time, for example.
 """
+
+# TODO: This query is broken
 
 
 def do_query(archives, config_file=None, logger=None, context=None):
@@ -15,8 +17,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
     Returns result of form:
 
         {
-          <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>],
-          ...
+            <YEAR>:
+                [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>],
+                ...
+            <YEAR>:
+                ...
         }
 
     :param archives: RDD of defoe.nls.archive.Archive
@@ -28,9 +33,16 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :return: total number of documents, pages and words per year
     :rtype: list
     """
-    newdf=df.filter(df.source_text_clean.isNotNull()).filter(df["model"]=="nls").select(df.year, df.archive_filename,df.num_text_unit,df.source_text_clean)
-    archive_df= newdf.groupby("archive_filename", "year","num_text_unit").count()
-    #>>> archive_df.show()
+
+    newdf = (
+        df.filter(df.source_text_clean.isNotNull())
+        .filter(df["model"] == "nls")
+        .select(df.year, df.archive_filename, df.num_text_unit, df.source_text_clean)
+    )
+
+    archive_df = newdf.groupby("archive_filename", "year", "num_text_unit").count()
+
+    # >>> archive_df.show()
     # +--------------------+----+---------------+-----+
     # |    archive_filename|year|num_text_units |count|
     # +--------------------+----+---------------+-----+
@@ -41,4 +53,4 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # +--------------------+----+---------+-----------+
 
     # I need to take the number of words per page!
-    #todo return result
+    # todo return result

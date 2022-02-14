@@ -3,9 +3,9 @@ Object model representation of a page represented as an XML file in
 METS/MODS format.
 """
 
+from defoe.fmp.textblock import TextBlock
 
 from lxml import etree
-from defoe.fmp.textblock import TextBlock
 
 
 class Page(object):
@@ -14,23 +14,15 @@ class Page(object):
     in METS/MODS format.
     """
 
-    WORDS_XPATH = etree.XPath('//String/@CONTENT')
-    """ XPath query for String content """
-    STRINGS_XPATH = etree.XPath('//String')
-    """ XPath query for String elements """
-    IMAGES_XPATH = etree.XPath('//GraphicalElement')
-    """ XPath query for Graphical Element """
-    PAGE_XPATH = etree.XPath('//Page')
-    """ XPath query for Page """
-    WC_XPATH = etree.XPath('//String/@WC')
-    """ XPath query for Word Confidence  content """
-    CC_XPATH = etree.XPath('//String/@CC')
-    """ XPath query for Caracther Confidence content """
-    TB_XPATH_ID = etree.XPath('//TextBlock/@ID')
-    """ XPath query for Textblock ID """
-    TB_XPATH = etree.XPath('//TextBlock')
-    """ XPath query for Textblock content """
-   
+    # XPath Queries
+    WORDS_XPATH = etree.XPath("//String/@CONTENT")  # String content
+    STRINGS_XPATH = etree.XPath("//String")  # String elements
+    IMAGES_XPATH = etree.XPath("//GraphicalElement")  # Graphical elements
+    PAGE_XPATH = etree.XPath("//Page")  # Page
+    WC_XPATH = etree.XPath("//String/@WC")  # Word confidence content
+    CC_XPATH = etree.XPath("//String/@CC")  # Character confience content
+    TB_XPATH_ID = etree.XPath("//TextBlock/@ID")  # Textblock ID
+    TB_XPATH = etree.XPath("//TextBlock")  # Textblock content
 
     def __init__(self, document, code, source=None):
         """
@@ -58,9 +50,11 @@ class Page(object):
         self.page_images = None
         self.page_wc = None
         self.page_cc = None
-        self.page_blocks_id= None
-        self.tb = [TextBlock(tb, document.code, code) for tb in self.query(Page.TB_XPATH)] 
-        #self.page_tb = None
+        self.page_blocks_id = None
+        self.tb = [
+            TextBlock(tb, document.code, code) for tb in self.query(Page.TB_XPATH)
+        ]
+        # self.page_tb = None
 
     def query(self, xpath_query):
         """
@@ -113,7 +107,7 @@ class Page(object):
             self.page_wc = list(self.query(Page.WC_XPATH))
 
         return self.page_wc
-    
+
     @property
     def cc(self):
         """
@@ -138,9 +132,9 @@ class Page(object):
         :rtype: list(lxml.etree._ElementStringResult)
         """
         if not self.page_strings:
-            self.page_strings =self.query(Page.STRINGS_XPATH)
+            self.page_strings = self.query(Page.STRINGS_XPATH)
         return self.page_strings
-    
+
     @property
     def textblock_ids(self):
         """
@@ -176,4 +170,4 @@ class Page(object):
         :return: content
         :rtype: str or unicode
         """
-        return ' '.join(self.words)
+        return " ".join(self.words)

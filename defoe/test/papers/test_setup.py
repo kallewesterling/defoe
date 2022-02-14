@@ -20,7 +20,7 @@ class TestSetup(TestCase):
         Tests filename_to_object with valid XML file results in a
         tuple with an Issue.
         """
-        filename = get_path(fixtures, '1912_11_10_bl.xml')
+        filename = get_path(fixtures, "1912_11_10_bl.xml")
         result = filename_to_object(filename)
         self.assertTrue(result[0] is not None)
         self.assertTrue(isinstance(result[0], Issue))
@@ -31,7 +31,7 @@ class TestSetup(TestCase):
         Tests filename_to_object with a bad XML file results in a
         tuple with a filename and an error message.
         """
-        filename = get_path(fixtures, 'bad.xml')
+        filename = get_path(fixtures, "bad.xml")
         result = filename_to_object(filename)
         self.assertTrue(result[0] is not None)
         self.assertTrue(isinstance(result[0], str))
@@ -45,7 +45,7 @@ class TestSetup(TestCase):
         Tests filename_to_object with a non-existant file results in a
         tuple with a filename and an error message.
         """
-        filename = get_path(fixtures, 'no-such-file.xml')
+        filename = get_path(fixtures, "no-such-file.xml")
         result = filename_to_object(filename)
         self.assertTrue(result[0] is not None)
         self.assertTrue(isinstance(result[0], str))

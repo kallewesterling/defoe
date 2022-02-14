@@ -3,18 +3,18 @@ Gets page and the average of all words confidences for each page and groups by y
 
 """
 
-from operator import concat, add
 from defoe.alto.query_utils import calculate_words_confidence_average
+
 
 def do_query(archives, config_file=None, logger=None, context=None):
     """
-    Gets measure of Page Confidence (PC) and caculate the avergage of all words confidences (WC) per page. 
+    Gets measure of Page Confidence (PC) and calculate the average of all words confidences (WC) per page.
 
     Returns result of form:
 
         {
-          <YEAR>: [<QUALITY>, ...],
-          ...
+            <YEAR>: [<QUALITY>, ...],
+            ...
         }
 
     :param archives: RDD of defoe.alto.archive.Archive
@@ -28,14 +28,20 @@ def do_query(archives, config_file=None, logger=None, context=None):
     """
     # [(year, document), ...]
     documents = archives.flatMap(
-        lambda archive: [(document.year, document) for document in list(archive)])
+        lambda archive: [(document.year, document) for document in list(archive)]
+    )
 
     # [(year, [page_confidence, average_words_confidence ]), ...]
     qualities = documents.flatMap(
-        lambda document: [(document[0], [page.pc, calculate_words_confidence_average(page)]) for page in document[1]])
-    result = qualities \
-        .groupByKey() \
-        .map(lambda year_q:
-             (year_q[0], list(year_q[1]))) \
+        lambda document: [
+            (document[0], [page.pc, calculate_words_confidence_average(page)])
+            for page in document[1]
+        ]
+    )
+    result = (
+        qualities.groupByKey()
+        .map(lambda year_q: (year_q[0], list(year_q[1])))
         .collect()
+    )
+
     return result
