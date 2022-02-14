@@ -57,7 +57,7 @@ def get_article_matches(
 ):
     """
     TODO #3: Incomplete docstring
-        (<YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <KEYWORDS> )
+        (<YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>, <PREPROCESSED_WORDS>, <PAGE_NAME>, <KEYWORDS> )
 
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
@@ -76,38 +76,37 @@ def get_article_matches(
     :rtype: list(tuple)
     """
 
-    document_articles = document.articles
-
     matches = []
     for keyword in keywords:
-        for article in document_articles:
-            for tb in document_articles[article]:
+        for article_id, article in document.articles.items():
+            for tb in article:
+                preprocessed_words = [
+                    preprocess_word(word, preprocess_type) for word in tb.words
+                ]
+
                 match = None
-                tb_preprocessed_words = []
-
-                for word in tb.words:
-                    preprocessed_word = preprocess_word(word, preprocess_type)
-                    tb_preprocessed_words.append(preprocessed_word)
-
-                for preprocessed_word in tb_preprocessed_words:
-                    if preprocessed_word == keyword:
+                for preprocessed_word in preprocessed_words:
+                    if (
+                        preprocessed_word == keyword
+                    ):  # TODO: No fuzzy matching here. Could be == / in
                         match = (
                             document.year,
                             document,
-                            article,
+                            article_id,
                             tb.textblock_id,
                             tb.textblock_coords,
                             tb.textblock_page_area,
                             tb.words,
-                            tb_preprocessed_words,
+                            preprocessed_words,
                             tb.page_name,
                             keyword,
                         )
                         break
 
                 if match:
+                    # append and move to next article
                     matches.append(match)
-                    continue  # move to next article
+                    continue
 
     return matches
 

@@ -57,17 +57,18 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :rtype: dict
     """
 
+    # Get configuration
     config = query_utils.get_config(config_file)
 
+    # Process configuration
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
-
     keywords = query_utils.get_normalized_keywords(data_file, preprocess_type)
 
     # Spark: List all documents in archive, filtered by (year_min, year_max)
-    # [document, ...]
+    # documents = [document, ...]
     documents = archives.flatMap(
         lambda archive: [
             document
@@ -77,7 +78,10 @@ def do_query(archives, config_file=None, logger=None, context=None):
     )
 
     # Spark: apply get_article_matches to each document
-    # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword), ....]
+    # filtered_words = [
+    #    (year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_words, page_name, keyword),
+    #       ...
+    # ]
     filtered_words = documents.flatMap(
         lambda document: get_article_matches(document, keywords, preprocess_type)
     )
