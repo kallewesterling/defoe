@@ -108,7 +108,13 @@ class TextBlock(object):
         """
         attribs = [string.attrib for string in self.strings]
         return [
-            (x["HPOS"], x["VPOS"], x["WIDTH"], x["HEIGHT"], x["CONTENT"])
+            (
+                int(x["HPOS"]),
+                int(x["VPOS"]),
+                int(x["WIDTH"]),
+                int(x["HEIGHT"]),
+                x["CONTENT"],
+            )
             for x in attribs
         ]
 
