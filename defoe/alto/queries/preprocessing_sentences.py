@@ -42,9 +42,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     config = query_utils.get_config(config_file)
 
-    # TODO: This variable is not accessed
-    preprocess_type = query_utils.extract_preprocess_word_type(config)
-
     # [document, ...]
     documents = archives.flatMap(
         lambda archive: [document for document in list(archive)]

@@ -38,13 +38,15 @@ def get_pages_matches_no_prep(title, edition, archive, filename, text, keysenten
 
     :return: list of tuples
     """
+
     matches = []
     for keysentence in keysentences:
         sentence_match = get_sentences_list_matches(text, keysentence)
-        # sentence_match_idx = get_text_keyword_idx(text, keysentence)
+
         if sentence_match:
             match = (title, edition, archive, filename, text, keysentence)
             matches.append(match)
+
     return matches
 
 
@@ -71,18 +73,23 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
     :return: list of tuples
     :rtype: list(tuple)
     """
+
     matches = []
     for keyword in keywords:
         for page in document:
             match = None
+
             for word in page.words:
                 preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
                 if preprocessed_word == keyword:
                     match = (document.year, document, page, keyword)
                     break
+
             if match:
                 matches.append(match)
                 continue  # move to next page
+
     return matches
 
 
@@ -102,12 +109,15 @@ def get_document_keywords(
     :return: sorted list of keywords that occur within article
     :rtype: list(str or unicode)
     """
+
     matches = set()
     for page in document:
         for word in page.words:
             preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
             if preprocessed_word in keywords:
                 matches.add(preprocessed_word)
+
     return sorted(list(matches))
 
 
@@ -130,8 +140,10 @@ def document_contains_word(
     for page in document:
         for word in page.words:
             preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
             if keyword == preprocessed_word:
                 return True
+
     return False
 
 
@@ -140,7 +152,8 @@ def calculate_words_within_dictionary(
 ):
     """
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
-    Page words are normalized. 
+    Page words are normalized.
+
     :param page: Page
     :type page: defoe.nls.page.Page
     :param preprocess_type: how words should be preprocessed
@@ -148,26 +161,32 @@ def calculate_words_within_dictionary(
     :return: matches
     :rtype: list(str or unicode)
     """
+
     dictionary = words.words()
+
     counter = 0
     total_words = 0
     for word in page.words:
         preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
         if preprocessed_word != "":
             total_words += 1
+
             if preprocessed_word in dictionary:
                 counter += 1
+
     try:
         calculate_pc = str(counter * 100 / total_words)
     except:
         calculate_pc = "0"
+
     return calculate_pc
 
 
 def calculate_words_confidence_average(page):
     """
-    Calculates the average of "words confidence (wc)"  within a page.
-    Page words are normalized. 
+    Calculates the average of "words confidence (wc)" within a page.
+    Page words are normalized.
     :param page: Page
     :type page: defoe.nls.page.Page
     :param preprocess_type: how words should be preprocessed
@@ -175,15 +194,16 @@ def calculate_words_confidence_average(page):
     :return: matches
     :rtype: list(str or unicode)
     """
-    dictionary = words.words()
-    counter = 0
+
     total_wc = 0
     for wc in page.wc:
         total_wc += float(wc)
+
     try:
         calculate_wc = str(total_wc / len(page.wc))
     except:
         calculate_wc = "0"
+
     return calculate_wc
 
 
@@ -199,13 +219,16 @@ def get_page_as_string(page, preprocess_type=PreprocessWordType.LEMMATIZE):
     :return: page words as a string
     :rtype: string or unicode
     """
+
     page_string = ""
     for word in page.words:
         preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
         if page_string == "":
             page_string = preprocessed_word
         else:
             page_string += " " + preprocessed_word
+
     return page_string
 
 
@@ -215,28 +238,31 @@ def clean_text_as_string(text, flag, defoe_path, os_type):
     Handling hyphenated words: combine and split and also fixing the long-s
 
     """
+
     if flag == 2:
         text_combined = text
     else:
         text_string = ""
+
         for word in text:
             if text_string == "":
                 text_string = word
             else:
                 text_string += " " + word
 
-        text_separeted = text_string.split("- ")
-        text_combined = "".join(text_separeted)
+        text_separated = text_string.split("- ")
+        text_combined = "".join(text_separated)
 
     if (len(text_combined) > 1) and ("f" in text_combined):
-
         text_clean = longsfix_sentence(text_combined, defoe_path, os_type)
     else:
         text_clean = text_combined
+
     if flag != 2:
         text_final = text_clean.split()
     else:
         text_final = text_clean
+
     text_string_final = ""
     for word in text_final:
         if flag == 0:
@@ -255,6 +281,7 @@ def clean_text_as_string(text, flag, defoe_path, os_type):
             separated_str = re.sub(
                 r"([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))", r"\1 ", word
             )
+
             if text_string_final == "":
                 text_string_final = separated_str
             else:
@@ -264,6 +291,7 @@ def clean_text_as_string(text, flag, defoe_path, os_type):
 
 
 # TODO: This function will fail as defoe_path and os_type are not defined
+# -- but the function is not currently used in any scripts
 def clean_headers_page_as_string(page):
     """
     Clean a page as a single string,

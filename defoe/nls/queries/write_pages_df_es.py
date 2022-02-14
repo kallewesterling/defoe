@@ -37,19 +37,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     text_unit = "page"
 
-    # TODO: I don't think any of the below are used?
-    if "os_type" in config:
-        if config["os_type"] == "linux":
-            os_type = "sys-i386-64"
-        else:
-            os_type = "sys-i386-snow-leopard"
-    else:
-        os_type = "sys-i386-64"
-    if "defoe_path" in config:
-        defoe_path = config["defoe_path"]
-    else:
-        defoe_path = "./"
-
     preprocess_none = query_utils.parse_preprocess_word_type("none")
     preprocess_normalize = query_utils.parse_preprocess_word_type("normalize")
     preprocess_lemmatize = query_utils.parse_preprocess_word_type("lemmatize")

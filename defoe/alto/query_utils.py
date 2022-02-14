@@ -138,7 +138,7 @@ def calculate_words_within_dictionary(
 
 def calculate_words_confidence_average(page):
     """
-    Calculates the average of "words confidence (wc)"  within a page.
+    Calculates the average of "words confidence (wc)" within a page.
     Page words are normalized.
     :param page: Page
     :type page: defoe.alto.page.Page

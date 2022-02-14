@@ -166,8 +166,8 @@ def calculate_words_within_dictionary(
 
 def calculate_words_confidence_average(page):
     """
-    Calculates the average of "words confidence (wc)"  within a page.
-    Page words are normalized. 
+    Calculates the average of "words confidence (wc)" within a page.
+    Page words are normalized.
     :param page: Page
     :type page: defoe.nls.page.Page
     :param preprocess_type: how words should be preprocessed
@@ -226,8 +226,8 @@ def clean_page_as_string(page, defoe_path, os_type):
         else:
             page_string += " " + word
 
-    page_separeted = page_string.split("- ")
-    page_combined = "".join(page_separeted)
+    page_separated = page_string.split("- ")
+    page_combined = "".join(page_separated)
 
     if (len(page_combined) > 1) and ("f" in page_combined):
 

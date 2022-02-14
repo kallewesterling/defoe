@@ -3,7 +3,6 @@ Gets concordance and collocation for keywords selecting only the pages which hav
 This query detects also the sentences in which keywords appear, and preprocess each word of each sentence with different methods. 
 """
 
-from defoe import query_utils
 from defoe.nls.query_utils import extract_sentences, total_preprocessed
 
 
@@ -37,11 +36,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
     by year
     :rtype: dict
     """
-
-    config = query_utils.get_config(config_file)
-
-    # TODO: Remove, seems like this variable is not used?
-    preprocess_type = query_utils.extract_preprocess_word_type(config)
 
     # [document, ...]
     documents = archives.flatMap(

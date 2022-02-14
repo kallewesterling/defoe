@@ -37,19 +37,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     text_unit = "page"
 
-    # TODO: None of the below are being used, I believe?
-    if "os_type" in config:
-        if config["os_type"] == "linux":
-            os_type = "sys-i386-64"
-        else:
-            os_type = "sys-i386-snow-leopard"
-    else:
-        os_type = "sys-i386-64"
-    if "defoe_path" in config:
-        defoe_path = config["defoe_path"]
-    else:
-        defoe_path = "./"
-
     preprocess_none = query_utils.parse_preprocess_word_type("none")
     preprocess_normalize = query_utils.parse_preprocess_word_type("normalize")
     preprocess_lemmatize = query_utils.parse_preprocess_word_type("lemmatize")
@@ -122,27 +109,6 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 clean_page[13],
             )
         ]
-    )
-
-    # TODO: Looks like `nlsRow` isn't used
-    nlsRow = Row(
-        "title",
-        "edition",
-        "year",
-        "place",
-        "archive_filename",
-        "source_text_filename",
-        "text_unit",
-        "text_unit_id",
-        "num_text_unit",
-        "type_archive",
-        "model",
-        "source_text_raw",
-        "source_text_clean",
-        "source_text_norm",
-        "source_text_lemmatize",
-        "source_text_stem",
-        "num_words",
     )
 
     matching_pages = pages.map(
