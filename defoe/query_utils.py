@@ -805,8 +805,9 @@ def get_config(config_file, optional=False):
         raise FileNotFoundError(e)
 
 
-def get_normalized_keywords(config_file):
+def get_normalized_keywords(config_file, preprocess_type=PreprocessWordType.NONE):
     with open(config_file, "r") as f:
-        keywords = [normalize(word) for word in list(f)]
-
-    return keywords
+        if preprocess_type:
+            return [preprocess_word(word, preprocess_type) for word in list(f)]
+        else:
+            return [normalize(word) for word in list(f)]

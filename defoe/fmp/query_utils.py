@@ -55,7 +55,7 @@ def get_article_matches(
 ):
     """
     TODO #3: Incomplete docstring
-        (<YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDENATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <KEYWORDS> )
+        (<YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <KEYWORDS> )
 
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
@@ -114,7 +114,7 @@ def get_tb_matches(target_match, keywords):
     """
     TODO #3: Incomplete docstring
 
-    (target_match=><YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDENATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <TARGETWORD>)
+    (target_match=><YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <TARGETWORD>)
 
     :param document: target_match
     :type document: list
@@ -167,9 +167,9 @@ def get_tb_matches(target_match, keywords):
 
 def segment_image(coords, page_name, issue_path, keyword, output_path, target=""):
     """
-    Segments texblock articles given coordenates and page path
+    Segments texblock articles given coordinates and page path
 
-    :param coords: coordenates of an image
+    :param coords: coordinates of an image
     :type coords: string
     :param page_name: name of the page XML which the texblock has been extracted from.
     :type page_name: string

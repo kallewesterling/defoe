@@ -26,7 +26,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                     {
                         "article_id": <ARTICLE ID>,
                         "issue_filename": <ISSUE.ZIP>,
-                        "coord": <COORDENATES>,
+                        "coord": <COORDINATES>,
                         "page_area": <PAGE AREA>,
                         "page_filename": < PAGE FILENAME>,
                         "place": <PLACE>,
@@ -57,10 +57,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
 
-    with open(data_file, "r") as f:
-        keywords = [
-            query_utils.preprocess_word(word, preprocess_type) for word in list(f)
-        ]
+    keywords = query_utils.get_normalized_keywords(data_file, preprocess_type)
 
     # [document, ...]
     documents = archives.flatMap(
