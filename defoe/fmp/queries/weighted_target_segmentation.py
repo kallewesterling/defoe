@@ -1,20 +1,14 @@
 """
-This query filters articles’ textblocks by selecting the ones that have one of
+This query filters articles' textblocks by selecting the ones that have one of
 the target word(s) AND any the keywords. Later it produces the segmentation/
 crop or the filtered textblocks.
 """
 
-from this import d
 from pyspark.rdd import PipelinedRDD
 
 from defoe import query_utils
 from defoe.fmp import Document
-from defoe.fmp.query_utils import (
-    segment_image,
-    preprocess_word,
-    PreprocessWordType,
-    convert_coords,
-)
+from defoe.fmp.query_utils import segment_image, preprocess_word, PreprocessWordType
 
 from collections import namedtuple, defaultdict
 import os
@@ -235,6 +229,12 @@ def do_query(
             [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
         )
 
+        # TODO: I'd like to put this in a `logger.info` if possible...
+        print("Info: Querying using the following target words (after preprocessing):")
+        print(target_words)
+        print("Info: Querying using the following keywords (after preprocessing):")
+        print(keywords)
+
         return target_words, keywords
 
     # Setup settings
@@ -272,8 +272,6 @@ def do_query(
                 "page_area": match.textblock.textblock_page_area,
                 "year": match.textblock.year,
                 "date": match.textblock.document.date,
-                # "words": matched.words,
-                # "preprocessed_words":  matched.preprocessed,
                 "page_filename": match.textblock.textblock_page_name,
                 "issue_id": match.textblock.document.documentId,
                 "issue_dirname": match.textblock.document.archive.filename,
