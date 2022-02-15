@@ -92,8 +92,15 @@ def find_words_in_document(
     for article_id, article in document.articles.items():
         for tb in article:
             preprocessed_data = [
-                (x[0], x[1], x[2], x[3], preprocess_word(x[4], preprocess_type))
-                for x in tb.locations
+                (
+                    x[0],
+                    x[1],
+                    x[2],
+                    x[3],
+                    preprocess_word(x[4], preprocess_type),
+                    position,
+                )
+                for position, x in enumerate(tb.locations)
             ]
 
             keywords_matched = defaultdict(lambda: [])
