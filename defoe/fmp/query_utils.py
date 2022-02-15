@@ -4,6 +4,7 @@ Query-related utility functions.
 
 from defoe.query_utils import PreprocessWordType, preprocess_word
 from defoe.fmp.document import Document
+from defoe.fmp import Page
 
 from nltk.corpus import words
 from PIL import Image, ImageDraw, ImageColor
@@ -17,6 +18,18 @@ def convert_coords(x, y, w, h):
     """
     Takes starting x, y coordinates (upper-left corner) and a width and height,
     and returns the correct format for PIL to draw a rectangle.
+
+    :param x: x value in pixels for left side of rectangle
+    :type x: int
+    :param y: y value in pixels for left side of rectangle
+    :type y: int
+    :param w: rectangle's width in pixels
+    :type w: int
+    :param h: rectangle's height in pixels
+    :type h: int
+    :return: list of two tuples with coordinates of the rectangle's two
+    opposite corners: (1) upper-left, (2) lower-right
+    :rtype: list(tuple)
     """
     x0 = x
     y0 = y
@@ -27,21 +40,23 @@ def convert_coords(x, y, w, h):
 
 
 def get_page_matches(
-    document: Document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
+    document: Document, keywords: list, preprocess_type=PreprocessWordType.NORMALIZE
 ):
     """
     Get pages within a document that include one or more keywords.
-    For each page that includes a specific keyword, add a tuple of
-    form:
+    For each page that includes a specific keyword, add a tuple of form:
         (<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)
+
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
+
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
+
     :param document: document
     :type document: defoe.fmp.document.Document
     :param keywords: keywords
-    :type keywords: list(str or unicode:
+    :type keywords: list(str)
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
@@ -234,12 +249,13 @@ def segment_image(
     output_path: str,
     target: str = "",
     highlight: list = [],
-    highlight_frame: str = "#C02F1D",
-    highlight_frame_width: int = 2,
-    highlight_tint: str = "#FFFF00",
+    highlight_frame: str = "#C02F1D",  # highlight box frame's tint (hex)
+    highlight_frame_width: int = 2,  # highlight box frame's width (pixels)
+    highlight_tint: str = "#FFFF00",  # highlight box's tint (hex)
     highlight_tint_transparency: float = 0.25,  # Degree of transparency, 0-1 (percent)
-    max_height: int = 1200,
-    limit_size: int = 950000,  # File size limit in bytes
+    max_height: int = 1200,  # max height of resulting image (pixels)
+    limit_size: int = 950000,  # File size limit (bytes)
+    overwrite_existing: bool = False,
 ) -> str:
     """
     Segments textblock articles given coordinates and page path
@@ -262,6 +278,12 @@ def segment_image(
     :type highlight: # TODO #3
     :param highlight_frame: # TODO #3
     :type highlight_frame: # TODO #3
+    :param highlight_frame_width: # TODO #3
+    :type highlight_frame_width: # TODO #3
+    :param highlight_tint: # TODO #3
+    :type highlight_tint: # TODO #3
+    :param highlight_tint_transparency: # TODO #3
+    :type highlight_tint_transparency: # TODO #3
     :param max_height: # TODO #3
     :type max_height: # TODO #3
     :param limit_size: # TODO #3
@@ -295,6 +317,10 @@ def segment_image(
 
     image_in = get_image_name(issue_path, page_name)
     image_out = get_image_out(image_in, coords, target, keyword)
+
+    if os.path.exists(image_out) and overwrite_existing:
+        # Exit early, without any file operations - to save time
+        return image_out
 
     # Open image (using PIL)
     im = Image.open(image_in)
@@ -353,20 +379,20 @@ def segment_image(
 
 
 def get_document_keywords(
-    document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
+    document: Document, keywords: list, preprocess_type=PreprocessWordType.NORMALIZE
 ):
     """
     Gets list of keywords occuring within an document.
 
-    :param article: Article
-    :type article: defoe.papers.article.Article
+    :param document: Document
+    :type document: defoe.fmp.document.Document
     :param keywords: keywords
-    :type keywords: list(str or unicode)
+    :type keywords: list(str)
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: sorted list of keywords that occur within article
-    :rtype: list(str or unicode)
+    :return: sorted list of keywords that occur within document
+    :rtype: list(str)
     """
 
     matches = set()
@@ -382,19 +408,19 @@ def get_document_keywords(
 
 
 def document_contains_word(
-    document, keyword, preprocess_type=PreprocessWordType.NORMALIZE
+    document: Document, keyword: str, preprocess_type=PreprocessWordType.NORMALIZE
 ):
     """
-    Checks if a keyword occurs within an article.
+    Checks if a keyword occurs within an document.
 
-    :param article: Article
-    :type article: defoe.papers.article.Article
-    :param keywords: keyword
-    :type keywords: str or unicode
+    :param document: Document
+    :type document: defoe.fmp.document.Document
+    :param keyword: keyword
+    :type keyword: str
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: True if the article contains the word, false otherwise
+    :return: True if the document contains the word, false otherwise
     :rtype: bool
     """
 
@@ -409,11 +435,12 @@ def document_contains_word(
 
 
 def calculate_words_within_dictionary(
-    page, preprocess_type=PreprocessWordType.NORMALIZE
+    page: Page, preprocess_type=PreprocessWordType.NORMALIZE
 ):
     """
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
     Page words are normalized.
+
     :param page: Page
     :type page: defoe.fmp.page.Page
     :param preprocess_type: how words should be preprocessed
@@ -444,7 +471,7 @@ def calculate_words_within_dictionary(
     return calculate_pc
 
 
-def calculate_words_confidence_average(page):
+def calculate_words_confidence_average(page: Page):
     """
     Calculates the average of "words confidence (wc)" within a page.
     Page words are normalized.
@@ -467,4 +494,3 @@ def calculate_words_confidence_average(page):
         calculate_wc = "0"
 
     return calculate_wc
-
