@@ -78,19 +78,18 @@ def do_query(archives, config_file=None, logger=None, context=None):
     )
 
     # Spark: apply get_article_matches to each document
-    # filtered_words = [
+    # article_matches = [
     #    (year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_data, page_name, keyword),
     #       ...
     # ]
-    # TODO #7: resulting list's tuples will include x, y, width, and height
     article_matches = documents.flatMap(
         lambda document: get_article_matches(document, keywords, preprocess_type)
     )
 
-    # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, preprocessed_data, page_name, keyword), ....]
-    # =>
-    # [(word, {"article_id": article_id, ...}), ...]
-    # TODO #7: each `document_article_word` below will include x, y, width, and height (part of preprocessed_data), which can be passed to `segment_image`
+    # Spark: re-organize article_matches into matching_docs
+    # matching_docs = [
+    #   (word, {"article_id": article_id, ...}),
+    # ...]
     matching_docs = article_matches.map(
         lambda document_article_word: (
             document_article_word[9],
