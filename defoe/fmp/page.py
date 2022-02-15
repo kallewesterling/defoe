@@ -32,7 +32,7 @@ class Page(object):
         which this page belongs
         :type document: defoe.alto.document.Document
         :param code: identifier for this page within an archive
-        :type code: str or unicode
+        :type code: str
         :param source: stream. If None then an attempt is made to
         open the file holding the page via the given "document"
         :type source: zipfile.ZipExt or another file-like object
@@ -88,7 +88,7 @@ class Page(object):
         so the words are only retrieved once.
 
         :return: words
-        :rtype: list(str or unicode)
+        :rtype: list(str)
         """
         if not self.page_words:
             self.page_words = list(map(str, self.query(Page.WORDS_XPATH)))
@@ -168,6 +168,6 @@ class Page(object):
         delimiter.
 
         :return: content
-        :rtype: str or unicode
+        :rtype: str
         """
         return " ".join(self.words)

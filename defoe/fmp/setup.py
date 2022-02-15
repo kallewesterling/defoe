@@ -12,10 +12,10 @@ def filename_to_object(filename):
     string.
 
     :param filename: filename
-    :type filename: str or unicode
+    :type filename: str
     :return: tuple of form (Archive, None) or (filename, error message),
     if there was an error creating Archive
-    :rtype: tuple(defoe.fmp.archive.Archive | str or unicode, str or unicode)
+    :rtype: tuple(defoe.fmp.archive.Archive | str, str)
     """
     try:
         result = (Archive(filename), None)

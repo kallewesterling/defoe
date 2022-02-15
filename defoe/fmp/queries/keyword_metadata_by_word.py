@@ -44,7 +44,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
-    :type config_file: str or unicode
+    :type config_file: str
     :param logger: logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped

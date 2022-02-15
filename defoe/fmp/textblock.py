@@ -39,7 +39,7 @@ class TextBlock(object):
         so the words are only retrieved once.
 
         :return: words
-        :rtype: list(str or unicode)
+        :rtype: list(str)
         """
         if not self.textblock_words:
             self.textblock_words = list(
@@ -94,7 +94,7 @@ class TextBlock(object):
         delimiter.
 
         :return: content
-        :rtype: str or unicode
+        :rtype: str
         """
         return " ".join(self.words)
 

@@ -36,7 +36,7 @@ class Archive(AltoArchive):
         Constructor
 
         :param filename: archive filename
-        :type: filename: str or unicode
+        :type: filename: str
         """
         AltoArchive.__init__(self, filename)
 
@@ -46,7 +46,7 @@ class Archive(AltoArchive):
         the document as a whole.
 
         :return: pattern
-        :rtype: str or unicode
+        :rtype: str
         """
         return "([0-9]*?_[0-9]*?)_mets\.xml"  # pylint: disable=anomalous-backslash-in-string
 
@@ -55,7 +55,7 @@ class Archive(AltoArchive):
         Gets pattern to find filenames corresponding to individual pages.
 
         :return: pattern
-        :rtype: str or unicode
+        :rtype: str
         """
         return "([0-9]*?_[0-9]*?)_([0-9_]*)\.xml"  # pylint: disable=anomalous-backslash-in-string
 
@@ -64,7 +64,7 @@ class Archive(AltoArchive):
         Gets information from ZIP file about metadata file.
 
         :param document_code: document file code
-        :type document_code: str or unicode
+        :type document_code: str
         :return: information
         :rtype: zipfile.ZipInfo
         """
@@ -78,9 +78,9 @@ class Archive(AltoArchive):
         Gets information from ZIP file about a page file.
 
         :param document_code: page file code
-        :type document_code: str or unicode
+        :type document_code: str
         :param page_code: file code
-        :type page_code: str or unicode
+        :type page_code: str
         :return: information
         :rtype: zipfile.ZipInfo
         """
@@ -94,7 +94,7 @@ class Archive(AltoArchive):
         Opens metadata file.
 
         :param document_code: document file code
-        :type document_code: str or unicode
+        :type document_code: str
         :return: stream
         """
         if ".zip" in self.filename:
@@ -107,9 +107,9 @@ class Archive(AltoArchive):
         Opens page file.
 
         :param document_code: page file code
-        :type document_code: str or unicode
+        :type document_code: str
         :param page_code: file code
-        :type page_code: str or unicode
+        :type page_code: str
         :return: stream
         :rtype: zipfile.ZipExt
         """

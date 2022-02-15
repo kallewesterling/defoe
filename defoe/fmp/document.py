@@ -20,7 +20,7 @@ class Document(object):
         Constructor
 
         :param code: identifier for this document within an archive
-        :type code: str or unicode
+        :type code: str
         :param archive: archive to which this document belongs
         :type archive: defoe.alto.archive.Archive
         """
@@ -88,7 +88,7 @@ class Document(object):
         * "1870-09-01" returns [1870]
 
         :param text: text to parse
-        :type text: str or unicode
+        :type text: str
         :return: years
         :rtype: set(int)
         """
@@ -120,7 +120,7 @@ class Document(object):
         [123, 456]
 
         :param page_code: page code
-        :type page_code: str or unicode
+        :type page_code: str
         :return: list of page codes
         :rtype: list(int)
         """
@@ -132,7 +132,7 @@ class Document(object):
         Run XPath query.
 
         :param query: XPath query
-        :type query: str or unicode
+        :type query: str
         :return: list of query results or None if none
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
@@ -143,9 +143,9 @@ class Document(object):
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str or unicode
+        :type query: str
         :return: query result or None if none
-        :rtype: str or unicode
+        :rtype: str
         """
         result = self.query(query)
         if not result:
@@ -157,7 +157,7 @@ class Document(object):
         Given a page code, return a new Page object.
 
         :param code: page code
-        :type code: str or unicode
+        :type code: str
         :return: Page object
         :rtype: defoe.alto.page.Page
         """
@@ -179,7 +179,7 @@ class Document(object):
         this document.
 
         :param page_code: file code
-        :type page_code: str or unicode
+        :type page_code: str
         :return: information
         :rtype: zipfile.ZipInfo
         """
@@ -211,7 +211,7 @@ class Document(object):
         Iterate over strings in pages.
 
         :return: page and string
-        :rtype: tuple(defoe.alto.page.Page, str or unicode)
+        :rtype: tuple(defoe.alto.page.Page, str)
         """
         for page in self:
             for string in page.strings:
@@ -222,7 +222,7 @@ class Document(object):
         Iterate over textblocks in pages
 
         :return: page and textblock
-        :rtype: tuple(defoe.alto.page.Page, str or unicode)
+        :rtype: tuple(defoe.alto.page.Page, str)
         """
         for page in self:
             for tb in page.tb:
@@ -233,7 +233,7 @@ class Document(object):
         Iterate over words in pages.
 
         :return: page and word
-        :rtype: tuple(defoe.alto.page.Page, str or unicode)
+        :rtype: tuple(defoe.alto.page.Page, str)
         """
         for page in self:
             for word in page.words:
@@ -244,7 +244,7 @@ class Document(object):
         Iterate over words cualities in pages.
 
         :return: page and wc
-        :rtype: tuple(defoe.alto.page.Page, str or unicode)
+        :rtype: tuple(defoe.alto.page.Page, str)
         """
         for page in self:
             for wc in page.wc:
@@ -280,7 +280,7 @@ class Document(object):
         Iterate over characters cualities in pages.
 
         :return: page and cc
-        :rtype: tuple(defoe.alto.page.Page, str or unicode)
+        :rtype: tuple(defoe.alto.page.Page, str)
         """
         for page in self:
             for cc in page.cc:
@@ -302,7 +302,7 @@ class Document(object):
         Iterate over strings.
 
         :return: string
-        :rtype: str or unicode
+        :rtype: str
         """
         for _, string in self.scan_strings():
             yield string
@@ -312,7 +312,7 @@ class Document(object):
         Iterate over strings.
 
         :return: string
-        :rtype: str or unicode
+        :rtype: str
         """
         for _, tb in self.scan_tb():
             yield tb
@@ -322,7 +322,7 @@ class Document(object):
         Iterate over strings.
 
         :return: word
-        :rtype: str or unicode
+        :rtype: str
         """
         for _, word in self.scan_words():
             yield word
@@ -342,7 +342,7 @@ class Document(object):
         Iterate over words cualities.
 
         :return: wc
-        :rtype: str or unicode
+        :rtype: str
         """
         for _, wc in self.scan_wc():
             yield wc
@@ -352,7 +352,7 @@ class Document(object):
         Iterate over characters cualities.
 
         :return: wc
-        :rtype: str or unicode
+        :rtype: str
         """
         for _, cc in self.scan_cc():
             yield cc

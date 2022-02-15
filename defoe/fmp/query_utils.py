@@ -92,7 +92,7 @@ def get_tb_matches(target_match, keywords):
     :param document: target_match
     :type document: list
     :param keywords: keywords
-    :type keywords: list(str or unicode:
+    :type keywords: list(str:
     :return: list of tuples
     :rtype: list(tuple)
     """
@@ -142,8 +142,8 @@ def get_tb_matches(target_match, keywords):
 def get_article_matches(
     document: Document,
     keywords: list,
-    preprocess_type=PreprocessWordType.LEMMATIZE,
-    fuzzy=False,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
+    fuzzy: bool = False,
 ):
     """
     Takes a document and a list of keywords and a type of preprocessing,
@@ -446,7 +446,7 @@ def calculate_words_within_dictionary(
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
-    :rtype: list(str or unicode)
+    :rtype: list(str)
     """
 
     dictionary = words.words()
@@ -481,7 +481,7 @@ def calculate_words_confidence_average(page: Page):
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
-    :rtype: list(str or unicode)
+    :rtype: list(str)
     """
 
     total_wc = 0
