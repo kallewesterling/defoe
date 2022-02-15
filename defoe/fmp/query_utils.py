@@ -285,17 +285,27 @@ def segment_image(
 
     # Open image (using PIL)
     im = Image.open(image_in)
-    im = im.convert("RGB")
+    im = im.convert("RGBA")
 
     # Set up our drawing
     highlight_colour = ImageColor.getrgb(highlight_colour)
-    draw = ImageDraw.Draw(im)
+    TINT_COLOR = highlight_colour
+    TRANSPARENCY = 0.25  # Degree of transparency, 0-1 (percent)
+    OPACITY = int(255 * TRANSPARENCY)
+    overlay = Image.new("RGBA", im.size, TINT_COLOR + (0,))
+    draw = ImageDraw.Draw(overlay)
 
     for points in highlight:
         x, y, w, h, _ = points
         draw.rectangle(
-            convert_coords(x, y, w, h), fill=None, outline=highlight_colour, width=3
+            convert_coords(x, y, w, h),
+            fill=TINT_COLOR + (OPACITY,),
+            outline=highlight_colour,
+            width=3,
         )
+
+    im = Image.alpha_composite(im, overlay)
+    im = im.convert("RGB")  # Remove alpha for saving in jpg format.
 
     # Set up our cropping
     coords_list = coords.split(",")
@@ -318,6 +328,10 @@ def segment_image(
     crop.save(image_out, quality=80, optimize=True)
 
     # TODO #7: This is where we'll test for file size and resize the image to lower quality until it reaches the limit
+    # file_size = get_file_size(outpath)
+    # Limit file size to 1MB
+    # if file_size > 950000:
+    #     crop.save(outpath, quality=10, optimize=True)
 
     return image_out
 
