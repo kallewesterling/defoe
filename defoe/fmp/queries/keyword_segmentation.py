@@ -114,7 +114,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                     issue_path=document_article_word[1].archive.filename,
                     keyword=document_article_word[9],
                     output_path=output_path,
-                    preprocessed_data=document_article_word[7],
+                    highlight=document_article_word[10],
                 ),
             },
         )

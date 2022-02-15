@@ -112,7 +112,10 @@ def get_tb_matches(target_match, keywords):
 
 
 def get_article_matches(
-    document: Document, keywords: list, preprocess_type=PreprocessWordType.LEMMATIZE
+    document: Document,
+    keywords: list,
+    preprocess_type=PreprocessWordType.LEMMATIZE,
+    fuzzy=False,
 ):
     """
     Takes a document and a list of keywords and a type of preprocessing,
@@ -153,19 +156,40 @@ def get_article_matches(
 
     matches = []
     for keyword in keywords:
+        processed_keyword = preprocess_word(keyword, preprocess_type)
+
         for article_id, article in document.articles.items():
             for tb in article:
-                # TODO #7: We will need to switch here from `tb.words` to `tb.locations`,
-                # an attribute which contains x, y, width, height for each word
                 preprocessed_data = [
                     (x[0], x[1], x[2], x[3], preprocess_word(x[4], preprocess_type))
                     for x in tb.locations
                 ]
 
-                match = None
+                match, highlight = None, None
                 for *_, word in preprocessed_data:
-                    # TODO: This if clause could have fuzzy matching: == / in
-                    if word == keyword:
+                    if fuzzy:
+                        matching = (
+                            word == keyword
+                            or word == processed_keyword
+                            or processed_keyword in word
+                        )
+                    else:
+                        matching = word == keyword or word == processed_keyword
+
+                    if matching:
+                        if fuzzy:
+                            highlight = [
+                                (x, y, w, h, word)
+                                for x, y, w, h, word in preprocessed_data
+                                if word and processed_keyword in word or keyword in word
+                            ]
+                        else:
+                            highlight = [
+                                (x, y, w, h, word)
+                                for x, y, w, h, word in preprocessed_data
+                                if word and processed_keyword == word or keyword == word
+                            ]
+
                         match = (
                             document.year,
                             document,
@@ -177,6 +201,7 @@ def get_article_matches(
                             preprocessed_data,
                             tb.page_name,
                             keyword,
+                            highlight,
                         )
                         break
 
@@ -196,7 +221,7 @@ def segment_image(
     keyword: str,
     output_path: str,
     target="",
-    preprocessed_data=None,
+    highlight=[],
 ) -> list:
     """
     Segments textblock articles given coordinates and page path
@@ -205,7 +230,7 @@ def segment_image(
     :type coords: string
     :param page_name: name of the page XML which the textblock has been extracted from.
     :type page_name: string
-    :param issue_path: path of the ZIPPED archive/issue
+    :param issue_path: path of the ZIPPED archive or the issue
     :type issue_path: string
     :param year: year of the publication
     :type year: integer
@@ -217,8 +242,6 @@ def segment_image(
     :type target # TODO
     :return: list of images cropped/segmented
     """
-
-    print(preprocessed_data)
 
     # Get image_in (the image we want to crop)
     if ".zip" in issue_path:
@@ -250,6 +273,7 @@ def segment_image(
     # draw = ImageDraw.Draw(im)
     # for coords in draw_coords:
     #    draw.rectangle(coords, fill=None, outline=colour, width=3)
+    print(highlight)
 
     # Crop image (using PIL)
     crop = im.crop(c_set)
