@@ -9,6 +9,7 @@ from nltk.corpus import words
 from PIL import Image, ImageDraw, ImageColor
 
 from pathlib import Path
+from math import floor
 import os
 
 
@@ -235,6 +236,7 @@ def segment_image(
     target: str = "",
     highlight: list = [],
     highlight_colour: str = "#C02F1D",
+    max_height: int = 1200,
 ) -> list:
     """
     Segments textblock articles given coordinates and page path
@@ -316,13 +318,14 @@ def segment_image(
 
     # TODO #7: This is also where we should adopt the resizing from `improcess`/`crop_images.py`
     # Resize image if >1200px tall:
-    # width, height = crop.size
-    # if height > max_height:
-    #   Calculate aspect ratio
-    #   ratio = max_height / height
-    #   new_width = int(floor(ratio * width))
-    #   new_height = int(floor(ratio * height))
-    #   crop = crop.resize((new_width, new_height))
+    if max_height:
+        width, height = crop.size
+        if height > max_height:
+            # Calculate aspect ratio
+            ratio = max_height / height
+            new_width = int(floor(ratio * width))
+            new_height = int(floor(ratio * height))
+            crop = crop.resize((new_width, new_height))
 
     # Save image (using PIL)
     crop.save(image_out, quality=80, optimize=True)
