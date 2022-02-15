@@ -95,8 +95,8 @@ def find_words_in_document(
     """
 
     get_highlight_coords = lambda target_loc, keyword_loc: [
-        convert_coords(target_loc.x, target_loc.y, target_loc.w, target_loc.h),
-        convert_coords(keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
+        (target_loc.x, target_loc.y, target_loc.w, target_loc.h),
+        (keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
     ]
 
     matches = []

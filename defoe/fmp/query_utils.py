@@ -334,7 +334,7 @@ def segment_image(
     draw = ImageDraw.Draw(overlay)
 
     for points in highlight:
-        x, y, w, h, _ = points
+        x, y, w, h, *_ = points
         draw.rectangle(
             convert_coords(x, y, w, h),
             fill=TINT_COLOR + (OPACITY,),
