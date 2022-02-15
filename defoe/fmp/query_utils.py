@@ -226,7 +226,6 @@ def get_article_matches(
     return matches
 
 
-# TODO #7: This function will accept x, y, width, and height for highlighting
 def segment_image(
     coords: str,
     page_name: str,
@@ -237,6 +236,7 @@ def segment_image(
     highlight: list = [],
     highlight_colour: str = "#C02F1D",
     max_height: int = 1200,
+    limit_size: int = 950000,  # File size limit in bytes
 ) -> list:
     """
     Segments textblock articles given coordinates and page path
@@ -316,7 +316,6 @@ def segment_image(
     # Crop image (using PIL)
     crop = im.crop(c_set)
 
-    # TODO #7: This is also where we should adopt the resizing from `improcess`/`crop_images.py`
     # Resize image if >1200px tall:
     if max_height:
         width, height = crop.size
@@ -330,11 +329,14 @@ def segment_image(
     # Save image (using PIL)
     crop.save(image_out, quality=80, optimize=True)
 
-    # TODO #7: This is where we'll test for file size and resize the image to lower quality until it reaches the limit
-    # file_size = get_file_size(outpath)
     # Limit file size to 1MB
-    # if file_size > 950000:
-    #     crop.save(outpath, quality=10, optimize=True)
+    check_size = lambda path: os.stat(path).st_size
+    if check_size(image_out) > limit_size:
+        crop.save(image_out, quality=50, optimize=True)
+
+    # TODO: This should be a while loop (with a lower limit) attempting to save
+    if check_size(image_out) > limit_size:
+        print(f"Warning: File {image_out} still too large.")
 
     return image_out
 
