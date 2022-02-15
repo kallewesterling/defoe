@@ -98,7 +98,7 @@ def find_words_in_document(
 
             keywords_matched = defaultdict(lambda: [])
             targetwords_matched = []
-            for *_, word, position in preprocessed_data:
+            for x, y, w, h, word, position in preprocessed_data:
                 loc = WordLocation(
                     word=word,
                     position=position,
@@ -109,6 +109,10 @@ def find_words_in_document(
                     textblock_coords=tb.textblock_coords,
                     textblock_page_area=tb.textblock_page_area,
                     textblock_page_name=tb.page_name,
+                    x=x,
+                    y=y,
+                    w=w,
+                    h=h,
                 )
 
                 # TODO: Only absolute match. We may want to consider fuzzy matching here as well
