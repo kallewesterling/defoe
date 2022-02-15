@@ -4,11 +4,17 @@ the target word(s) AND any the keywords. Later it produces the segmentation/
 crop or the filtered textblocks.
 """
 
+from this import d
 from pyspark.rdd import PipelinedRDD
 
 from defoe import query_utils
 from defoe.fmp import Document
-from defoe.fmp.query_utils import segment_image, preprocess_word, PreprocessWordType
+from defoe.fmp.query_utils import (
+    segment_image,
+    preprocess_word,
+    PreprocessWordType,
+    convert_coords,
+)
 
 from collections import namedtuple, defaultdict
 import os
@@ -33,7 +39,8 @@ WordLocation = namedtuple(
 )
 
 MatchedWords = namedtuple(
-    "MatchedWords", "target_word keyword textblock distance words preprocessed"
+    "MatchedWords",
+    "target_word keyword textblock distance words preprocessed highlight",
 )
 
 
@@ -87,8 +94,12 @@ def find_words_in_document(
     :rtype: list(tuple)
     """
 
-    matches = []
+    get_highlight_coords = lambda target_loc, keyword_loc: [
+        convert_coords(target_loc.x, target_loc.y, target_loc.w, target_loc.h),
+        convert_coords(keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
+    ]
 
+    matches = []
     for article_id, article in document.articles.items():
         for tb in article:
             preprocessed_data = [
@@ -143,6 +154,7 @@ def find_words_in_document(
                             distance=min_distance,
                             words=tb.words,
                             preprocessed=preprocessed_data,
+                            highlight=get_highlight_coords(target_loc, keyword_loc),
                         )
                     )
 
@@ -202,49 +214,45 @@ def do_query(
     :rtype: dict
     """
 
-    config = query_utils.get_config(config_file)
+    def parse(input_words):
+        if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
+            raise RuntimeError(
+                f"Your data file ({data_file}) must contain two lists: targets and keywords."
+            )
+        if (
+            not type(input_words.get("targets")) == list
+            or not type(input_words.get("keywords")) == list
+        ):
+            raise RuntimeError(
+                f"Your data file ({data_file}) must contain two lists: targets and keywords. At least one of them is currently not a valid YAML list."
+            )
 
+        target_words = set(
+            [preprocess_word(word, preprocess_type) for word in input_words["targets"]]
+        )
+
+        keywords = set(
+            [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
+        )
+
+        return target_words, keywords
+
+    # Setup settings
+    config = query_utils.get_config(config_file)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
+    target_words, keywords = parse(query_utils.get_config(data_file))
 
-    input_words = query_utils.get_config(data_file)
-
-    if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
-        raise RuntimeError(
-            f"Your data file ({data_file}) must contain two lists: targets and keywords."
-        )
-    if (
-        not type(input_words.get("targets")) == list
-        or not type(input_words.get("keywords")) == list
-    ):
-        raise RuntimeError(
-            f"Your data file ({data_file}) must contain two lists: targets and keywords. At least one of them is currently not a valid YAML list."
-        )
-
-    target_words = set(
-        [preprocess_word(word, preprocess_type) for word in input_words["targets"]]
-    )
-
-    keywords = set(
-        [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
-    )
-
-    # retrieve the documents from each archive
+    # Retrieve documents from each archive
     documents = archives.flatMap(
-        lambda archive: [
-            document
-            for document in archive
-            if int(year_min) <= document.year <= int(year_max)
-        ]
+        lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
     )
 
     # find textblocks that contain pairs of (target word, keyword) and record their distance
     filtered_words = documents.flatMap(
-        lambda document: find_words_in_document(
-            document, target_words, keywords, preprocess_type
-        )
+        lambda doc: find_words_in_document(doc, target_words, keywords, preprocess_type)
     )
 
     # create the output dictionary
