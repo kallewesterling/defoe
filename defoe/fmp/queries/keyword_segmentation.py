@@ -109,12 +109,12 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 "issue_id": document_article_word[1].documentId,
                 "issue_dirname": document_article_word[1].archive.filename,
                 "cropped_image": segment_image(
-                    document_article_word[4],
-                    document_article_word[8],
-                    document_article_word[1].archive.filename,
-                    document_article_word[9],
-                    output_path,
-                    document_article_word[7],
+                    coords=document_article_word[4],
+                    page_name=document_article_word[8],
+                    issue_path=document_article_word[1].archive.filename,
+                    keyword=document_article_word[9],
+                    output_path=output_path,
+                    preprocessed_data=document_article_word[7],
                 ),
             },
         )
