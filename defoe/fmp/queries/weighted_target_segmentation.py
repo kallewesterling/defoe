@@ -4,8 +4,11 @@ the target word(s) AND any the keywords. Later it produces the segmentation/
 crop or the filtered textblocks.
 """
 
+from pyspark.rdd import PipelinedRDD
+
 from defoe import query_utils
-from defoe.fmp.query_utils import segment_image
+from defoe.fmp import Document
+from defoe.fmp.query_utils import segment_image, preprocess_word, PreprocessWordType
 
 from collections import namedtuple, defaultdict
 import os
@@ -21,48 +24,62 @@ WordLocation = namedtuple(
         "textblock_id "
         "textblock_coords "
         "textblock_page_area "
-        "textblock_page_name"
+        "textblock_page_name "
+        "x "
+        "y "
+        "w "
+        "h"
     ),
 )
+
 MatchedWords = namedtuple(
     "MatchedWords", "target_word keyword textblock distance words preprocessed"
 )
 
 
-def compute_distance(word1_loc, word2_loc):
-    return abs(word1_loc.position - word2_loc.position)
+def get_min_distance_to_target(keyword_locations: list, target_locations: list):
+    """
+    # TODO #3: add missing docstring
+    """
 
+    # compute_distance provides the absolute distance between `position` attributes of two WordLocation objects
+    compute_distance = lambda k_loc, t_loc: abs(k_loc.position - t_loc.position)
 
-def get_min_distance_to_target(keyword_locations, target_locations):
-    min_distance = None
-    target_loc = None
-    keyword_loc = None
+    # TODO: I have a feeling this could be refactored with `functools.reduce`
+    min_distance, target_loc, keyword_loc = None, None, None
     for k_loc in keyword_locations:
         for t_loc in target_locations:
-            d = compute_distance(k_loc, t_loc)
-            if not min_distance or d < min_distance:
-                min_distance = d
+            word_distance = compute_distance(k_loc, t_loc)
+
+            if not min_distance or word_distance < min_distance:
+                min_distance = word_distance
                 target_loc = t_loc
                 keyword_loc = k_loc
+
     return min_distance, target_loc, keyword_loc
 
 
-def find_words(
-    document,
-    target_words,
-    keywords,
-    preprocess_type=query_utils.PreprocessWordType.LEMMATIZE,
+def find_words_in_document(
+    document: Document,
+    target_words: list,
+    keywords: list,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
     """
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
+
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
+
     The distance between keyword and target word is recorded in the output tuple.
+
     :param document: document
-    :type document: defoe.alto.document.Document
+    :type document: defoe.fmp.document.Document
+    :param target_words: # TODO #3
+    :type target_words: # TODO #3
     :param keywords: keywords
-    :type keywords: list(str or unicode:
+    :type keywords: list(str)
     :param preprocess_type: how words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
@@ -71,36 +88,39 @@ def find_words(
     """
 
     matches = []
-    document_articles = document.articles
-    for article in document_articles:
-        for tb in document_articles[article]:
-            keys = defaultdict(lambda: [])
-            targets = []
-            preprocessed_words = []
 
-            for pos, word in enumerate(tb.words):
-                preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+    for article_id, article in document.articles.items():
+        for tb in article:
+            preprocessed_data = [
+                (x[0], x[1], x[2], x[3], preprocess_word(x[4], preprocess_type))
+                for x in tb.locations
+            ]
+
+            keywords_matched = defaultdict(lambda: [])
+            targetwords_matched = []
+            for *_, word, position in preprocessed_data:
                 loc = WordLocation(
-                    word=preprocessed_word,
-                    position=pos,
+                    word=word,
+                    position=position,
                     year=document.year,
                     document=document,
-                    article=article,
+                    article=article_id,
                     textblock_id=tb.textblock_id,
                     textblock_coords=tb.textblock_coords,
                     textblock_page_area=tb.textblock_page_area,
                     textblock_page_name=tb.page_name,
                 )
-                preprocessed_words.append(preprocessed_word)
 
-                if preprocessed_word in keywords:
-                    keys[preprocessed_word].append(loc)
-                if preprocessed_word in target_words:
-                    targets.append(loc)
+                # TODO: Only absolute match. We may want to consider fuzzy matching here as well
+                if word != "" and word in keywords:
+                    keywords_matched[word].append(loc)
 
-            for k, l in keys.items():
+                if word != "" and word in target_words:
+                    targetwords_matched.append(loc)
+
+            for locations in keywords_matched.values():
                 min_distance, target_loc, keyword_loc = get_min_distance_to_target(
-                    l, targets
+                    locations, targetwords_matched
                 )
 
                 if min_distance:
@@ -111,14 +131,16 @@ def find_words(
                             textblock=target_loc,
                             distance=min_distance,
                             words=tb.words,
-                            preprocessed=preprocessed_words,
+                            preprocessed=preprocessed_data,
                         )
                     )
 
     return matches
 
 
-def do_query(archives, config_file=None, logger=None, context=None):
+def do_query(
+    archives: PipelinedRDD, config_file: str = None, logger=None, context=None
+):
     """
     Crops articles' images for keywords and groups by word.
 
@@ -141,7 +163,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                         "coord": <COORDINATES>,
                         "cropped_image": <IMAGE.JPG>,
                         "page_area": <PAGE AREA>,
-                        "page_filename": < PAGE FILENAME>,
+                        "page_filename": <PAGE FILENAME>,
                         "place": <PLACE>,
                         "textblock_id": <TEXTBLOCK ID>,
                         "title": <TITLER>,
@@ -161,7 +183,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
-    :type config_file: str or unicode
+    :type config_file: str
     :param logger: logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
@@ -178,17 +200,24 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     input_words = query_utils.get_config(data_file)
 
+    if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
+        raise RuntimeError(
+            f"Your data file ({data_file}) must contain two lists: targets and keywords."
+        )
+    if (
+        not type(input_words.get("targets")) == list
+        or not type(input_words.get("keywords")) == list
+    ):
+        raise RuntimeError(
+            f"Your data file ({data_file}) must contain two lists: targets and keywords. At least one of them is currently not a valid YAML list."
+        )
+
     target_words = set(
-        [
-            query_utils.preprocess_word(word, preprocess_type)
-            for word in input_words["targets"]
-        ]
+        [preprocess_word(word, preprocess_type) for word in input_words["targets"]]
     )
+
     keywords = set(
-        [
-            query_utils.preprocess_word(word, preprocess_type)
-            for word in input_words["keywords"]
-        ]
+        [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
     )
 
     # retrieve the documents from each archive
@@ -202,7 +231,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     # find textblocks that contain pairs of (target word, keyword) and record their distance
     filtered_words = documents.flatMap(
-        lambda document: find_words(document, target_words, keywords, preprocess_type)
+        lambda document: find_words_in_document(
+            document, target_words, keywords, preprocess_type
+        )
     )
 
     # create the output dictionary
@@ -211,31 +242,31 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # to
     #   [(word, {"article_id": article_id, ...}), ...]
     matching_docs = filtered_words.map(
-        lambda matched: (
-            matched.keyword,
+        lambda match: (
+            match.keyword,
             {
-                "title": matched.textblock.document.title,
-                "place": matched.textblock.document.place,
-                "article_id": matched.textblock.article,
-                "textblock_id": matched.textblock.textblock_id,
-                "coord": matched.textblock.textblock_coords,
-                "page_area": matched.textblock.textblock_page_area,
-                "year": matched.textblock.year,
-                "date": matched.textblock.document.date,
+                "title": match.textblock.document.title,
+                "place": match.textblock.document.place,
+                "article_id": match.textblock.article,
+                "textblock_id": match.textblock.textblock_id,
+                "coord": match.textblock.textblock_coords,
+                "page_area": match.textblock.textblock_page_area,
+                "year": match.textblock.year,
+                "date": match.textblock.document.date,
                 # "words": matched.words,
                 # "preprocessed_words":  matched.preprocessed,
-                "page_filename": matched.textblock.textblock_page_name,
-                "issue_id": matched.textblock.document.documentId,
-                "issue_dirname": matched.textblock.document.archive.filename,
-                "target_word": matched.target_word,
-                "distance": matched.distance,
+                "page_filename": match.textblock.textblock_page_name,
+                "issue_id": match.textblock.document.documentId,
+                "issue_dirname": match.textblock.document.archive.filename,
+                "target_word": match.target_word,
+                "distance": match.distance,
                 "cropped_image": segment_image(
-                    matched.textblock.textblock_coords,
-                    matched.textblock.textblock_page_name,
-                    matched.textblock.document.archive.filename,
-                    matched.keyword,
+                    match.textblock.textblock_coords,
+                    match.textblock.textblock_page_name,
+                    match.textblock.document.archive.filename,
+                    match.keyword,
                     output_path,
-                    matched.target_word,
+                    match.target_word,
                 ),
             },
         )
