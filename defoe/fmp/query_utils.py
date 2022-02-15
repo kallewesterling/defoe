@@ -4,13 +4,25 @@ Query-related utility functions.
 
 from defoe.query_utils import PreprocessWordType, preprocess_word
 from defoe.fmp.document import Document
-from defoe.fmp.page import Page
 
 from nltk.corpus import words
-from PIL import Image
+from PIL import Image, ImageDraw, ImageColor
 
 from pathlib import Path
 import os
+
+
+def convert_coords(x, y, w, h):
+    """
+    Takes starting x, y coordinates (upper-left corner) and a width and height,
+    and returns the correct format for PIL to draw a rectangle.
+    """
+    x0 = x
+    y0 = y
+    x1 = x + w
+    y1 = y + h
+
+    return [(x0, y0), (x1, y1)]
 
 
 def get_page_matches(
@@ -220,8 +232,9 @@ def segment_image(
     issue_path: str,
     keyword: str,
     output_path: str,
-    target="",
-    highlight=[],
+    target: str = "",
+    highlight: list = [],
+    highlight_colour: str = "#C02F1D",
 ) -> list:
     """
     Segments textblock articles given coordinates and page path
@@ -243,37 +256,50 @@ def segment_image(
     :return: list of images cropped/segmented
     """
 
-    # Get image_in (the image we want to crop)
-    if ".zip" in issue_path:
-        image_in = os.path.split(issue_path)[0]
-    else:
-        image_in = issue_path
+    def get_image_name(issue_path, page_name):
+        """Get image_in (the image we want to crop)"""
+        if ".zip" in issue_path:
+            image_in = os.path.split(issue_path)[0]
+        else:
+            image_in = issue_path
 
-    image_name = Path(page_name).stem
-    image_in = Path(image_in, image_name + ".jp2")
+        image_name = Path(page_name).stem
+        image_in = Path(image_in, image_name + ".jp2")
 
-    coords_list = coords.split(",")
-    c_set = tuple([int(s) for s in coords_list])
+        return image_in
 
-    # Setup image_out (the image we want to save)
-    filename = f"crop_{Path(image_in).stem}_"
-    coords_name = coords.replace(",", "_")
-    if target:
-        filename += f"{target}_{keyword}"
-    else:
-        filename += f"{keyword}"
-    filename += f"_{coords_name}.jpg"
+    def get_image_out(image_in, coords, target, keyword):
+        """Setup image_out (the image we want to save)"""
+        filename = f"crop_{Path(image_in).stem}_"
+        coords_name = coords.replace(",", "_")
+        if target:
+            filename += f"{target}_{keyword}"
+        else:
+            filename += f"{keyword}"
+        filename += f"_{coords_name}.jpg"
 
-    image_out = os.path.join(output_path, filename)
+        return os.path.join(output_path, filename)
+
+    image_in = get_image_name(issue_path, page_name)
+    image_out = get_image_out(image_in, coords, target, keyword)
 
     # Open image (using PIL)
     im = Image.open(image_in)
+    im = im.convert("RGB")
 
-    # TODO #7: From `improcess`/`crop_images.py`, we get:
-    # draw = ImageDraw.Draw(im)
-    # for coords in draw_coords:
-    #    draw.rectangle(coords, fill=None, outline=colour, width=3)
-    print(highlight)
+    # Set up our drawing
+    highlight_colour = ImageColor.getrgb(highlight_colour)
+    draw = ImageDraw.Draw(im)
+
+    for points in highlight:
+        x, y, w, h, _ = points
+        draw.rectangle(
+            convert_coords(x, y, w, h), fill=None, outline=highlight_colour, width=3
+        )
+
+    # Set up our cropping
+    coords_list = coords.split(",")
+    c_set = tuple([int(s) for s in coords_list])
 
     # Crop image (using PIL)
     crop = im.crop(c_set)
@@ -290,6 +316,8 @@ def segment_image(
 
     # Save image (using PIL)
     crop.save(image_out, quality=80, optimize=True)
+
+    # TODO #7: This is where we'll test for file size and resize the image to lower quality until it reaches the limit
 
     return image_out
 
