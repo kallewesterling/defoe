@@ -234,7 +234,10 @@ def segment_image(
     output_path: str,
     target: str = "",
     highlight: list = [],
-    highlight_colour: str = "#C02F1D",
+    highlight_frame: str = "#C02F1D",
+    highlight_frame_width: int = 2,
+    highlight_tint: str = "#FFFF00",
+    highlight_tint_transparency: float = 0.25,  # Degree of transparency, 0-1 (percent)
     max_height: int = 1200,
     limit_size: int = 950000,  # File size limit in bytes
 ) -> str:
@@ -257,8 +260,8 @@ def segment_image(
     :type target: # TODO #3
     :param highlight: # TODO #3
     :type highlight: # TODO #3
-    :param highlight_colour: # TODO #3
-    :type highlight_colour: # TODO #3
+    :param highlight_frame: # TODO #3
+    :type highlight_frame: # TODO #3
     :param max_height: # TODO #3
     :type max_height: # TODO #3
     :param limit_size: # TODO #3
@@ -298,10 +301,9 @@ def segment_image(
     im = im.convert("RGBA")
 
     # Set up our drawing
-    highlight_colour = ImageColor.getrgb(highlight_colour)
-    TINT_COLOR = highlight_colour
-    TRANSPARENCY = 0.25  # Degree of transparency, 0-1 (percent)
-    OPACITY = int(255 * TRANSPARENCY)
+    highlight_frame = ImageColor.getrgb(highlight_frame)
+    TINT_COLOR = ImageColor.getrgb(highlight_tint)
+    OPACITY = int(255 * highlight_tint_transparency)
     overlay = Image.new("RGBA", im.size, TINT_COLOR + (0,))
     draw = ImageDraw.Draw(overlay)
 
@@ -310,8 +312,8 @@ def segment_image(
         draw.rectangle(
             convert_coords(x, y, w, h),
             fill=TINT_COLOR + (OPACITY,),
-            outline=highlight_colour,
-            width=3,
+            outline=highlight_frame,
+            width=highlight_frame_width,
         )
 
     im = Image.alpha_composite(im, overlay)
