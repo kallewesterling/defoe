@@ -237,7 +237,7 @@ def segment_image(
     highlight_colour: str = "#C02F1D",
     max_height: int = 1200,
     limit_size: int = 950000,  # File size limit in bytes
-) -> list:
+) -> str:
     """
     Segments textblock articles given coordinates and page path
 
@@ -253,9 +253,17 @@ def segment_image(
     :type keyword: string
     :param output_path: path to store the cropped image
     :type output_path: string
-    :param target # TODO
-    :type target # TODO
-    :return: list of images cropped/segmented
+    :param target: # TODO #3
+    :type target: # TODO #3
+    :param highlight: # TODO #3
+    :type highlight: # TODO #3
+    :param highlight_colour: # TODO #3
+    :type highlight_colour: # TODO #3
+    :param max_height: # TODO #3
+    :type max_height: # TODO #3
+    :param limit_size: # TODO #3
+    :type limit_size: # TODO #3
+    :return: the path of the cropped/segmented image
     """
 
     def get_image_name(issue_path, page_name):
@@ -331,6 +339,7 @@ def segment_image(
 
     # Limit file size to 1MB
     check_size = lambda path: os.stat(path).st_size
+
     if check_size(image_out) > limit_size:
         crop.save(image_out, quality=50, optimize=True)
 
