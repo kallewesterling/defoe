@@ -253,7 +253,7 @@ def segment_image(
     highlight_frame_width: int = 2,  # highlight box frame's width (pixels)
     highlight_tint: str = "#FFFF00",  # highlight box's tint (hex)
     highlight_tint_transparency: float = 0.25,  # Degree of transparency, 0-1 (percent)
-    max_height: int = 1200,  # max height of resulting image (pixels)
+    max_height: int = 0,  # max height of resulting image (pixels)
     limit_size: int = 950000,  # File size limit (bytes)
     overwrite_existing: bool = False,
 ) -> str:
@@ -352,7 +352,7 @@ def segment_image(
     # Crop image (using PIL)
     crop = im.crop(c_set)
 
-    # Resize image if >1200px tall:
+    # Resize image if max_height is set up:
     if max_height:
         width, height = crop.size
         if height > max_height:
