@@ -255,7 +255,7 @@ def do_query(
             target=match.target_word,
             highlight=match.highlight,
         )
-        if output_path
+        if output_path != "."
         else None
     )
 
