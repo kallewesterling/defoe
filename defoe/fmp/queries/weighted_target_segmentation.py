@@ -245,6 +245,20 @@ def do_query(
     output_path = query_utils.extract_output_path(config)
     target_words, keywords = parse(query_utils.get_config(data_file))
 
+    optional_crop = (
+        lambda match: segment_image(
+            coords=match.textblock.textblock_coords,
+            page_name=match.textblock.textblock_page_name,
+            issue_path=match.textblock.document.archive.filename,
+            keyword=match.keyword,
+            output_path=output_path,
+            target=match.target_word,
+            highlight=match.highlight,
+        )
+        if output_path
+        else None
+    )
+
     # Retrieve documents from each archive
     documents = archives.flatMap(
         lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
@@ -277,15 +291,7 @@ def do_query(
                 "issue_dirname": match.textblock.document.archive.filename,
                 "target_word": match.target_word,
                 "distance": match.distance,
-                "cropped_image": segment_image(
-                    coords=match.textblock.textblock_coords,
-                    page_name=match.textblock.textblock_page_name,
-                    issue_path=match.textblock.document.archive.filename,
-                    keyword=match.keyword,
-                    output_path=output_path,
-                    target=match.target_word,
-                    highlight=match.highlight,
-                ),
+                "cropped_image": optional_crop(match),
             },
         )
     )
