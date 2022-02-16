@@ -373,6 +373,7 @@ def segment_image(
 
     # TODO: This should be a while loop (with a lower limit) attempting to save
     if check_size(image_out) > limit_size:
+        # TODO: This should probably be a logging thing also
         print(f"Warning: File {image_out} still too large.")
 
     return image_out
