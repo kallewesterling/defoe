@@ -24,16 +24,11 @@ class PreprocessWordType(enum.Enum):
     Word preprocessing types.
     """
 
-    NORMALIZE = 1
-    """ Normalize word """
-    STEM = 2
-    """ Normalize and stem word """
-    LEMMATIZE = 3
-    """ Normalize and lemmatize word """
-    NONE = 4
-    """ Apply no preprocessing """
-    NORMALIZE_NUM = 5
-    """ Normalize word including numbers"""
+    NORMALIZE = 1  # Normalize word
+    STEM = 2  # Normalize and stem word
+    LEMMATIZE = 3  # Normalize and lemmatize word
+    NONE = 4  # Apply no preprocessing
+    NORMALIZE_NUM = 5  # Normalize word including numbers
 
 
 def parse_preprocess_word_type(type_str):
@@ -47,6 +42,7 @@ def parse_preprocess_word_type(type_str):
     :raises: ValueError if "preprocess" is not one of the expected
     values
     """
+
     try:
         preprocess_type = PreprocessWordType[type_str.upper()]
     except KeyError:
@@ -60,7 +56,9 @@ def parse_preprocess_word_type(type_str):
     return preprocess_type
 
 
-def extract_preprocess_word_type(config, default=PreprocessWordType.LEMMATIZE):
+def extract_preprocess_word_type(
+    config: dict, default: PreprocessWordType = PreprocessWordType.LEMMATIZE
+):
     """
     Extract PreprocessWordType from "preprocess" dictionary value in
     query configuration.
@@ -82,7 +80,7 @@ def extract_preprocess_word_type(config, default=PreprocessWordType.LEMMATIZE):
     return preprocess_type
 
 
-def extract_data_file(config, default_path):
+def extract_data_file(config: dict, default_path: str):
     """
     Extract data file path from "data" dictionary value in query
     configuration.
@@ -96,6 +94,12 @@ def extract_data_file(config, default_path):
     :rtype: str or unicode
     :raises: KeyError if "data" is not in config
     """
+
+    if "data" not in config:
+        raise KeyError(
+            "Configuration file does not contain the required data value with a path to a data file."
+        )
+
     data_file = config["data"]
 
     if not os.path.isabs(data_file):
@@ -104,7 +108,7 @@ def extract_data_file(config, default_path):
     return data_file
 
 
-def extract_window_size(config, default=10):
+def extract_window_size(config: dict, default=10):
     """
     Extract window size from "window" dictionary value in query
     configuration.
@@ -129,7 +133,7 @@ def extract_window_size(config, default=10):
     return window
 
 
-def extract_years_filter(config):
+def extract_years_filter(config: dict):
     """
     Extract min and max years to filter data from "years_filter" dictionary value the query
     configuration. The years will be splited by the "-" character.
@@ -144,14 +148,15 @@ def extract_years_filter(config):
 
     if "years_filter" not in config:
         raise ValueError("years_filter value not found in the config file")
-    else:
-        years = config["years_filter"]
-        year_min = years.split("-")[0]
-        year_max = years.split("-")[1]
+
+    years = config["years_filter"]
+    year_min = years.split("-")[0]
+    year_max = years.split("-")[1]
+
     return year_min, year_max
 
 
-def extract_output_path(config):
+def extract_output_path(config: dict):
     """
     Extract output path from "output_path" dictionary value the query
     configuration.
@@ -182,6 +187,7 @@ def normalize(word):
     :return: normalized word
     :rtype word: str or unicode
     """
+
     return re.sub(NON_AZ_REGEXP, "", word.lower())
 
 
@@ -219,7 +225,9 @@ def stem(word):
     :return: normalized word
     :rtype word: str or unicode
     """
+
     stemmer = PorterStemmer()
+
     return stemmer.stem(word)
 
 
@@ -255,21 +263,26 @@ def preprocess_word(word, preprocess_type=PreprocessWordType.NONE):
     :return: preprocessed word
     :rtype: string or unicode
     """
+
     if preprocess_type == PreprocessWordType.NORMALIZE:
         normalized_word = normalize(word)
         preprocessed_word = normalized_word
+
     elif preprocess_type == PreprocessWordType.STEM:
         normalized_word = normalize(word)
         preprocessed_word = stem(normalized_word)
+
     elif preprocess_type == PreprocessWordType.LEMMATIZE:
         normalized_word = normalize(word)
         preprocessed_word = lemmatize(normalized_word)
+
     elif preprocess_type == PreprocessWordType.NORMALIZE_NUM:
         normalized_word = normalize_including_numbers(word)
         preprocessed_word = normalized_word
 
     else:  # PreprocessWordType.NONE or unknown
         preprocessed_word = word
+
     return preprocessed_word
 
 

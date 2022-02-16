@@ -153,6 +153,7 @@ def main():
         query_l = query.rstrip()
         arguments = query_l.split(" ")
         query_name = arguments[0]
+
         # Default Values for results and config_file:
         query_config_file = None
         results_file = "results_" + str(num_query) + ".yml"
@@ -172,9 +173,11 @@ def main():
         query = importlib.import_module(query_name)
         do_query = query.do_query
         results = do_query(ok_data, query_config_file, log, context)
+
         if results != "0":
             with open(results_file, "w") as f:
                 f.write(yaml.safe_dump(dict(results)))
+
         num_query += 1
 
 

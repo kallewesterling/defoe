@@ -174,7 +174,9 @@ def main():
     results = do_query(ok_data, query_config_file, log, context)
     if results != "0":
         with open(results_file, "w") as f:
-            # f.write(yaml.dump(dict(results), allow_unicode=True))
+            # TODO: here, we could also make it possible to use filename ending to determine what result file we want:
+            # yml: yaml
+            # json: json
             f.write(yaml.safe_dump(dict(results)))
 
 
