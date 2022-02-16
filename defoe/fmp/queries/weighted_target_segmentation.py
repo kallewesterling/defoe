@@ -244,6 +244,13 @@ def do_query(
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
     target_words, keywords = parse(query_utils.get_config(data_file))
+    highlight_results = config["highlight"]
+
+    # TODO: I'd like to put this in a `logger.info` if possible...
+    if output_path == ".":
+        print("Info: Output path is set to `.` -- no images will be generated.")
+
+    get_highlight = lambda match: match.highlight if highlight_results else []
 
     optional_crop = (
         lambda match: segment_image(
@@ -253,7 +260,7 @@ def do_query(
             keyword=match.keyword,
             output_path=output_path,
             target=match.target_word,
-            highlight=match.highlight,
+            highlight=get_highlight(match),
         )
         if output_path != "."
         else None
