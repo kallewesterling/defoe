@@ -372,6 +372,14 @@ def segment_image(
         crop.save(image_out, quality=50, optimize=True)
 
     if check_size(image_out) > limit_size:
+        # Temporary solution to #11 (TODO: refactor this whole part of file size check + resizing)
+        width, height = crop.size
+        if height > 2000:
+            # Calculate aspect ratio
+            ratio = 2000 / height
+            new_width = int(floor(ratio * width))
+            new_height = int(floor(ratio * height))
+            crop = crop.resize((new_width, new_height))
         crop.save(image_out, quality=40, optimize=True)
 
     if check_size(image_out) > limit_size:
