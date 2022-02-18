@@ -371,6 +371,15 @@ def segment_image(
     if check_size(image_out) > limit_size:
         crop.save(image_out, quality=50, optimize=True)
 
+    if check_size(image_out) > limit_size:
+        crop.save(image_out, quality=40, optimize=True)
+
+    if check_size(image_out) > limit_size:
+        crop.save(image_out, quality=30, optimize=True)
+
+    if check_size(image_out) > limit_size:
+        crop.save(image_out, quality=20, optimize=True)
+
     # TODO: This should be a while loop (with a lower limit) attempting to save
     if check_size(image_out) > limit_size:
         # TODO: This should probably be a logging thing also
