@@ -216,6 +216,7 @@ def do_query(
     :rtype: dict
     """
 
+    '''
     def log(msg, level):
         """ Wrapper function for logging. """
 
@@ -227,6 +228,7 @@ def do_query(
 
         if level == "warn":
             logger.warn(msg)
+    '''
 
     def parse(input_words):
         if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
@@ -249,10 +251,10 @@ def do_query(
             [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
         )
 
-        target_list = ",".join(target_words)
-        kw_list = ",".join(keywords)
-        log(f"Query uses target words (after preprocessing): {target_list}", "info")
-        log(f"Query uses keywords (after preprocessing): {kw_list}", "info")
+        # target_list = ",".join(target_words)
+        # kw_list = ",".join(keywords)
+        # log(f"Query uses target words (after preprocessing): {target_list}", "info")
+        # log(f"Query uses keywords (after preprocessing): {kw_list}", "info")
 
         return target_words, keywords
 
@@ -267,7 +269,7 @@ def do_query(
     target_words, keywords = parse(query_utils.get_config(data_file))
 
     if output_path == ".":
-        log("Output path is set to `.` -- no images will be generated.", "warn")
+        # log("Output path is set to `.` -- no images will be generated.", "warn")
         get_highlight = lambda _: []
     else:
         highlight_results = config["highlight"]
@@ -293,7 +295,7 @@ def do_query(
         lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
     )
 
-    log("1/3 Documents retrieved from archive.", "info")
+    # log("1/3 Documents retrieved from archive.", "info")
 
     # find textblocks that contain the closest pair of any given tuple (target word,
     # keyword) and record their distance
@@ -303,7 +305,7 @@ def do_query(
         )
     )
 
-    log("2/3 Search query ran.", "info")
+    # log("2/3 Search query ran.", "info")
 
     print(filtered_words.collect())
 
@@ -334,7 +336,7 @@ def do_query(
         )
     )
 
-    log("3/3 Output dictionary created.", "info")
+    # log("3/3 Output dictionary created.", "info")
 
     # group by the matched keywords and collect all the articles by keyword
     # [(word, {"article_id": article_id, ...}), ...]
