@@ -209,12 +209,24 @@ def do_query(
     :type archives: pyspark.rdd.PipelinedRDD
     :param config_file: query configuration file
     :type config_file: str
-    :param logger: logger (unused)
+    :param logger: logger
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by word
     :rtype: dict
     """
+
+    def log(msg, level):
+        """ Wrapper function for logging. """
+
+        if not logger:
+            return False
+
+        if level == "info":
+            log.info(msg)
+
+        if level == "warn":
+            log.warn(msg)
 
     def parse(input_words):
         if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
@@ -237,11 +249,10 @@ def do_query(
             [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
         )
 
-        if logger:
-            target_list = ",".join(target_words)
-            kw_list = ",".join(keywords)
-            logger.info(f"Query uses target words (after preprocessing): {target_list}")
-            logger.info(f"Query uses keywords (after preprocessing): {kw_list}")
+        target_list = ",".join(target_words)
+        kw_list = ",".join(keywords)
+        log(f"Query uses target words (after preprocessing): {target_list}", "info")
+        log(f"Query uses keywords (after preprocessing): {kw_list}", "info")
 
         return target_words, keywords
 
@@ -256,8 +267,7 @@ def do_query(
     target_words, keywords = parse(query_utils.get_config(data_file))
 
     if output_path == ".":
-        if logger:
-            logger.warn("Output path is set to `.` -- no images will be generated.")
+        log("Output path is set to `.` -- no images will be generated.", "warn")
         get_highlight = lambda _: []
     else:
         highlight_results = config["highlight"]
@@ -283,8 +293,7 @@ def do_query(
         lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
     )
 
-    if logger:
-        logger.info("1/3 Documents retrieved from archive.")
+    log("1/3 Documents retrieved from archive.", "info")
 
     # find textblocks that contain the closest pair of any given tuple (target word,
     # keyword) and record their distance
@@ -294,8 +303,7 @@ def do_query(
         )
     )
 
-    if logger:
-        logger.info("2/3 Search query ran.")
+    log.info("2/3 Search query ran.", "info")
 
     # create the output dictionary
     # mapping from
@@ -324,8 +332,7 @@ def do_query(
         )
     )
 
-    if logger:
-        logger.info("3/3 Output dictionary created.")
+    log("3/3 Output dictionary created.", "info")
 
     # group by the matched keywords and collect all the articles by keyword
     # [(word, {"article_id": article_id, ...}), ...]
