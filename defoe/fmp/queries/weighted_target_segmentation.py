@@ -223,10 +223,10 @@ def do_query(
             return False
 
         if level == "info":
-            log.info(msg)
+            logger.info(msg)
 
         if level == "warn":
-            log.warn(msg)
+            logger.warn(msg)
 
     def parse(input_words):
         if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
