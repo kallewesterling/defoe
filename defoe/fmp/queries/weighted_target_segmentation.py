@@ -153,10 +153,11 @@ def check_word(word, lst, fuzzy=False):
 
     if not fuzzy:
         return word in lst
-    else:
-        for target_or_keyword in lst:
-            if target_or_keyword in word:
-                return True
+
+    # TODO: Consider DeezyMatch?
+    for target_or_keyword in lst:
+        if target_or_keyword in word:
+            return True
 
 
 get_word_data = lambda loc, document, article_id, tb: WordLocation(
@@ -368,6 +369,7 @@ def do_query(
             output_path=output_path,
             target=match.target_word,
             highlight=get_highlight(match),
+            logger=logger,
         )
         if output_path != "."
         else None
@@ -378,6 +380,9 @@ def do_query(
         lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
     )
 
+    if logger:
+        logger.info("1/3 Documents retrieved from archive.")
+
     # find textblocks that contain the closest pair of any given tuple (target word,
     # keyword) and record their distance
     filtered_words = documents.flatMap(
@@ -385,6 +390,9 @@ def do_query(
             doc, target_words, keywords, preprocess_type, fuzzy_target, fuzzy_keyword
         )
     )
+
+    if logger:
+        logger.info("2/3 Search query ran.")
 
     # create the output dictionary
     # mapping from
@@ -412,6 +420,9 @@ def do_query(
             },
         )
     )
+
+    if logger:
+        logger.info("3/3 Output dictionary created.")
 
     # group by the matched keywords and collect all the articles by keyword
     # [(word, {"article_id": article_id, ...}), ...]

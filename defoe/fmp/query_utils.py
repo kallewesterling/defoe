@@ -282,6 +282,7 @@ def segment_image(
     max_height: int = 0,  # max height of resulting image (pixels)
     limit_size: int = 950000,  # File size limit (bytes)
     overwrite_existing: bool = False,
+    logger=None,  # optional logger
 ) -> str:
     """
     Segments textblock articles given coordinates and page path
@@ -418,6 +419,9 @@ def segment_image(
     if check_size(image_out) > limit_size:
         # TODO: This should probably be a logging thing also
         print(f"Warning: File {image_out} still too large.")
+
+    if logger:
+        logger.info(f"File saved: {image_out}")
 
     return image_out
 
