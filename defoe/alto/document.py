@@ -214,7 +214,7 @@ class Document(object):
 
     def scan_wc(self):
         """
-        Iterate over words cualities in pages.
+        Iterate over words qualities in pages.
 
         :return: page and wc
         :rtype: tuple(defoe.alto.page.Page, str or unicode)
@@ -225,7 +225,7 @@ class Document(object):
 
     def scan_cc(self):
         """
-        Iterate over characters cualities in pages.
+        Iterate over characters qualities in pages.
 
         :return: page and cc
         :rtype: tuple(defoe.alto.page.Page, str or unicode)
@@ -277,7 +277,7 @@ class Document(object):
 
     def wc(self):
         """
-        Iterate over words cualities.
+        Iterate over words qualities.
 
         :return: wc
         :rtype: str or unicode
@@ -287,7 +287,7 @@ class Document(object):
 
     def cc(self):
         """
-        Iterate over characters cualities.
+        Iterate over characters qualities.
 
         :return: wc
         :rtype: str or unicode

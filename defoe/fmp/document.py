@@ -4,6 +4,7 @@ of XML files in METS/MODS format.
 """
 
 from defoe.fmp.page import Page
+from defoe.fmp.archive import Archive
 
 from lxml import etree
 import re
@@ -15,7 +16,7 @@ class Document(object):
     collection of XML files in METS/MODS format.
     """
 
-    def __init__(self, code, archive):
+    def __init__(self, code: str, archive: Archive):
         """
         Constructor
 
@@ -70,7 +71,7 @@ class Document(object):
         #######################
 
     @staticmethod
-    def parse_year(text):
+    def parse_year(text: str):
         """
         Parse text to extract years of form 16xx to 19xx.
 
@@ -113,7 +114,7 @@ class Document(object):
             return []
 
     @staticmethod
-    def sorter(page_code):
+    def sorter(page_code: str):
         """
         Given a page code of form [0-9]*(_[0-9]*), split this
         into the sub-codes. For example, given 123_456, return
@@ -127,7 +128,7 @@ class Document(object):
         codes = list(map(int, page_code.split("_")))
         return codes
 
-    def query(self, query):
+    def query(self, query: str):
         """
         Run XPath query.
 
@@ -138,7 +139,7 @@ class Document(object):
         """
         return self.metadata_tree.xpath(query, namespaces=self.namespaces)
 
-    def single_query(self, query):
+    def single_query(self, query: str):
         """
         Run XPath query and return first result.
 
@@ -152,7 +153,7 @@ class Document(object):
             return None
         return str(result[0])
 
-    def page(self, code):
+    def page(self, code: str):
         """
         Given a page code, return a new Page object.
 
@@ -173,7 +174,7 @@ class Document(object):
         """
         return self.archive.get_document_info(self.code)
 
-    def get_page_info(self, page_code):
+    def get_page_info(self, page_code: str):
         """
         Gets information from ZIP file about a page file within
         this document.
@@ -185,7 +186,7 @@ class Document(object):
         """
         return self.archive.get_page_info(self.code, page_code)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         """
         Given a page index, return a new Page object.
 
@@ -241,7 +242,7 @@ class Document(object):
 
     def scan_wc(self):
         """
-        Iterate over words cualities in pages.
+        Iterate over words qualities in pages.
 
         :return: page and wc
         :rtype: tuple(defoe.alto.page.Page, str)
@@ -277,7 +278,7 @@ class Document(object):
 
     def scan_cc(self):
         """
-        Iterate over characters cualities in pages.
+        Iterate over characters qualities in pages.
 
         :return: page and cc
         :rtype: tuple(defoe.alto.page.Page, str)
@@ -309,7 +310,7 @@ class Document(object):
 
     def tb(self):
         """
-        Iterate over strings.
+        Iterate over textblocks.
 
         :return: string
         :rtype: str
@@ -319,7 +320,7 @@ class Document(object):
 
     def words(self):
         """
-        Iterate over strings.
+        Iterate over words.
 
         :return: word
         :rtype: str
@@ -339,7 +340,7 @@ class Document(object):
 
     def wc(self):
         """
-        Iterate over words cualities.
+        Iterate over words qualities.
 
         :return: wc
         :rtype: str
@@ -349,7 +350,7 @@ class Document(object):
 
     def cc(self):
         """
-        Iterate over characters cualities.
+        Iterate over characters qualities.
 
         :return: wc
         :rtype: str
@@ -402,7 +403,7 @@ class Document(object):
         """
         Parse the strucLink information
         :return: 1) A dictionary with articles IDs as keys. And per article ID, we have a list of parts/textblokcs ids that conform each article. 
-                 2) A dictionary with parts/textblocks ids as keys, and page and area as values. 
+                 2) A dictionary with parts/textblocks ids as keys, and page and area as values.
         :rtype: two dictionaries
         {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
         {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}

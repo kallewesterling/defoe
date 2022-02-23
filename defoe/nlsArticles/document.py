@@ -24,23 +24,24 @@ class Document(object):
         :type archive: defoe.alto.archive.Archive
         """
         self.namespaces = {
-            "mods": 'http://www.loc.gov/mods/v3',
-            "mets": 'http://www.loc.gov/METS/'
+            "mods": "http://www.loc.gov/mods/v3",
+            "mets": "http://www.loc.gov/METS/",
         }
         self.archive = archive
         self.code = code
         self.num_pages = 0
         self.metadata = self.archive.open_document(self.code)
         self.metadata_tree = etree.parse(self.metadata)
-        self.title = self.single_query('//mods:title/text()')
-        self.edition = self.single_query('//mods:partName/text()')
-        self.page_codes = sorted(self.archive.document_codes[self.code], key=Document.sorter)
-        #sorted(self.archive.document_codes[self.code], key=Document.sorter)
+        self.title = self.single_query("//mods:title/text()")
+        self.edition = self.single_query("//mods:partName/text()")
+        self.page_codes = sorted(
+            self.archive.document_codes[self.code], key=Document.sorter
+        )
+        # sorted(self.archive.document_codes[self.code], key=Document.sorter)
         self.num_pages = len(self.page_codes)
-        self.years = \
-            Document.parse_year(self.single_query('//mods:dateIssued/text()'))
-        self.publisher = self.single_query('//mods:publisher/text()')
-        self.place = self.single_query('//mods:placeTerm[@type=\'text\']/text()')
+        self.years = Document.parse_year(self.single_query("//mods:dateIssued/text()"))
+        self.publisher = self.single_query("//mods:publisher/text()")
+        self.place = self.single_query("//mods:placeTerm[@type='text']/text()")
         # place may often have a year in.
         self.years += Document.parse_year(self.place)
         self.years = sorted(self.years)
@@ -48,7 +49,7 @@ class Document(object):
             self.year = self.years[0]
         else:
             self.year = None
-        self.date = self.single_query('//mods:dateIssued/text()')
+        self.date = self.single_query("//mods:dateIssued/text()")
         self.document_type = "book"
         self.model = "nlsArticles"
 
@@ -76,7 +77,9 @@ class Document(object):
         :rtype: set(int)
         """
         try:
-            date_pattern = re.compile("(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))")
+            date_pattern = re.compile(
+                "(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))"
+            )
             if date_pattern.match(text):
                 return [int(text[0:4])]
             long_pattern = re.compile("(1[6-9]\d\d)")
@@ -208,7 +211,7 @@ class Document(object):
         for page in self:
             for word in page.words:
                 yield page, word
-    
+
     def scan_header_left_words(self):
         """
         Iterate over header_left_words in pages.
@@ -219,7 +222,7 @@ class Document(object):
         for page in self:
             for header_left_word in page.header_left_words:
                 yield page, header_left_word
-    
+
     def scan_header_right_words(self):
         """
         Iterate over header_left_words in pages.
@@ -241,10 +244,10 @@ class Document(object):
         for page in self:
             for hpos_vpos_font_word in page.hpos_vpos_font_words:
                 yield page, hpos_vpos_font_word
-    
+
     def scan_wc(self):
         """
-        Iterate over words cualities in pages.
+        Iterate over words qualities in pages.
 
         :return: page and wc
         :rtype: tuple(defoe.alto.page.Page, str or unicode)
@@ -252,10 +255,10 @@ class Document(object):
         for page in self:
             for wc in page.wc:
                 yield page, wc
-    
+
     def scan_cc(self):
         """
-        Iterate over characters cualities in pages.
+        Iterate over characters qualities in pages.
 
         :return: page and cc
         :rtype: tuple(defoe.alto.page.Page, str or unicode)
@@ -294,7 +297,7 @@ class Document(object):
         """
         for _, word in self.scan_words():
             yield word
-    
+
     def header_left_words(self):
         """
         Iterate over strings.
@@ -304,7 +307,7 @@ class Document(object):
         """
         for _, header_left_word in self.scan_header_left_words():
             yield header_left_word
-    
+
     def header_right_words(self):
         """
         Iterate over strings.
@@ -314,7 +317,7 @@ class Document(object):
         """
         for _, header_right_word in self.scan_header_right_words():
             yield header_right_word
-    
+
     def hpos_vpos_font_words(self):
         """
         Iterate over strings.
@@ -334,20 +337,20 @@ class Document(object):
         """
         for _, image in self.scan_images():
             yield image
-    
+
     def wc(self):
         """
-        Iterate over words cualities.
+        Iterate over words qualities.
 
         :return: wc
         :rtype: str or unicode
         """
         for _, wc in self.scan_wc():
             yield wc
-    
+
     def cc(self):
         """
-        Iterate over characters cualities.
+        Iterate over characters qualities.
 
         :return: wc
         :rtype: str or unicode
