@@ -8,43 +8,26 @@ from pyspark.rdd import PipelinedRDD
 
 from defoe import query_utils
 from defoe.fmp import Document
-from defoe.fmp.query_utils import segment_image, preprocess_word, PreprocessWordType
+from defoe.fmp.query_utils import (
+    segment_image,
+    preprocess_word,
+    PreprocessWordType,
+    MatchedWords,
+    WordLocation,
+)
 
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 import os
 
-WordLocation = namedtuple(
-    "WordLocation",
-    (
-        "word "
-        "position "
-        "year "
-        "document "
-        "article "
-        "textblock_id "
-        "textblock_coords "
-        "textblock_page_area "
-        "textblock_page_name "
-        "x "
-        "y "
-        "w "
-        "h"
-    ),
-)
 
-MatchedWords = namedtuple(
-    "MatchedWords",
-    "target_word keyword textblock distance words preprocessed highlight",
-)
+# compute_distance provides the absolute distance between `position` attributes of two WordLocation objects
+compute_distance = lambda k_loc, t_loc: abs(k_loc.position - t_loc.position)
 
 
 def get_min_distance_to_target(keyword_locations: list, target_locations: list):
     """
     # TODO #3: add missing docstring
     """
-
-    # compute_distance provides the absolute distance between `position` attributes of two WordLocation objects
-    compute_distance = lambda k_loc, t_loc: abs(k_loc.position - t_loc.position)
 
     # TODO: I have a feeling this could be refactored with `functools.reduce`
     min_distance, target_loc, keyword_loc = None, None, None
@@ -58,6 +41,12 @@ def get_min_distance_to_target(keyword_locations: list, target_locations: list):
                 keyword_loc = k_loc
 
     return min_distance, target_loc, keyword_loc
+
+
+get_highlight_coords = lambda target_loc, keyword_loc: [
+    (target_loc.x, target_loc.y, target_loc.w, target_loc.h),
+    (keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
+]
 
 
 def find_words_in_document(
@@ -87,11 +76,6 @@ def find_words_in_document(
     :return: list of tuples
     :rtype: list(tuple)
     """
-
-    get_highlight_coords = lambda target_loc, keyword_loc: [
-        (target_loc.x, target_loc.y, target_loc.w, target_loc.h),
-        (keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
-    ]
 
     matches = []
     for article_id, article in document.articles.items():
@@ -163,7 +147,7 @@ def do_query(
 
     config_file must be a yml file that has the following values:
         * preprocess: Treatment to use for preprocessing the words. Options: [normalize|stem|lemmatize|none]
-        * data: yaml file with a list of the target words and a list of keywords to search for.
+        * data: YAML file with a list of the target words and a list of keywords to search for.
                 This should be in the same path at the configuration file.
         * years_filter: Min and Max years to filter the data. Separated by "-"
         * output_path: The path to store the cropped images.
@@ -229,11 +213,11 @@ def do_query(
             [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
         )
 
-        # TODO: I'd like to put this in a `logger.info` if possible...
-        print("Info: Querying using the following target words (after preprocessing):")
-        print(target_words)
-        print("Info: Querying using the following keywords (after preprocessing):")
-        print(keywords)
+        if logger:
+            target_list = ",".join(target_words)
+            kw_list = ",".join(keywords)
+            logger.info(f"Query uses target words (after preprocessing): {target_list}")
+            logger.info(f"Query uses keywords (after preprocessing): {kw_list}")
 
         return target_words, keywords
 
@@ -245,9 +229,9 @@ def do_query(
     output_path = query_utils.extract_output_path(config)
     target_words, keywords = parse(query_utils.get_config(data_file))
 
-    # TODO: I'd like to put this in a `logger.info` if possible...
     if output_path == ".":
-        print("Info: Output path is set to `.` -- no images will be generated.")
+        if logger:
+            logger.warn("Output path is set to `.` -- no images will be generated.")
         get_highlight = lambda _: []
     else:
         highlight_results = config["highlight"]

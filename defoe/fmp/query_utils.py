@@ -11,7 +11,33 @@ from PIL import Image, ImageDraw, ImageColor
 
 from pathlib import Path
 from math import floor
+from collections import namedtuple
 import os
+
+
+WordLocation = namedtuple(
+    "WordLocation",
+    (
+        "word "
+        "position "
+        "year "
+        "document "
+        "article "
+        "textblock_id "
+        "textblock_coords "
+        "textblock_page_area "
+        "textblock_page_name "
+        "x "
+        "y "
+        "w "
+        "h"
+    ),
+)
+
+MatchedWords = namedtuple(
+    "MatchedWords",
+    "target_word keyword textblock distance words preprocessed highlight",
+)
 
 
 def convert_coords(x, y, w, h):
