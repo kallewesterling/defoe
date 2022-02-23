@@ -8,6 +8,7 @@ from pyspark.rdd import PipelinedRDD
 
 from defoe import query_utils
 from defoe.fmp import Document
+
 from defoe.fmp.query_utils import (
     segment_image,
     preprocess_word,
@@ -16,10 +17,21 @@ from defoe.fmp.query_utils import (
     WordLocation,
 )
 
-from collections import defaultdict
+# from collections import defaultdict
+from itertools import product
 import os
 
 
+get_highlight_coords = lambda target_loc, keyword_loc: [
+    (target_loc.x, target_loc.y, target_loc.w, target_loc.h),
+    (keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
+]
+get_highlight_coords.__doc__ = (
+    """ Parses out the coordinates for highlights around target words and keywords """
+)
+
+
+'''
 # compute_distance provides the absolute distance between `position` attributes of two WordLocation objects
 compute_distance = lambda k_loc, t_loc: abs(k_loc.position - t_loc.position)
 
@@ -41,12 +53,6 @@ def get_min_distance_to_target(keyword_locations: list, target_locations: list):
                 keyword_loc = k_loc
 
     return min_distance, target_loc, keyword_loc
-
-
-get_highlight_coords = lambda target_loc, keyword_loc: [
-    (target_loc.x, target_loc.y, target_loc.w, target_loc.h),
-    (keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
-]
 
 
 def find_words_in_document(
@@ -135,6 +141,120 @@ def find_words_in_document(
                             highlight=get_highlight_coords(target_loc, keyword_loc),
                         )
                     )
+
+    return matches
+'''
+
+
+def check_word(word, lst, fuzzy=False):
+    """ Fuzzy/non-fuzzy check of word against a list """
+    if not word:
+        return False
+
+    if not fuzzy:
+        return word in lst
+    else:
+        for target_or_keyword in lst:
+            if target_or_keyword in word:
+                return True
+
+
+get_word_data = lambda loc, document, article_id, tb: WordLocation(
+    word=loc[4],
+    position=loc[5],
+    document=document,
+    year=document.year,
+    article=article_id,
+    textblock_id=tb.textblock_id,
+    textblock_coords=tb.textblock_coords,
+    textblock_page_area=tb.textblock_page_area,
+    textblock_page_name=tb.page_name,
+    x=loc[0],
+    y=loc[1],
+    w=loc[2],
+    h=loc[3],
+)
+get_word_data.__doc__ = """ Extracts a WordLocation object from a tb.location object, combined with data from document, article, and tb. """
+
+
+def find_closest(
+    document: Document,
+    target_words: list,
+    keywords: list,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
+    fuzzy_target: bool = False,
+    fuzzy_keyword: bool = False,
+):
+    """
+    Updated query structure (replaces the earlier one, above). This structure allows for
+    fuzzy searching, and is faster (?).
+
+    TODO: More docstring needed.
+    """
+
+    matches = []
+
+    for article_id, article in document.articles.items():
+        for tb in article:
+            # Preprocess all words in textblock
+            # Result is list of tuples:
+            # [
+            #   (x, y, w, h, word, position in textblock),
+            #   ...
+            # ]
+            preprocessed_locations = [
+                (
+                    x[0],
+                    x[1],
+                    x[2],
+                    x[3],
+                    preprocess_word(x[4], preprocess_type),
+                    position,
+                )
+                for position, x in enumerate(tb.locations)
+            ]
+
+            # Find targets in preprocessed_locations
+            found_targets = [
+                get_word_data(x, document, article_id, tb)
+                for x in preprocessed_locations
+                if check_word(x[4], target_words, fuzzy_target)
+            ]
+
+            # Find keywords in preprocessed_locations
+            found_keywords = [
+                get_word_data(x, document, article_id, tb)
+                for x in preprocessed_locations
+                if check_word(x[4], keywords, fuzzy_keyword)
+            ]
+
+            # Pair targets and keywords and add a final count of their difference in position
+            found = [
+                (x[0], x[1], abs(x[0].position - x[1].position))
+                for x in list(product(found_targets, found_keywords))
+            ]
+
+            # Sort by the difference in position
+            found.sort(key=lambda x: x[2])
+
+            if found:
+                # extract from found[0]:
+                # target:WordLocation, keyword:WordLocation, distance:int
+                target_loc, keyword_loc, distance = found[0]
+
+                # append the closest distance word between target and keyword
+                # to matches list
+                matches.append(
+                    MatchedWords(
+                        target_word=target_loc.word,
+                        keyword=keyword_loc.word,
+                        textblock=target_loc,
+                        distance=distance,
+                        words=tb.words,
+                        preprocessed=preprocessed_locations,
+                        highlight=get_highlight_coords(target_loc, keyword_loc),
+                    )
+                )
 
     return matches
 
@@ -227,6 +347,8 @@ def do_query(
     data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
+    fuzzy_keyword = query_utils.extract_fuzzy(config, "keyword")
+    fuzzy_target = query_utils.extract_fuzzy(config, "target")
     target_words, keywords = parse(query_utils.get_config(data_file))
 
     if output_path == ".":
@@ -256,9 +378,12 @@ def do_query(
         lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
     )
 
-    # find textblocks that contain pairs of (target word, keyword) and record their distance
+    # find textblocks that contain the closest pair of any given tuple (target word,
+    # keyword) and record their distance
     filtered_words = documents.flatMap(
-        lambda doc: find_words_in_document(doc, target_words, keywords, preprocess_type)
+        lambda doc: find_closest(
+            doc, target_words, keywords, preprocess_type, fuzzy_target, fuzzy_keyword
+        )
     )
 
     # create the output dictionary

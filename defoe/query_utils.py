@@ -177,6 +177,34 @@ def extract_output_path(config: dict):
     return output_path
 
 
+def extract_fuzzy(config: dict, kind="target"):
+    """
+    Extract boolean for fuzzy search dictionary value from the query
+    configuration file.
+
+    fuzzy_target: False
+    fuzzy_keyword: True
+
+    :param config: config
+    :type config: dict
+    :param kind: kind
+    :type kind: str
+    :return: fuzzy_search
+    :rtype: bool
+    """
+
+    if f"fuzzy_{kind}" not in config:
+        return False
+
+    if (
+        config[f"fuzzy_{kind}"].lower() == "true"
+        or config[f"fuzzy_{kind}"].lower() == "1"
+    ):
+        return True
+
+    return False
+
+
 def normalize(word):
     """
     Normalize a word by converting it to lower-case and removing all
