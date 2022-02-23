@@ -196,6 +196,9 @@ def extract_fuzzy(config: dict, kind="target"):
     if f"fuzzy_{kind}" not in config:
         return False
 
+    if isinstance(config[f"fuzzy_{kind}"], bool):
+        return config[f"fuzzy_{kind}"]
+
     if (
         config[f"fuzzy_{kind}"].lower() == "true"
         or config[f"fuzzy_{kind}"].lower() == "1"
