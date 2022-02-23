@@ -307,8 +307,6 @@ def do_query(
 
     # log("2/3 Search query ran.", "info")
 
-    print(filtered_words.collect())
-
     # create the output dictionary
     # mapping from
     #   [MatchedWords(target_word, keyword, textblock_location, distance, words, preprocessed)]
