@@ -303,7 +303,7 @@ def do_query(
         )
     )
 
-    log.info("2/3 Search query ran.", "info")
+    log("2/3 Search query ran.", "info")
 
     print(filtered_words.collect())
 
