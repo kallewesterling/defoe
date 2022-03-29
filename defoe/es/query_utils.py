@@ -29,7 +29,7 @@ def get_sentences_list_matches(text, keysentence):
                 for _ in range(0, count):
                     matches.append(sentence)
         else:
-            pattern = re.compile(r"^%s$" % sentence)
+            pattern = re.compile(rf"^{sentence}$")
 
             for word in text_list:
                 if re.search(pattern, word):
