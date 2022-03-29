@@ -27,6 +27,8 @@ class TextBlock(object):
         self.textblock_wc = None
         self.textblock_cc = None
         self.textblock_shape = None
+        # Note that the attribute `textblock_coords` is only set when iterating through a Document.articles.
+        # TODO: The attribute `textblock_coords` should be set on the object instead.
         self.textblock_coords = None
         self.textblock_page_area = None
         self.textblock_id = self.textblock_tree.get("ID")
