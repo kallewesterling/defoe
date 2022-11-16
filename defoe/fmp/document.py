@@ -60,6 +60,7 @@ class Document(object):
         self.document_type = "newspaper"
         self.model = "fmp"
         self._articles = None
+        self.articles
 
         #### New ############
         # [art0001, art0002, art0003]
