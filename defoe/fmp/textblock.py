@@ -47,9 +47,11 @@ class TextBlock(object):
             x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
         ]
         test = {
-            f"xxx{ext}": Path(f"xxx{ext}").exists()
+            f"{document_code}_{page_code}{ext}": Path(
+                f"{document_code}_{page_code}{ext}"
+            ).exists()
             for ext in image_types
-            if Path(f"xxx{ext}").exists()
+            if Path(f"{document_code}_{page_code}{ext}").exists()
         }
         if len(test) == 1:
             key = list(test.keys())[0]
