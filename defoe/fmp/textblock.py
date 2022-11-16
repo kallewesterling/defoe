@@ -3,6 +3,11 @@ Object model representation of a textblock represented as an XML file in
 METS/MODS format.
 """
 
+from pathlib import Path
+import mimetypes
+
+mimetypes.init()
+
 
 class TextBlock(object):
     """
@@ -27,12 +32,34 @@ class TextBlock(object):
         self.textblock_wc = None
         self.textblock_cc = None
         self.textblock_shape = None
-        # Note that the attribute `textblock_coords` is only set when iterating through a Document.articles.
-        # TODO: The attribute `textblock_coords` should be set on the object instead.
+        # Note that the attribute `textblock_coords` is only set when
+        # iterating through a Document.articles.
+        # TODO: The attribute `textblock_coords` should be set on the object
+        # instead.
         self.textblock_coords = None
         self.textblock_page_area = None
         self.textblock_id = self.textblock_tree.get("ID")
         self.page_name = document_code + "_" + page_code + ".xml"
+        self.image_name = self.get_image_name(document_code, page_code)
+
+    def get_image_name(self, document_code, page_code):
+        image_types = [
+            x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
+        ]
+        test = {
+            f"xxx{ext}": Path(f"xxx{ext}").exists()
+            for ext in image_types
+            if Path(f"xxx{ext}").exists()
+        }
+        if len(test) == 1:
+            key = list(test.keys())[0]
+            return key
+        elif len(test) > 1:
+            raise RuntimeError(
+                "Multiple possible images found: " + ", ".join(list(test.keys()))
+            )
+        else:
+            return None
 
     @property
     def words(self):
@@ -52,8 +79,8 @@ class TextBlock(object):
     @property
     def wc(self):
         """
-        Gets all word confidences (wc)  in textblock. These are then saved in an attribute,
-        so the wc are only retrieved once.
+        Gets all word confidences (wc)  in textblock. These are then saved in
+        an attribute, so the wc are only retrieved once.
 
         :return: wc
         :rtype: list(str)
@@ -65,8 +92,8 @@ class TextBlock(object):
     @property
     def cc(self):
         """
-        Gets all character confidences (cc)  in textblock. These are then saved in an attribute,
-        so the cc are only retrieved once.
+        Gets all character confidences (cc)  in textblock. These are then
+        saved in an attribute, so the cc are only retrieved once.
 
         :return: cc
         :rtype: list(str)
@@ -92,7 +119,7 @@ class TextBlock(object):
     @property
     def content(self):
         """
-        Gets all words in textblock and contatenates together using ' ' as
+        Gets all words in textblock and concatenates together using ' ' as
         delimiter.
 
         :return: content
@@ -119,4 +146,3 @@ class TextBlock(object):
             )
             for x in attribs
         ]
-
