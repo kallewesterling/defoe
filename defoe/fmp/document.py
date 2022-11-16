@@ -59,8 +59,6 @@ class Document(object):
         self.date = self.single_query("//mods:dateIssued/text()")
         self.document_type = "newspaper"
         self.model = "fmp"
-        self._articles = None
-        self.articles
 
         #### New ############
         # [art0001, art0002, art0003]
@@ -263,23 +261,21 @@ class Document(object):
         :rtype: dictionary of articles. Each
         {'art0001': ['pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', page1 area3], ...]], ...}
         """
-        if not self._articles:
-            articlesInfo = self.articles_info()
-            for page in self:
-                for tb in page.tb:
-                    for articleId in articlesInfo:
-                        for partId in articlesInfo[articleId]:
-                            if partId == tb.textblock_id:
-                                if articleId not in self._articles:
-                                    self._articles[articleId] = []
-                                tb.textblock_shape = articlesInfo[articleId][partId][0]
-                                tb.textblock_coords = articlesInfo[articleId][partId][1]
-                                tb.textblock_page_area = articlesInfo[articleId][
-                                    partId
-                                ][2]
-                                self._articles[articleId].append(tb)
+        self.document_articles = {}
+        articlesInfo = self.articles_info()
+        for page in self:
+            for tb in page.tb:
+                for articleId in articlesInfo:
+                    for partId in articlesInfo[articleId]:
+                        if partId == tb.textblock_id:
+                            if articleId not in self.document_articles:
+                                self.document_articles[articleId] = []
+                            tb.textblock_shape = articlesInfo[articleId][partId][0]
+                            tb.textblock_coords = articlesInfo[articleId][partId][1]
+                            tb.textblock_page_area = articlesInfo[articleId][partId][2]
+                            self.document_articles[articleId].append(tb)
 
-        return self._articles
+        return self.document_articles
 
     def scan_cc(self):
         """
@@ -413,7 +409,7 @@ class Document(object):
         {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
         {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
         """
-        # articlesId = []
+        articlesId = []
         articlesParts = dict()
         partsPage = dict()
         elem = self.metadata_tree.findall("mets:structLink", self.namespaces)
@@ -436,7 +432,7 @@ class Document(object):
         :rtype: dictionary
         #{'art0001 {'pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', 'page1 area3'], ....}}
         """
-        # articlesId = []
+        articlesId = []
         articlesInfo = dict()
         for a_id in self.articlesId:
             articlesInfo[a_id] = dict()
