@@ -59,7 +59,7 @@ class Document(object):
         self.date = self.single_query("//mods:dateIssued/text()")
         self.document_type = "newspaper"
         self.model = "fmp"
-        self.document_articles = {}
+        self._articles = None
 
         #### New ############
         # [art0001, art0002, art0003]
@@ -262,23 +262,23 @@ class Document(object):
         :rtype: dictionary of articles. Each
         {'art0001': ['pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', page1 area3], ...]], ...}
         """
-        if len(self.document_articles) == 0:
+        if not self._articles:
             articlesInfo = self.articles_info()
             for page in self:
                 for tb in page.tb:
                     for articleId in articlesInfo:
                         for partId in articlesInfo[articleId]:
                             if partId == tb.textblock_id:
-                                if articleId not in self.document_articles:
-                                    self.document_articles[articleId] = []
+                                if articleId not in self._articles:
+                                    self._articles[articleId] = []
                                 tb.textblock_shape = articlesInfo[articleId][partId][0]
                                 tb.textblock_coords = articlesInfo[articleId][partId][1]
                                 tb.textblock_page_area = articlesInfo[articleId][
                                     partId
                                 ][2]
-                                self.document_articles[articleId].append(tb)
+                                self._articles[articleId].append(tb)
 
-        return self.document_articles
+        return self._articles
 
     def scan_cc(self):
         """
