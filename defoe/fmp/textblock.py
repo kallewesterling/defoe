@@ -26,6 +26,8 @@ class TextBlock(object):
         Constructor.
         """
         self.textblock_tree = textblock_tree
+        self.document_code = document_code
+        self.page_code = page_code
         self.textblock_words = None
         self.textblock_strings = None
         self.textblock_images = None
