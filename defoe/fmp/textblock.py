@@ -7,6 +7,7 @@ from pathlib import Path
 import mimetypes
 
 mimetypes.init()
+image_types = [x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"]
 
 
 class TextBlock(object):
@@ -45,24 +46,21 @@ class TextBlock(object):
         self.page_name = document_code + "_" + page_code + ".xml"
         self.image_name = self.get_image_name(document_code, page_code)
 
-    def get_image_name(self, document_code, page_code):
-        image_types = [
-            x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
-        ]
-        test = {
-            f"{document_code}_{page_code}{ext}": Path(
-                f"{document_code}_{page_code}{ext}"
-            ).exists()
-            for ext in image_types
-            if Path(f"{document_code}_{page_code}{ext}").exists()
-        }
+    def get_image_name(self, document_code=None, page_code=None):
+        if not document_code:
+            document_code = self.document_code
+        if not page_code:
+            page_code = self.page_code
+
+        dir = self.page.document.archive.filename
+        stem = Path(dir) / f"{document_code}_{page_code}"
+
+        test = [f"{stem}{ext}" for ext in image_types if Path(f"{stem}{ext}").exists()]
+
         if len(test) == 1:
-            key = list(test.keys())[0]
-            return key
+            return test[0]
         elif len(test) > 1:
-            raise RuntimeError(
-                "Multiple possible images found: " + ", ".join(list(test.keys()))
-            )
+            raise RuntimeError("Multiple possible images found: " + ", ".join(test))
         else:
             return None
 
