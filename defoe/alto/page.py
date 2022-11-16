@@ -40,6 +40,7 @@ class Page(object):
         """
         if not source:
             source = document.archive.open_page(document.code, code)
+        self.document = document
         self.code = code
         self.tree = etree.parse(source)
         self.page_tree = self.single_query(Page.PAGE_XPATH)
