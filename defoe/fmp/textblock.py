@@ -22,13 +22,14 @@ class TextBlock(object):
     CC_XPATH = "TextLine/String/@CC"  # Character confidence content
     WORDS_XPATH = "TextLine/String/@CONTENT"  # Word content
 
-    def __init__(self, textblock_tree, document_code, page_code, page):
+    def __init__(self, textblock_tree, document_code, page_code, document, page):
         """
         Constructor.
         """
         self.textblock_tree = textblock_tree
         self.document_code = document_code
         self.page_code = page_code
+        self.document = document
         self.page = page
         self.textblock_words = None
         self.textblock_strings = None

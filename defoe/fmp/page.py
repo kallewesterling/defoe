@@ -53,7 +53,8 @@ class Page(object):
         self.page_cc = None
         self.page_blocks_id = None
         self.tb = [
-            TextBlock(tb, document.code, code, self) for tb in self.query(Page.TB_XPATH)
+            TextBlock(tb, document.code, code, document, self)
+            for tb in self.query(Page.TB_XPATH)
         ]
         # self.page_tb = None
 
