@@ -150,3 +150,19 @@ class TextBlock(object):
             )
             for x in attribs
         ]
+
+    def get_article_id(self):
+        """Attempts to get article ID in parent document for the TextBlock"""
+        test = [
+            id
+            for id, textblock_ids in self.document.articlesParts.items()
+            if self.textblock_id in textblock_ids
+        ]
+
+        if len(test) == 1:
+            return test[0]
+
+        raise RuntimeError(
+            "Article ID for TextBlock could not be reconstructed:\n- "
+            + "\n- ".join(test)
+        )
