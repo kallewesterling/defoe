@@ -4,7 +4,8 @@ of XML files in METS/MODS format.
 """
 
 from defoe.fmp.page import Page
-from defoe.fmp.archive import Archive
+
+# from defoe.fmp.archive import Archive
 
 from typing import Union
 from lxml import etree
@@ -19,7 +20,9 @@ class Document(object):
     collection of XML files in METS/MODS format.
     """
 
-    def __init__(self, code: str, archive: Archive):
+    def __init__(
+        self, code: str, archive
+    ):  # TODO: cannot do typehinting here due to circular import
         """
         Constructor
 
