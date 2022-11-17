@@ -64,6 +64,7 @@ class Document(object):
         self.date = self.single_query("//mods:dateIssued/text()")
         self.document_type = "newspaper"
         self.model = "fmp"
+        self.textblocks = list(self.tb())  # TODO: slows down, but needed for now!
 
         #### New ############
         # [art0001, art0002, art0003]
