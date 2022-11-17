@@ -4,11 +4,13 @@ of XML files in METS/MODS format.
 """
 
 from defoe.fmp.page import Page
+from defoe.fmp.archive import Archive
 
-# from defoe.fmp.archive import Archive
-
+from typing import Union
 from lxml import etree
 import re
+from zipfile import ZipInfo
+from lxml.etree import Element
 
 
 class Document(object):
@@ -17,7 +19,7 @@ class Document(object):
     collection of XML files in METS/MODS format.
     """
 
-    def __init__(self, code: str, archive):
+    def __init__(self, code: str, archive: Archive):
         """
         Constructor
 
@@ -42,14 +44,14 @@ class Document(object):
         self.metadata_tree = etree.parse(self.metadata)
         self.title = self.single_query("//mods:title/text()")
         self.page_codes = sorted(
-            self.archive.document_codes[self.code], key=Document.sorter
+            self.archive.document_codes[self.code], key=Document._sorter
         )
         self.num_pages = len(self.page_codes)
-        self.years = Document.parse_year(self.single_query("//mods:dateIssued/text()"))
+        self.years = Document._parse_year(self.single_query("//mods:dateIssued/text()"))
         self.publisher = self.single_query("//mods:publisher/text()")
         self.place = self.single_query("//mods:placeTerm/text()")
         # place may often have a year in.
-        self.years += Document.parse_year(self.place)
+        self.years += Document._parse_year(self.place)
         self.years = sorted(self.years)
         self.documentId = self.single_query("//mods:identifier/text()")
         if self.years:
@@ -62,17 +64,17 @@ class Document(object):
 
         #### New ############
         # [art0001, art0002, art0003]
-        self.articlesId = self.parse_structMap_Logical()
+        self.articlesId = self._parse_structMap_Logical()
         # {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
         # {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
-        self.articlesParts, self.partsPage = self.parse_structLink()
+        self.articlesParts, self.partsPage = self._parse_structLink()
         # {'pa0001001': ['RECT', '1220,5,2893,221'], 'pa0001003': ['RECT', '2934,14,3709,211'], 'pa0004044': ['RECT', '5334,2088,5584,2121']}
-        self.partsCoord = self.parse_structMap_Physical()
+        self.partsCoord = self._parse_structMap_Physical()
         self.num_articles = len(self.articlesId)
         #######################
 
     @staticmethod
-    def parse_year(text: str):
+    def _parse_year(text: str) -> list:
         """
         Parse text to extract years of form 16xx to 19xx.
 
@@ -115,7 +117,7 @@ class Document(object):
             return []
 
     @staticmethod
-    def sorter(page_code: str):
+    def _sorter(page_code: str) -> list:
         """
         Given a page code of form [0-9]*(_[0-9]*), split this
         into the sub-codes. For example, given 123_456, return
@@ -129,7 +131,7 @@ class Document(object):
         codes = list(map(int, page_code.split("_")))
         return codes
 
-    def query(self, query: str):
+    def query(self, query: str) -> Union[list, None]:
         """
         Run XPath query.
 
@@ -140,7 +142,7 @@ class Document(object):
         """
         return self.metadata_tree.xpath(query, namespaces=self.namespaces)
 
-    def single_query(self, query: str):
+    def single_query(self, query: str) -> Union[str, None]:
         """
         Run XPath query and return first result.
 
@@ -154,7 +156,7 @@ class Document(object):
             return None
         return str(result[0])
 
-    def page(self, code: str):
+    def page(self, code: str) -> Page:
         """
         Given a page code, return a new Page object.
 
@@ -165,7 +167,7 @@ class Document(object):
         """
         return Page(self, code)
 
-    def get_document_info(self):
+    def get_document_info(self) -> Union[ZipInfo, None]:
         """
         Gets information from ZIP file about metadata file
         corresponding to this document.
@@ -175,7 +177,7 @@ class Document(object):
         """
         return self.archive.get_document_info(self.code)
 
-    def get_page_info(self, page_code: str):
+    def get_page_info(self, page_code: str) -> Union[ZipInfo, None]:
         """
         Gets information from ZIP file about a page file within
         this document.
@@ -187,7 +189,7 @@ class Document(object):
         """
         return self.archive.get_page_info(self.code, page_code)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int) -> Page:
         """
         Given a page index, return a new Page object.
 
@@ -198,7 +200,7 @@ class Document(object):
         """
         return self.page(self.page_codes[index])
 
-    def __iter__(self):
+    def __iter__(self) -> Page:
         """
         Iterate over page codes, returning new Page objects.
 
@@ -208,7 +210,7 @@ class Document(object):
         for page_code in self.page_codes:
             yield self.page(page_code)
 
-    def scan_strings(self):
+    def scan_strings(self) -> tuple:
         """
         Iterate over strings in pages.
 
@@ -219,7 +221,7 @@ class Document(object):
             for string in page.strings:
                 yield page, string
 
-    def scan_tb(self):
+    def scan_tb(self) -> tuple:
         """
         Iterate over textblocks in pages
 
@@ -230,7 +232,7 @@ class Document(object):
             for tb in page.tb:
                 yield page, tb
 
-    def scan_words(self):
+    def scan_words(self) -> tuple:
         """
         Iterate over words in pages.
 
@@ -241,7 +243,7 @@ class Document(object):
             for word in page.words:
                 yield page, word
 
-    def scan_wc(self):
+    def scan_wc(self) -> tuple:
         """
         Iterate over words qualities in pages.
 
@@ -253,7 +255,7 @@ class Document(object):
                 yield page, wc
 
     @property
-    def articles(self):
+    def articles(self) -> dict:
         """
         Iterate calculates the articles in each page.
 
@@ -261,8 +263,8 @@ class Document(object):
         :rtype: dictionary of articles. Each
         {'art0001': ['pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', page1 area3], ...]], ...}
         """
-        self.document_articles = {}
-        articlesInfo = self.articles_info()
+        self.document_articles = dict()
+        articlesInfo = self._articles_info()
         for page in self:
             for tb in page.tb:
                 for articleId in articlesInfo:
@@ -277,7 +279,7 @@ class Document(object):
 
         return self.document_articles
 
-    def scan_cc(self):
+    def scan_cc(self) -> tuple:
         """
         Iterate over characters qualities in pages.
 
@@ -288,7 +290,7 @@ class Document(object):
             for cc in page.cc:
                 yield page, cc
 
-    def scan_images(self):
+    def scan_images(self) -> tuple:
         """
         Iterate over images in pages.
 
@@ -299,7 +301,7 @@ class Document(object):
             for image in page.images:
                 yield page, image
 
-    def strings(self):
+    def strings(self) -> str:
         """
         Iterate over strings.
 
@@ -309,7 +311,7 @@ class Document(object):
         for _, string in self.scan_strings():
             yield string
 
-    def tb(self):
+    def tb(self) -> str:
         """
         Iterate over textblocks.
 
@@ -319,7 +321,7 @@ class Document(object):
         for _, tb in self.scan_tb():
             yield tb
 
-    def words(self):
+    def words(self) -> str:
         """
         Iterate over words.
 
@@ -329,7 +331,7 @@ class Document(object):
         for _, word in self.scan_words():
             yield word
 
-    def images(self):
+    def images(self) -> Element:
         """
         Iterate over images.
 
@@ -339,7 +341,7 @@ class Document(object):
         for _, image in self.scan_images():
             yield image
 
-    def wc(self):
+    def wc(self) -> str:
         """
         Iterate over words qualities.
 
@@ -349,7 +351,7 @@ class Document(object):
         for _, wc in self.scan_wc():
             yield wc
 
-    def cc(self):
+    def cc(self) -> str:
         """
         Iterate over characters qualities.
 
@@ -359,7 +361,7 @@ class Document(object):
         for _, cc in self.scan_cc():
             yield cc
 
-    def parse_structMap_Physical(self):
+    def _parse_structMap_Physical(self) -> dict:
         """
         Parse the structMap Physical information
         :return: dictionary with the ID of each part as a keyword. For each part, it gets the shape and coord.
@@ -383,7 +385,7 @@ class Document(object):
                         ]
         return partsCoord
 
-    def parse_structMap_Logical(self):
+    def _parse_structMap_Logical(self) -> list:
         """
         Parse the structMap Logical information
         :return: list of articlesID that conforms each document/issue. It only returns the articles ID, no other type of elements.
@@ -400,7 +402,7 @@ class Document(object):
                 articlesId.append(list(article.values())[0])
         return articlesId
 
-    def parse_structLink(self):
+    def _parse_structLink(self) -> tuple:
         """
         Parse the strucLink information
         :return: 1) A dictionary with articles IDs as keys. And per article ID, we have a list of parts/textblokcs ids that conform each article.
@@ -409,7 +411,6 @@ class Document(object):
         {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
         {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
         """
-        articlesId = []
         articlesParts = dict()
         partsPage = dict()
         elem = self.metadata_tree.findall("mets:structLink", self.namespaces)
@@ -426,13 +427,12 @@ class Document(object):
                 articlesParts[article_parts[0]] = article_parts[1:]
         return articlesParts, partsPage
 
-    def articles_info(self):
+    def _articles_info(self) -> dict:
         """
         :return: create a dicitionary, with articles IDs as keys. Each entry has has a dictionary of parts/textblocks as values, with all the parts information (shape, coords and page_area).
         :rtype: dictionary
         #{'art0001 {'pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', 'page1 area3'], ....}}
         """
-        articlesId = []
         articlesInfo = dict()
         for a_id in self.articlesId:
             articlesInfo[a_id] = dict()
