@@ -3,6 +3,8 @@ Object model representation of a textblock represented as an XML file in METS/
 MODS format.
 """
 
+from PIL import ImageOps
+
 
 class TextBlock(object):
     """
@@ -79,6 +81,9 @@ class TextBlock(object):
             self._image = self._image.crop(self.locations_bbox())
 
         return self._image
+
+    def get_resized_image(self, max_width: int = 500, max_height: int = 500):
+        return ImageOps.contain(self.image, (max_width, max_height))
 
     @property
     def words(self):

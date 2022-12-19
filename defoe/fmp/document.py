@@ -7,7 +7,6 @@ from .page import Page
 from .patterns import DATE_PATTERNS, PART_ID
 
 from lxml import etree
-from lxml.etree import Element
 from typing import Union
 from zipfile import ZipInfo
 
@@ -39,7 +38,7 @@ class Document(object):
         }
         self.archive = archive
         self.code = code
-        self.document_type = "newspaper"
+        self.type = "newspaper"
         self.model = "fmp"
         self.metadata = self.archive.open_document(self.code)
         self.metadata_tree = etree.parse(self.metadata)
@@ -48,23 +47,27 @@ class Document(object):
         )
         self.num_pages = len(self.page_codes)
 
-        self.title = self.single_query("//mods:title/text()")
-        self.publisher = self.single_query("//mods:publisher/text()")
-        self.place = self.single_query("//mods:placeTerm/text()")
-        self.documentId = self.single_query("//mods:identifier/text()")
-        self.date = self.single_query("//mods:dateIssued/text()")
-
         self.year, self.years = self._get_years()
 
         # See property accessors below
+        self._id = None
         self._articles = None
+        self._title = None
+        self._publisher = None
+        self._place = None
+        self._date = None
 
         # TODO: the following slows down, but needed for now!
         self.textblocks = list(self.tb())
 
-        # New #################
-        # [art0001, art0002, art0003]
-        self.articlesId = self._parse_structMap_Logical()
+        # [
+        #   'art0001',
+        #   'art0002',
+        #   'art0003'
+        # ]
+        self.articles_ids = self._parse_structMap_Logical()
+        self.num_articles = len(self.articles_ids)
+
         # {
         #   '#art0001': [
         #       '#pa0001001',
@@ -77,8 +80,11 @@ class Document(object):
         #   ]
         # }
 
-        # {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
-        self.articlesParts, self.partsPage = self._parse_structLink()
+        # {
+        #   'pa0001001': 'page1 area1',
+        #   'pa0001003': 'page1 area3'
+        # }
+        self.articles_parts, self.page_parts = self._get_struct_link()
 
         # {
         #   'pa0001001': [
@@ -91,10 +97,17 @@ class Document(object):
         #       'RECT', '5334,2088,5584,2121'
         #   ]
         # }
-        self.partsCoord = self._parse_structMap_Physical()
+        self.parts_coord = self._get_parts_coord()
 
-        self.num_articles = len(self.articlesId)
-        #######################
+        # Adding backward compatibility
+        self._parse_structMap_Physical = self._get_parts_coord
+        self._parse_structLink = self._get_struct_link
+        self.articlesParts = self.articles_parts
+        self.partsPage = self.page_parts
+        self.articlesId = self.articles_ids
+        self.documentId = self.id
+        self.partsCoord = self.parts_coord
+        self.document_type = self.type
 
     def _get_years(self):
         years = Document._parse_year(self.date)
@@ -135,17 +148,19 @@ class Document(object):
         try:
             if DATE_PATTERNS.standard.match(text):
                 return [int(text[0:4])]
-            # long_pattern = re.compile(r"(1[6-9]\d\d)")
-            # short_pattern = re.compile(r"\d\d")
+
             results = []
             chunks = iter(DATE_PATTERNS.long.split(text)[1:])
             for year, rest in zip(chunks, chunks):
                 results.append(int(year))
                 century = year[0:2]
                 short_years = DATE_PATTERNS.short.findall(rest)
+
                 for short_year in short_years:
                     results.append(int(century + short_year))
+
             return sorted(set(results))
+
         except TypeError:
             return []
 
@@ -288,6 +303,36 @@ class Document(object):
                 yield page, wc
 
     @property
+    def title(self):
+        if not self._title:
+            self._title = self.single_query("//mods:title/text()")
+        return self._title
+
+    @property
+    def publisher(self):
+        if not self._publisher:
+            self._publisher = self.single_query("//mods:publisher/text()")
+        return self._publisher
+
+    @property
+    def place(self):
+        if not self._place:
+            self._place = self.single_query("//mods:placeTerm/text()")
+        return self._place
+
+    @property
+    def id(self):
+        if not self._id:
+            self._id = self.single_query("//mods:identifier/text()")
+        return self._id
+
+    @property
+    def date(self):
+        if not self._date:
+            self._date = self.single_query("//mods:dateIssued/text()")
+        return self._date
+
+    @property
     def articles(self) -> dict:
         """
         Iterate calculates the articles in each page.
@@ -385,7 +430,7 @@ class Document(object):
         for _, word in self.scan_words():
             yield word
 
-    def graphics(self) -> Element:
+    def graphics(self) -> etree.Element:
         """
         Iterate over graphics.
 
@@ -415,7 +460,7 @@ class Document(object):
         for _, cc in self.scan_cc():
             yield cc
 
-    def _parse_structMap_Physical(self) -> dict:
+    def _get_parts_coord(self) -> dict:
         """
         Parse the structMap Physical information
         :return: dictionary with the ID of each part as a keyword. For each
@@ -470,9 +515,9 @@ class Document(object):
                 articlesId.append(list(article.values())[0])
         return articlesId
 
-    def _parse_structLink(self) -> tuple:
+    def _get_struct_link(self) -> tuple:
         """
-        Parse the strucLink information
+        Parse the structLink information from the METS document.
         :return: 1) A dictionary with articles IDs as keys. And per article
                     ID, we have a list of parts/textblokcs ids that conform
                     each article.
@@ -497,8 +542,8 @@ class Document(object):
             'pa0001003': 'page1 area3'
         }
         """
-        articlesParts = dict()
-        partsPage = dict()
+        articles_parts = dict()
+        page_parts = dict()
         elem = self.metadata_tree.findall("mets:structLink", self.namespaces)
         for smlinkgrp in elem:
             # TODO: following line is not accessed so commented out
@@ -509,13 +554,16 @@ class Document(object):
                     "mets:smLocatorLink", self.namespaces
                 )
                 article_parts = []
+
                 for link in linkl:
-                    idstring = list(link.values())[0]
-                    partId = PART_ID.sub("", idstring)
-                    article_parts.append(partId)
-                    partsPage[partId] = list(link.values())[1]
-                articlesParts[article_parts[0]] = article_parts[1:]
-        return articlesParts, partsPage
+                    id_str = list(link.values())[0]
+                    part_id = PART_ID.sub("", id_str)
+                    article_parts.append(part_id)
+                    page_parts[part_id] = list(link.values())[1]
+
+                articles_parts[article_parts[0]] = article_parts[1:]
+
+        return articles_parts, page_parts
 
     def _articles_info(self) -> dict:
         """
@@ -536,10 +584,10 @@ class Document(object):
         # }
         """
         articlesInfo = dict()
-        for a_id in self.articlesId:
+        for a_id in self.articles_ids:
             articlesInfo[a_id] = dict()
-            for p_id in self.articlesParts[a_id]:
-                if p_id in self.partsCoord:
-                    self.partsCoord[p_id].append(self.partsPage[p_id])
-                    articlesInfo[a_id][p_id] = self.partsCoord[p_id]
+            for p_id in self.articles_parts[a_id]:
+                if p_id in self.parts_coord:
+                    self.parts_coord[p_id].append(self.page_parts[p_id])
+                    articlesInfo[a_id][p_id] = self.parts_coord[p_id]
         return articlesInfo
