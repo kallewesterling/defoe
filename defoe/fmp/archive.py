@@ -144,7 +144,7 @@ class Archive(AltoArchive):
         :rtype: BytesIO
         """
 
-        stem = self.filename + "/" + document_code + "_" + page_code
+        stem = self.filename + document_code + "_" + page_code
         print(stem)
 
         test = [
