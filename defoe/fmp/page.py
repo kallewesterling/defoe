@@ -6,17 +6,8 @@ format.
 from .textblock import TextBlock
 
 from lxml import etree
-from pathlib import Path
 from PIL import Image
 from typing import Union
-import mimetypes
-
-mimetypes.init()
-image_types = [
-    type
-    for type, desc in mimetypes.types_map.items()
-    if desc.split("/")[0] == "image"
-]
 
 
 class Page(object):
@@ -223,26 +214,11 @@ class Page(object):
 
     @property
     def image(self) -> Image.Image:
-        """
-        Gets the image for the page. This is then saved in an attribute, so
-        the image is only retrieved once.
-
-        :return: page image
-        :rtype: PIL.Image.Image
-        """
-        if not self._image:
-            if not self.image_path:
-                raise RuntimeError("No image found for page.")
-
-            self._image = Image.open(self.image_path)
-
-        return self._image
+        self.document.archive.open_image(self.document.code, self.code)
 
     @property
     def image_path(self) -> Union[str, None]:
-        if not self._image_path:
-            self._image_path = self.get_image_name()
-        return self._image_path
+        self.document.archive.get_image_path()
 
     def get_image_name(self, document_code=None, page_code=None):
         if not document_code:
@@ -250,20 +226,4 @@ class Page(object):
         if not page_code:
             page_code = self.code
 
-        dir = self.document.archive.filename
-        stem = Path(dir) / f"{document_code}_{page_code}"
-
-        test = [
-            f"{stem}{ext}"
-            for ext in image_types
-            if Path(f"{stem}{ext}").exists()
-        ]
-
-        if len(test) == 1:
-            return test[0]
-        elif len(test) > 1:
-            raise RuntimeError(
-                "Multiple possible images found: " + ", ".join(test)
-            )
-        else:
-            return None
+        return self.document.archive.get_image_path(document_code, page_code)

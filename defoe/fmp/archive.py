@@ -25,6 +25,7 @@ from .archive_combine import AltoArchive
 from defoe.spark_utils import open_stream
 
 from pathlib import Path
+from PIL import Image
 import mimetypes
 
 mimetypes.init()
@@ -132,16 +133,16 @@ class Archive(AltoArchive):
                 self.filename + "/" + document_code + "_" + page_code + ".xml"
             )
 
-    def open_image(self, document_code, page_code):
+    def get_image_path(self, document_code, page_code):
         """
-        Open image file.
+        Get path to image file.
 
         :param document_code: page file code
         :type document_code: str
         :param page_code: file code
         :type page_code: str
-        :return: stream
-        :rtype: BytesIO
+        :return: image path
+        :rtype: str
         """
 
         stem = self.filename + document_code + "_" + page_code
@@ -160,3 +161,18 @@ class Archive(AltoArchive):
             )
         else:
             return None
+
+    def open_image(self, document_code, page_code):
+        """
+        Open image file.
+
+        :param document_code: page file code
+        :type document_code: str
+        :param page_code: file code
+        :type page_code: str
+        :return: image
+        :rtype: PIL.Image.Image
+        """
+
+        path = self.get_image_path(document_code, page_code)
+        return Image.open(path)

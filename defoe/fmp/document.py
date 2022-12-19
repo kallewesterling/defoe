@@ -4,13 +4,12 @@ of XML files in METS/MODS format.
 """
 
 from .page import Page
+from .patterns import DATE_PATTERNS, PART_ID
 
 from lxml import etree
 from lxml.etree import Element
 from typing import Union
 from zipfile import ZipInfo
-
-import re
 
 
 class Document(object):
@@ -130,19 +129,16 @@ class Document(object):
         :rtype: set(int)
         """
         try:
-            date_pattern = re.compile(
-                r"(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))"
-            )
-            if date_pattern.match(text):
+            if DATE_PATTERNS.standard.match(text):
                 return [int(text[0:4])]
-            long_pattern = re.compile(r"(1[6-9]\d\d)")
-            short_pattern = re.compile(r"\d\d")
+            # long_pattern = re.compile(r"(1[6-9]\d\d)")
+            # short_pattern = re.compile(r"\d\d")
             results = []
-            chunks = iter(long_pattern.split(text)[1:])
+            chunks = iter(DATE_PATTERNS.long.split(text)[1:])
             for year, rest in zip(chunks, chunks):
                 results.append(int(year))
                 century = year[0:2]
-                short_years = short_pattern.findall(rest)
+                short_years = DATE_PATTERNS.short.findall(rest)
                 for short_year in short_years:
                     results.append(int(century + short_year))
             return sorted(set(results))
@@ -511,7 +507,7 @@ class Document(object):
                 article_parts = []
                 for link in linkl:
                     idstring = list(link.values())[0]
-                    partId = re.sub("[^A-Za-z0-9]+", "", idstring)
+                    partId = PART_ID.sub("", idstring)
                     article_parts.append(partId)
                     partsPage[partId] = list(link.values())[1]
                 articlesParts[article_parts[0]] = article_parts[1:]
