@@ -145,9 +145,9 @@ class Archive(AltoArchive):
         """
 
         stem = self.filename + document_code + "_" + page_code
-        print(stem)
 
         print(image_types)
+        print([f"{stem}{ext}" for ext in image_types])
 
         test = [
             f"{stem}{ext}"
