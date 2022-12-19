@@ -40,12 +40,18 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         document_pattern = re.compile(self.get_document_pattern())
         page_pattern = re.compile(self.get_page_pattern())
         document_matches = [
-            _f for _f in [document_pattern.match(name) for name in self.filenames] if _f
+            _f
+            for _f in [document_pattern.match(name) for name in self.filenames]
+            if _f
         ]
         page_matches = [
-            _f for _f in [page_pattern.match(name) for name in self.filenames] if _f
+            _f
+            for _f in [page_pattern.match(name) for name in self.filenames]
+            if _f
         ]
-        self.document_codes = {match.group(1): [] for match in document_matches}
+        self.document_codes = {
+            match.group(1): [] for match in document_matches
+        }
         for match in page_matches:
             self.document_codes[match.group(1)].append(match.group(2))
 
