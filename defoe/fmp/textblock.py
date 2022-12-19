@@ -4,6 +4,11 @@ MODS format.
 """
 
 from PIL import ImageOps
+from defoe.query_utils import normalize, normalize_including_numbers, lemmatize
+from thefuzz import fuzz
+
+FUZZ_METHOD = "token_set_ratio"
+MIN_RATIO = 85
 
 
 class TextBlock(object):
@@ -63,6 +68,9 @@ class TextBlock(object):
         self.image_name = self.page.get_image_name()
 
     def get_locations_bbox(self):
+        """
+        Returns the "real" bounding box for the locations' x and y values.
+        """
         xs = [x[0] for x in self.locations] + [
             x[0] + x[2] for x in self.locations
         ]
@@ -98,6 +106,10 @@ class TextBlock(object):
         return self._image
 
     def highlight(self, highlight=[], max_width=0, max_height=0):
+        """
+        Shortcut function to add highlight to a TextBlock
+        # TODO: Add functionality to just pass a token index list?
+        """
         image = self.page.highlight(image=self.page.image, highlight=highlight)
 
         cropped = image.crop(self.locations_bbox)
@@ -112,6 +124,10 @@ class TextBlock(object):
     def get_resized_image(
         self, max_width: int = 500, max_height: int = 500, image=None
     ):
+        """
+        Shortcut function that returns a resized image constrained by a
+        maximum width and a maximum height.
+        """
         if not image:
             image = self.image
 
@@ -223,3 +239,120 @@ class TextBlock(object):
             "Article ID for TextBlock could not be reconstructed:\n- "
             + "\n- ".join(test)
         )
+
+    def match(
+        self,
+        token=None,
+        normalise=True,
+        include_numbers=True,
+        lemmatise=True,
+        fuzz_method=FUZZ_METHOD,
+        min_ratio=MIN_RATIO,
+        all_results=False,
+        sort_results=True,
+        sort_reverse=True,
+    ):
+        match_word = token
+
+        nav = (
+            self.page.document.archive.filename,
+            self.page.document.code,
+            self.page.code,
+            self.id,
+        )
+        tokens = [
+            (nav, ix, x[0], x[1], x[2], x[3], x[4])
+            for ix, x in enumerate(self.locations)
+        ]
+
+        if normalise and include_numbers:
+            tokens = [
+                (nav, ix, x, y, w, h, normalize(token))
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+        elif normalise and not include_numbers:
+            tokens = [
+                (nav, ix, x, y, w, h, normalize_including_numbers(token))
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+
+        if lemmatise:
+            tokens = [
+                (nav, ix, x, y, w, h, lemmatize(token))
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+
+        if fuzz_method == "partial_ratio":
+            tokens = [
+                (
+                    nav,
+                    ix,
+                    x,
+                    y,
+                    w,
+                    h,
+                    token,
+                    fuzz.partial_ratio(token, match_word),
+                )
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+        elif fuzz_method == "ratio":
+            tokens = [
+                (
+                    nav,
+                    ix,
+                    x,
+                    y,
+                    w,
+                    h,
+                    token,
+                    fuzz.partial_ratio(token, match_word),
+                )
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+        elif fuzz_method == "token_sort_ratio":
+            tokens = [
+                (
+                    nav,
+                    ix,
+                    x,
+                    y,
+                    w,
+                    h,
+                    token,
+                    fuzz.token_sort_ratio(token, match_word),
+                )
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+        elif fuzz_method == "token_set_ratio":
+            tokens = [
+                (
+                    nav,
+                    ix,
+                    x,
+                    y,
+                    w,
+                    h,
+                    token,
+                    fuzz.token_set_ratio(token, match_word),
+                )
+                for nav, ix, x, y, w, h, token in tokens
+            ]
+        else:
+            raise SyntaxError(f"Unknown fuzz method provided: {fuzz_method}")
+
+        if all_results:
+            if not sort_results:
+                # we want all results, unsorted
+                return tokens
+            # we want all results, sorted
+            return sorted(tokens, key=lambda x: x[7], reverse=sort_reverse)
+
+        # let's match at a certain ratio
+        matches = [x for x in tokens if x[7] >= min_ratio]
+
+        if not sort_results:
+            return matches
+
+        # we want sorted matches
+        return sorted(matches, key=lambda x: x[7], reverse=sort_reverse)
