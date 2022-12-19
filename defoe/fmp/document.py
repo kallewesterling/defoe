@@ -21,9 +21,8 @@ class Document(object):
     XML files in METS/MODS format.
     """
 
-    def __init__(
-        self, code: str, archive
-    ):  # TODO: cannot do typehinting here due to circular import
+    # TODO: cannot do typehinting here due to circular import
+    def __init__(self, code: str, archive):
         """
         Constructor
 

@@ -49,12 +49,14 @@ class Page(object):
         open the file holding the page via the given "document"
         :type source: zipfile.ZipExt or another file-like object
         """
-        if not source:
-            self.source = document.archive.open_page(document.code, code)
-        else:
-            self.source = source
+
         self.document = document
         self.code = code
+
+        self.source = source
+        if not self.source:
+            self.source = document.archive.open_page(document.code, code)
+
         self.tree = etree.parse(self.source)
         self.page_tree = self.single_query(Page.PAGE_XPATH)
         self.width = int(self.page_tree.get("WIDTH"))
@@ -65,7 +67,6 @@ class Page(object):
             TextBlock(tb, document.code, code, document, self)
             for tb in self.query(Page.TB_XPATH)
         ]
-        # self.page_tb = None
 
         # See property accessors below
         self._words = None
@@ -77,9 +78,12 @@ class Page(object):
         self._image = None
         self._image_path = None
 
-        print(f"Page set up with _image_path {self._image_path}")
+        # Adding backward compatibility
+        self.page_words = self.words
+        self.page_strings = self.strings
+        self.page_wc = self.wc
+        self.page_cc = self.cc
 
-    # TODO: write this function and get it in the __init__
     def crop(self, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         """
         should return the page image cropped to the provided coord...

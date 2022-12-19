@@ -48,7 +48,11 @@ class TextBlock(object):
 
         # Adding backward compatibility
         self.textblock_id = self.id
-        self.image_name = self.page.image_path
+        self.textblock_words = self.words
+        self.textblock_strings = self.strings
+        self.textblock_wc = self.wx
+        self.textblock_cc = self.cc
+        self.image_name = self.page.get_image_name()
 
     # TODO: write this function and get it in the __init__
     def locations_bbox(self):
