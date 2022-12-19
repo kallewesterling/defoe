@@ -50,11 +50,10 @@ class TextBlock(object):
         self.id = self.tree.get("ID")
         self.page_name = document_code + "_" + page_code + ".xml"
 
-        self._locations_bbox = self.get_locations_bbox()
-        self.x = self._locations_bbox[0]
-        self.y = self._locations_bbox[1]
-        self.width = self._locations_bbox[2] - self._locations_bbox[0]
-        self.height = self._locations_bbox[3] - self._locations_bbox[1]
+        self._tokens_bbox = self.get_tokens_bbox()
+        self.x, self.y, x1, y1 = self._tokens_bbox[0]
+        self.width = x1 - self.x
+        self.height = y1 - self.y
 
         # See property accessors below
         self._words = None
@@ -71,17 +70,18 @@ class TextBlock(object):
         self.textblock_wc = self.wc
         self.textblock_cc = self.cc
         self.image_name = self.page.get_image_name()
+        self.locations = self.tokens
+        self.get_locations_bbox = self.get_tokens_bbox
+        self.locations_bbox = self.tokens_bbox
+        self.cc = self.character_confidences
+        self.wc = self.word_confidences
 
-    def get_locations_bbox(self):
+    def get_tokens_bbox(self):
         """
-        Returns the "real" bounding box for the locations' x and y values.
+        Returns the "real" bounding box for the tokens' x and y values.
         """
-        xs = [x[0] for x in self.locations] + [
-            x[0] + x[2] for x in self.locations
-        ]
-        ys = [x[1] for x in self.locations] + [
-            x[1] + x[3] for x in self.locations
-        ]
+        xs = [x[0] for x in self.tokens] + [x[0] + x[2] for x in self.tokens]
+        ys = [x[1] for x in self.tokens] + [x[1] + x[3] for x in self.tokens]
 
         if not xs or not ys:
             # fallback: return the full page. TODO: Print warning?
@@ -90,10 +90,10 @@ class TextBlock(object):
         return min(xs), min(ys), max(xs), max(ys)
 
     @property
-    def locations_bbox(self):
-        if not self._locations_bbox:
-            self._locations_bbox = self.get_locations_bbox()
-        return self._locations_bbox
+    def tokens_bbox(self):
+        if not self._tokens_bbox:
+            self._tokens_bbox = self.get_tokens_bbox()
+        return self._tokens_bbox
 
     @property
     def image(self):
@@ -106,37 +106,9 @@ class TextBlock(object):
         """
         if not self._image:
             self._image = self.page.image.copy()
-            self._image = self._image.crop(self.locations_bbox)
+            self._image = self._image.crop(self.tokens_bbox)
 
         return self._image
-
-    def highlight(self, highlight=[], max_width=0, max_height=0):
-        """
-        Shortcut function to add highlight to a TextBlock
-        # TODO: Add functionality to just pass a token index list?
-        """
-        image = self.page.highlight(image=self.page.image, highlight=highlight)
-
-        cropped = image.crop(self.locations_bbox)
-
-        if max_width and max_height:
-            return self.get_resized_image(
-                max_width=max_width, max_height=max_height, image=cropped
-            )
-
-        return cropped
-
-    def get_resized_image(
-        self, max_width: int = 500, max_height: int = 500, image=None
-    ):
-        """
-        Shortcut function that returns a resized image constrained by a
-        maximum width and a maximum height.
-        """
-        if not image:
-            image = self.image
-
-        return ImageOps.contain(image, (max_width, max_height))
 
     @property
     def words(self):
@@ -154,7 +126,7 @@ class TextBlock(object):
         return self._words
 
     @property
-    def wc(self):
+    def word_confidences(self):
         """
         Gets all word confidences (wc)  in textblock. These are then saved in
         an attribute, so the wc are only retrieved once.
@@ -167,7 +139,7 @@ class TextBlock(object):
         return self._wc
 
     @property
-    def cc(self):
+    def character_confidences(self):
         """
         Gets all character confidences (cc)  in textblock. These are then
         saved in an attribute, so the cc are only retrieved once.
@@ -210,7 +182,7 @@ class TextBlock(object):
         return " ".join(self.words)
 
     @property
-    def locations(self):
+    def tokens(self):
         """
         Gets all strings in textblock and returns them as a list of tuples:
             [
@@ -229,6 +201,34 @@ class TextBlock(object):
             for x in attribs
         ]
 
+    def highlight(self, highlight=[], max_width=0, max_height=0):
+        """
+        Shortcut function to add highlight to a TextBlock
+        # TODO: Add functionality to just pass a token index list?
+        """
+        image = self.page.highlight(image=self.page.image, highlight=highlight)
+
+        cropped = image.crop(self.tokens_bbox)
+
+        if max_width and max_height:
+            return self.get_resized_image(
+                max_width=max_width, max_height=max_height, image=cropped
+            )
+
+        return cropped
+
+    def get_resized_image(
+        self, max_width: int = 500, max_height: int = 500, image=None
+    ):
+        """
+        Shortcut function that returns a resized image constrained by a
+        maximum width and a maximum height.
+        """
+        if not image:
+            image = self.image
+
+        return ImageOps.contain(image, (max_width, max_height))
+
     def get_article_id(self):
         """Attempts to get article ID in parent document for the TextBlock"""
         test = [
@@ -245,10 +245,10 @@ class TextBlock(object):
             + "\n- ".join(test)
         )
 
-    def get_processed_locations(
+    def process_tokens(
         self, normalise=True, include_numbers=True, lemmatise=True, stem=True
     ):
-        tokens = self.locations
+        tokens = self.tokens.copy()
 
         if normalise and include_numbers:
             tokens = [
@@ -294,7 +294,7 @@ class TextBlock(object):
             self.id,
         )
 
-        tokens = self.get_processed_locations(
+        tokens = self.process_tokens(
             normalise=normalise,
             include_numbers=include_numbers,
             lemmatise=lemmatise,
