@@ -283,6 +283,7 @@ class TextBlock(object):
         all_results=False,
         sort_results=True,
         sort_reverse=True,
+        add_textblock=False,
     ):
         match_word = token
 
@@ -292,6 +293,9 @@ class TextBlock(object):
             self.page.code,
             self.id,
         )
+
+        if add_textblock:
+            nav += (self,)
 
         tokens = self.process_tokens(
             normalise=normalise,
