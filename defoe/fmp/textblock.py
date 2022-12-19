@@ -37,7 +37,6 @@ class TextBlock(object):
         self.textblock_page_area = None
         self.id = self.tree.get("ID")
         self.page_name = document_code + "_" + page_code + ".xml"
-        self.image_name = self.get_image_name(document_code, page_code)
 
         # See property accessors below
         self._words = None
@@ -49,6 +48,7 @@ class TextBlock(object):
 
         # Adding backward compatibility
         self.textblock_id = self.id
+        self.image_name = self.page.image_path
 
     # TODO: write this function and get it in the __init__
     def locations_bbox(self):
