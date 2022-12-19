@@ -39,8 +39,7 @@ def parse_preprocess_word_type(type_str):
     :type type_str: str or unicode
     :return: word preprocessing type
     :rtype: PreprocessingWordType
-    :raises: ValueError if "preprocess" is not one of the expected
-    values
+    :raises: ValueError if "preprocess" is not one of the expected values
     """
 
     try:
@@ -48,7 +47,10 @@ def parse_preprocess_word_type(type_str):
     except KeyError:
         raise KeyError(
             "preprocess must be one of {} but is '{}'".format(
-                [k.lower() for k in list(PreprocessWordType.__members__.keys())],
+                [
+                    k.lower()
+                    for k in list(PreprocessWordType.__members__.keys())
+                ],
                 type_str,
             )
         )
@@ -60,8 +62,8 @@ def extract_preprocess_word_type(
     config: dict, default: PreprocessWordType = PreprocessWordType.LEMMATIZE
 ):
     """
-    Extract PreprocessWordType from "preprocess" dictionary value in
-    query configuration.
+    Extract PreprocessWordType from "preprocess" dictionary value in query
+    configuration.
 
     :param config: config
     :type config: dict
@@ -82,13 +84,12 @@ def extract_preprocess_word_type(
 
 def extract_data_file(config: dict, default_path: str):
     """
-    Extract data file path from "data" dictionary value in query
-    configuration.
+    Extract data file path from "data" dictionary value in query configuration.
 
     :param config: config
     :type config: dict
-    :param default_path: default path to prepend to data file path if
-    data file path is a relative path
+    :param default_path: default path to prepend to data file path if data
+    file path is a relative path
     :type default_path: str or unicode
     :return: file path
     :rtype: str or unicode
@@ -97,7 +98,7 @@ def extract_data_file(config: dict, default_path: str):
 
     if "data" not in config:
         raise KeyError(
-            "Configuration file does not contain the required data value with a path to a data file."
+            "Configuration file does not contain the required data value with a path to a data file."  # noqa
         )
 
     data_file = config["data"]
@@ -110,8 +111,7 @@ def extract_data_file(config: dict, default_path: str):
 
 def extract_window_size(config: dict, default=10):
     """
-    Extract window size from "window" dictionary value in query
-    configuration.
+    Extract window size from "window" dictionary value in query configuration.
 
     :param config: config
     :type config: dict
@@ -135,8 +135,9 @@ def extract_window_size(config: dict, default=10):
 
 def extract_years_filter(config: dict):
     """
-    Extract min and max years to filter data from "years_filter" dictionary value the query
-    configuration. The years will be splited by the "-" character.
+    Extract min and max years to filter data from "years_filter" dictionary
+    value the query configuration. The years will be split using the "-"
+    character.
 
     years_filter: 1780-1918
 
@@ -701,7 +702,9 @@ def geoparser_coord_xml(geo_xml):
                             for subsubchild in subchild:
                                 toponymName = subsubchild.text
                                 # print(toponymName, latitude, longitude)
-                                dResolvedLocs[toponymName + "-" + toponymId] = {
+                                dResolvedLocs[
+                                    toponymName + "-" + toponymId
+                                ] = {
                                     "lat": latitude,
                                     "long": longitude,
                                     "pop": pop,
@@ -727,10 +730,15 @@ def geoparser_text_xml(geo_xml):
                                 if subsubsubchild.tag == "w":
                                     inf = {}
                                     inf["p"] = subsubsubchild.attrib["p"]
-                                    inf["group"] = subsubsubchild.attrib["group"]
+                                    inf["group"] = subsubsubchild.attrib[
+                                        "group"
+                                    ]
                                     inf["id"] = subsubsubchild.attrib["id"]
                                     inf["pws"] = subsubsubchild.attrib["pws"]
-                                    if "locname" in subsubsubchild.attrib.keys():
+                                    if (
+                                        "locname"
+                                        in subsubsubchild.attrib.keys()
+                                    ):
                                         inf["locname"] = subsubsubchild.attrib[
                                             "locname"
                                         ]
@@ -743,11 +751,11 @@ def geoparser_text_xml(geo_xml):
 
 def create_es_index(es_index, force_creation):
     """
-        Create specified index if it doesn't already exist
-        :param es_index: the name of the ES index
-        :param force_creation: delete the original index and create a brand new index
-        :return: bool created
-        """
+    Create specified index if it doesn't already exist
+    :param es_index: the name of the ES index
+    :param force_creation: delete the original index and create a brand new index
+    :return: bool created
+    """
     created = False
     es_index_settings = {
         "settings": {"number_of_shards": 1, "number_of_replicas": 0},
@@ -789,7 +797,9 @@ def create_es_index(es_index, force_creation):
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.NUM_TEXT_UNIT: {"type": "long",},
+                settings.NUM_TEXT_UNIT: {
+                    "type": "long",
+                },
                 settings.TYPE_ARCHIVE: {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
@@ -810,7 +820,10 @@ def create_es_index(es_index, force_creation):
                     "type": "text",
                     "fields": {"integer": {"type": "integer"}},
                 },
-                "misc": {"type": "text", "fields": {"keyword": {"type": "keyword"}}},
+                "misc": {
+                    "type": "text",
+                    "fields": {"keyword": {"type": "keyword"}},
+                },
             }
         },
     }
@@ -853,7 +866,9 @@ def get_config(config_file, optional=False):
         )
 
 
-def get_normalized_keywords(config_file, preprocess_type=PreprocessWordType.NONE):
+def get_normalized_keywords(
+    config_file, preprocess_type=PreprocessWordType.NONE
+):
     with open(config_file, "r") as f:
         if preprocess_type:
             return [preprocess_word(word, preprocess_type) for word in list(f)]

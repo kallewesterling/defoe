@@ -66,7 +66,9 @@ def convert_coords(x, y, w, h):
 
 
 def get_page_matches(
-    document: Document, keywords: list, preprocess_type=PreprocessWordType.NORMALIZE
+    document: Document,
+    keywords: list,
+    preprocess_type=PreprocessWordType.NORMALIZE,
 ):
     """
     Get pages within a document that include one or more keywords.
@@ -215,7 +217,13 @@ def get_article_matches(
         for article_id, article in document.articles.items():
             for tb in article:
                 preprocessed_data = [
-                    (x[0], x[1], x[2], x[3], preprocess_word(x[4], preprocess_type))
+                    (
+                        x[0],
+                        x[1],
+                        x[2],
+                        x[3],
+                        preprocess_word(x[4], preprocess_type),
+                    )
                     for x in tb.locations
                 ]
 
@@ -235,13 +243,17 @@ def get_article_matches(
                             highlight = [
                                 (x, y, w, h, word)
                                 for x, y, w, h, word in preprocessed_data
-                                if word and processed_keyword in word or keyword in word
+                                if word
+                                and processed_keyword in word
+                                or keyword in word
                             ]
                         else:
                             highlight = [
                                 (x, y, w, h, word)
                                 for x, y, w, h, word in preprocessed_data
-                                if word and processed_keyword == word or keyword == word
+                                if word
+                                and processed_keyword == word
+                                or keyword == word
                             ]
 
                         match = (
@@ -427,7 +439,9 @@ def segment_image(
 
 
 def get_document_keywords(
-    document: Document, keywords: list, preprocess_type=PreprocessWordType.NORMALIZE
+    document: Document,
+    keywords: list,
+    preprocess_type=PreprocessWordType.NORMALIZE,
 ):
     """
     Gets list of keywords occuring within an document.
@@ -456,7 +470,9 @@ def get_document_keywords(
 
 
 def document_contains_word(
-    document: Document, keyword: str, preprocess_type=PreprocessWordType.NORMALIZE
+    document: Document,
+    keyword: str,
+    preprocess_type=PreprocessWordType.NORMALIZE,
 ):
     """
     Checks if a keyword occurs within an document.

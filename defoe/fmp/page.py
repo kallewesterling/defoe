@@ -57,7 +57,7 @@ class Page(object):
         self.height = int(self.page_tree.get("HEIGHT"))
         self.pc = self.page_tree.get("PC")
 
-        self.tb = [
+        self.textblocks = [
             TextBlock(tb, document.code, code, document, self)
             for tb in self.query(Page.TB_XPATH)
         ]
@@ -77,6 +77,8 @@ class Page(object):
         self.page_strings = self.strings
         self.page_wc = self.wc
         self.page_cc = self.cc
+        self.tb = self.textblocks
+        self.tbs = self.textblocks
 
     def crop(self, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         """
