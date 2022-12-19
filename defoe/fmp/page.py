@@ -286,18 +286,18 @@ class Page(object):
 
     def match(
         self,
-        token=None,
-        normalise=True,
-        include_numbers=True,
-        lemmatise=True,
-        stem=True,
-        fuzz_method=FUZZ_METHOD,
-        min_ratio=MIN_RATIO,
-        all_results=False,
-        sort_results=True,
-        sort_reverse=True,
-        add_textblock=False,
-    ):
+        token: Union[str, list] = [],
+        normalise: bool = True,
+        include_numbers: bool = True,
+        lemmatise: bool = True,
+        stem: bool = True,
+        fuzz_method: str = FUZZ_METHOD,
+        min_ratio: float = MIN_RATIO,
+        all_results: bool = False,
+        sort_results: bool = True,
+        sort_reverse: bool = True,
+        add_textblock: bool = False,
+    ) -> list:
         return [
             match
             for tb in self.textblocks
