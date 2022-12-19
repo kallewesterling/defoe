@@ -48,7 +48,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str
         """
-        return "([0-9]*?_[0-9]*?)_mets\.xml"  # pylint: disable=anomalous-backslash-in-string
+        return "([0-9]*?_[0-9]*?)_mets\.xml"  # pylint: disable=anomalous-backslash-in-string # noqa
 
     def get_page_pattern(self):
         """
@@ -57,7 +57,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str
         """
-        return "([0-9]*?_[0-9]*?)_([0-9_]*)\.xml"  # pylint: disable=anomalous-backslash-in-string
+        return "([0-9]*?_[0-9]*?)_([0-9_]*)\.xml"  # pylint: disable=anomalous-backslash-in-string  # noqa
 
     def get_document_info(self, document_code):
         """
@@ -100,7 +100,9 @@ class Archive(AltoArchive):
         if ".zip" in self.filename:
             return self.zip.open(document_code + "_mets.xml")
         else:
-            return open_stream(self.filename + "/" + document_code + "_mets.xml")
+            return open_stream(
+                self.filename + "/" + document_code + "_mets.xml"
+            )
 
     def open_page(self, document_code, page_code):
         """

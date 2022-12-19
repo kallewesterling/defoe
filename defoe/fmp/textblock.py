@@ -7,7 +7,9 @@ from pathlib import Path
 import mimetypes
 
 mimetypes.init()
-image_types = [x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"]
+image_types = [
+    x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
+]
 
 
 class TextBlock(object):
@@ -22,7 +24,9 @@ class TextBlock(object):
     CC_XPATH = "TextLine/String/@CC"  # Character confidence content
     WORDS_XPATH = "TextLine/String/@CONTENT"  # Word content
 
-    def __init__(self, textblock_tree, document_code, page_code, document, page):
+    def __init__(
+        self, textblock_tree, document_code, page_code, document, page
+    ):
         """
         Constructor.
         """
@@ -31,39 +35,51 @@ class TextBlock(object):
         self.page_code = page_code
         self.document = document
         self.page = page
-        self.textblock_words = None
-        self.textblock_strings = None
+        self._words = None
+        self._strings = None
         self.textblock_images = None
-        self.textblock_wc = None
-        self.textblock_cc = None
-        self.textblock_shape = None
+        self._wc = None
+        self._cc = None
+        self._image = None
+        self.textblock_shape = None  # this is set by defoe.fmp.document
         # Note that the attribute `textblock_coords` is only set when
         # iterating through a Document.articles.
         # TODO: The attribute `textblock_coords` should be set on the object
         # instead.
-        self.textblock_coords = None
+        self.textblock_coords = None  # this is set by defoe.fmp.document
         self.textblock_page_area = None
         self.textblock_id = self.textblock_tree.get("ID")
         self.page_name = document_code + "_" + page_code + ".xml"
         self.image_name = self.get_image_name(document_code, page_code)
 
+    # TODO: write this function and get it in the __init__
+    def get_textblock_coords(self):
+        """this should get minX maxX minY maxY"""
+        raise NotImplementedError()
+
+    @property
+    def image(self):
+        """
+        Gets the image for the text block. This is then saved in an attribute,
+        so the image is only retrieved once.
+
+        :return: page image
+        :rtype: PIL.Image.Image
+        """
+        if not self._image:
+            self._image = self.get_image_name()
+        return self._image
+
+    # TODO: write this function and get it in the __init__
+    def get_cropped_image(self):
+        """
+        should return the image cropped to this TextBlock...
+        i.e. test for image, test for textblock_coords
+        """
+        raise NotImplementedError()
+
     def get_image_name(self, document_code=None, page_code=None):
-        if not document_code:
-            document_code = self.document_code
-        if not page_code:
-            page_code = self.page_code
-
-        dir = self.page.document.archive.filename
-        stem = Path(dir) / f"{document_code}_{page_code}"
-
-        test = [f"{stem}{ext}" for ext in image_types if Path(f"{stem}{ext}").exists()]
-
-        if len(test) == 1:
-            return test[0]
-        elif len(test) > 1:
-            raise RuntimeError("Multiple possible images found: " + ", ".join(test))
-        else:
-            return None
+        return self.page.image
 
     @property
     def words(self):
@@ -74,11 +90,11 @@ class TextBlock(object):
         :return: words
         :rtype: list(str)
         """
-        if not self.textblock_words:
-            self.textblock_words = list(
+        if not self._words:
+            self._words = list(
                 map(str, self.textblock_tree.xpath(TextBlock.WORDS_XPATH))
             )
-        return self.textblock_words
+        return self._words
 
     @property
     def wc(self):
@@ -89,9 +105,9 @@ class TextBlock(object):
         :return: wc
         :rtype: list(str)
         """
-        if not self.textblock_wc:
-            self.textblock_wc = list(self.textblock_tree.xpath(TextBlock.WC_XPATH))
-        return self.textblock_wc
+        if not self._wc:
+            self._wc = list(self.textblock_tree.xpath(TextBlock.WC_XPATH))
+        return self._wc
 
     @property
     def cc(self):
@@ -102,10 +118,10 @@ class TextBlock(object):
         :return: cc
         :rtype: list(str)
         """
-        if not self.textblock_cc:
-            self.textblock_cc = list(self.textblock_tree.xpath(TextBlock.CC_XPATH))
+        if not self._cc:
+            self._cc = list(self.textblock_tree.xpath(TextBlock.CC_XPATH))
 
-        return self.textblock_cc
+        return self._cc
 
     @property
     def strings(self):
@@ -116,9 +132,9 @@ class TextBlock(object):
         :return: strings
         :rtype: list(lxml.etree._ElementStringResult)
         """
-        if not self.textblock_strings:
-            self.textblock_strings = self.textblock_tree.xpath(TextBlock.STRINGS_XPATH)
-        return self.textblock_strings
+        if not self._strings:
+            self._strings = self.textblock_tree.xpath(TextBlock.STRINGS_XPATH)
+        return self._strings
 
     @property
     def content(self):

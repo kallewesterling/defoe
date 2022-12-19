@@ -42,7 +42,8 @@ class Document(object):
         }
         self.archive = archive
         self.code = code
-        self.num_pages = 0
+        self.document_type = "newspaper"
+        self.model = "fmp"
         self.metadata = self.archive.open_document(self.code)
         self.metadata_tree = etree.parse(self.metadata)
         self.title = self.single_query("//mods:title/text()")
@@ -50,30 +51,59 @@ class Document(object):
             self.archive.document_codes[self.code], key=Document._sorter
         )
         self.num_pages = len(self.page_codes)
-        self.years = Document._parse_year(self.single_query("//mods:dateIssued/text()"))
+
         self.publisher = self.single_query("//mods:publisher/text()")
         self.place = self.single_query("//mods:placeTerm/text()")
+        self.documentId = self.single_query("//mods:identifier/text()")
+        self.date = self.single_query("//mods:dateIssued/text()")
+
+        self.years = Document._parse_year(
+            self.single_query("//mods:dateIssued/text()")
+        )
         # place may often have a year in.
         self.years += Document._parse_year(self.place)
         self.years = sorted(self.years)
-        self.documentId = self.single_query("//mods:identifier/text()")
         if self.years:
-            self.year = self.years[0]
+            self.year = self.years[0]  # todo: issue warning here?
         else:
             self.year = None
-        self.date = self.single_query("//mods:dateIssued/text()")
-        self.document_type = "newspaper"
-        self.model = "fmp"
-        self.textblocks = list(self.tb())  # TODO: slows down, but needed for now!
 
-        #### New ############
+        self._articles = None
+
+        # TODO: the following slows down, but needed for now!
+        self.textblocks = list(self.tb())
+
+        # New #################
         # [art0001, art0002, art0003]
         self.articlesId = self._parse_structMap_Logical()
-        # {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
+        # {
+        #   '#art0001': [
+        #       '#pa0001001',
+        #       '#pa0001002',
+        #        ...
+        #   ],
+        #   '#art0002': [
+        #       '#pa0001008',
+        #       '#pa0001009' ..
+        #   ]
+        # }
+
         # {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
         self.articlesParts, self.partsPage = self._parse_structLink()
-        # {'pa0001001': ['RECT', '1220,5,2893,221'], 'pa0001003': ['RECT', '2934,14,3709,211'], 'pa0004044': ['RECT', '5334,2088,5584,2121']}
+
+        # {
+        #   'pa0001001': [
+        #       'RECT', '1220,5,2893,221'
+        #   ],
+        #   'pa0001003': [
+        #       'RECT', '2934,14,3709,211'
+        #   ],
+        #   'pa0004044': [
+        #       'RECT', '5334,2088,5584,2121'
+        #   ]
+        # }
         self.partsCoord = self._parse_structMap_Physical()
+
         self.num_articles = len(self.articlesId)
         #######################
 
@@ -102,12 +132,12 @@ class Document(object):
         """
         try:
             date_pattern = re.compile(
-                "(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))"
+                r"(1[6-9]\d{2}(-|/)(0[1-9]|1[0-2])(-|/)(0[1-9]|[12]\d|3[01]))"
             )
             if date_pattern.match(text):
                 return [int(text[0:4])]
-            long_pattern = re.compile("(1[6-9]\d\d)")
-            short_pattern = re.compile("\d\d")
+            long_pattern = re.compile(r"(1[6-9]\d\d)")
+            short_pattern = re.compile(r"\d\d")
             results = []
             chunks = iter(long_pattern.split(text)[1:])
             for year, rest in zip(chunks, chunks):
@@ -263,25 +293,44 @@ class Document(object):
         """
         Iterate calculates the articles in each page.
 
-        :return: a dictionary per page with all the articles. Each articles is conformed by one or more textblocks
+        :return: a dictionary per page with all the articles. Each article
+        is conformed by one or more textblocks
         :rtype: dictionary of articles. Each
-        {'art0001': ['pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', page1 area3], ...]], ...}
+        {
+            'art0001': [
+                'pa0001001': [
+                    'RECT', '1220,5,2893,221', 'page1 area1'
+                ],
+                'pa0001003': [
+                    'RECT', '2934,14,3709,211', page1 area3
+                ],
+                ...
+            ],
+            ...
+        }
         """
-        self.document_articles = dict()
-        articlesInfo = self._articles_info()
-        for page in self:
-            for tb in page.tb:
-                for articleId in articlesInfo:
-                    for partId in articlesInfo[articleId]:
-                        if partId == tb.textblock_id:
-                            if articleId not in self.document_articles:
-                                self.document_articles[articleId] = []
-                            tb.textblock_shape = articlesInfo[articleId][partId][0]
-                            tb.textblock_coords = articlesInfo[articleId][partId][1]
-                            tb.textblock_page_area = articlesInfo[articleId][partId][2]
-                            self.document_articles[articleId].append(tb)
+        if not self._articles:
+            self._articles = dict()
+            articlesInfo = self._articles_info()
+            for page in self:
+                for tb in page.tb:
+                    for articleId in articlesInfo:
+                        for partId in articlesInfo[articleId]:
+                            if partId == tb.textblock_id:
+                                if articleId not in self._articles:
+                                    self._articles[articleId] = []
+                                tb.textblock_shape = articlesInfo[articleId][
+                                    partId
+                                ][0]
+                                tb.textblock_coords = articlesInfo[articleId][
+                                    partId
+                                ][1]
+                                tb.textblock_page_area = articlesInfo[
+                                    articleId
+                                ][partId][2]
+                                self._articles[articleId].append(tb)
 
-        return self.document_articles
+        return self._articles
 
     def scan_cc(self) -> tuple:
         """
@@ -318,6 +367,8 @@ class Document(object):
     def tb(self) -> str:
         """
         Iterate over textblocks.
+        # TODO: Shouldn't this be called tbs (to be consistent with strings,
+        # words, or images)?
 
         :return: string
         :rtype: str
@@ -368,9 +419,20 @@ class Document(object):
     def _parse_structMap_Physical(self) -> dict:
         """
         Parse the structMap Physical information
-        :return: dictionary with the ID of each part as a keyword. For each part, it gets the shape and coord.
+        :return: dictionary with the ID of each part as a keyword. For each
+        part, it gets the shape and coord.
         :rtype: dictionary
-        {'pa0001001': ['RECT', '1220,5,2893,221'], 'pa0001003': ['RECT', '2934,14,3709,211'], 'pa0004044': ['RECT', '5334,2088,5584,2121']}
+        {
+            'pa0001001': [
+                'RECT', '1220,5,2893,221'
+            ],
+            'pa0001003': [
+                'RECT', '2934,14,3709,211'
+            ],
+            'pa0004044': [
+                'RECT', '5334,2088,5584,2121'
+            ]
+        }
         """
         partsCoord = dict()
         elem = self.metadata_tree.find(
@@ -392,7 +454,8 @@ class Document(object):
     def _parse_structMap_Logical(self) -> list:
         """
         Parse the structMap Logical information
-        :return: list of articlesID that conforms each document/issue. It only returns the articles ID, no other type of elements.
+        :return: list of articlesID that conforms each document/issue. It only
+        returns the articles ID, no other type of elements.
         :rtype: list
         [art0001, art0002, art0003]
         """
@@ -401,7 +464,9 @@ class Document(object):
             'mets:structMap[@TYPE="LOGICAL"]', self.namespaces
         )
         for logic in elem:
-            articles = logic.findall('mets:div[@TYPE="ARTICLE"]', self.namespaces)
+            articles = logic.findall(
+                'mets:div[@TYPE="ARTICLE"]', self.namespaces
+            )
             for article in articles:
                 articlesId.append(list(article.values())[0])
         return articlesId
@@ -409,19 +474,41 @@ class Document(object):
     def _parse_structLink(self) -> tuple:
         """
         Parse the strucLink information
-        :return: 1) A dictionary with articles IDs as keys. And per article ID, we have a list of parts/textblokcs ids that conform each article.
-                 2) A dictionary with parts/textblocks ids as keys, and page and area as values.
+        :return: 1) A dictionary with articles IDs as keys. And per article
+                    ID, we have a list of parts/textblokcs ids that conform
+                    each article.
+                 2) A dictionary with parts/textblocks ids as keys, and page
+                    and area as values.
         :rtype: two dictionaries
-        {'#art0001':['#pa0001001', '#pa0001002', '#pa0001003', '#pa0001004', '#pa0001005', '#pa0001006', '#pa0001007'], '#art0002': ['#pa0001008', '#pa0001009' ..]}
-        {'pa0001001': 'page1 area1', 'pa0001003': 'page1 area3'}
+        {
+            '#art0001':[
+                '#pa0001001',
+                '#pa0001002',
+                '#pa0001003',
+                ...
+            ],
+            '#art0002': [
+                '#pa0001008',
+                '#pa0001009'
+                ..
+            ]
+        }
+        {
+            'pa0001001': 'page1 area1',
+            'pa0001003': 'page1 area3'
+        }
         """
         articlesParts = dict()
         partsPage = dict()
         elem = self.metadata_tree.findall("mets:structLink", self.namespaces)
         for smlinkgrp in elem:
-            parts = smlinkgrp.findall("mets:smLinkGrp", self.namespaces)
+            # TODO: following line is not accessed so commented out
+            # (note: test this)
+            # parts = smlinkgrp.findall("mets:smLinkGrp", self.namespaces)
             for linklocator in smlinkgrp:
-                linkl = linklocator.findall("mets:smLocatorLink", self.namespaces)
+                linkl = linklocator.findall(
+                    "mets:smLocatorLink", self.namespaces
+                )
                 article_parts = []
                 for link in linkl:
                     idstring = list(link.values())[0]
@@ -433,9 +520,21 @@ class Document(object):
 
     def _articles_info(self) -> dict:
         """
-        :return: create a dicitionary, with articles IDs as keys. Each entry has has a dictionary of parts/textblocks as values, with all the parts information (shape, coords and page_area).
+        :return: create a dicitionary, with articles IDs as keys. Each entry
+        has has a dictionary of parts/textblocks as values, with all the parts
+        information (shape, coords and page_area).
         :rtype: dictionary
-        #{'art0001 {'pa0001001': ['RECT', '1220,5,2893,221', 'page1 area1'], 'pa0001003': ['RECT', '2934,14,3709,211', 'page1 area3'], ....}}
+        #{
+        #   'art0001 {
+        #       'pa0001001': [
+        #           'RECT', '1220,5,2893,221', 'page1 area1'
+        #       ],
+        #       'pa0001003': [
+        #           'RECT', '2934,14,3709,211', 'page1 area3'
+        #       ],
+        #       ...
+        #    }
+        # }
         """
         articlesInfo = dict()
         for a_id in self.articlesId:

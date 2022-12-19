@@ -6,6 +6,13 @@ METS/MODS format.
 from defoe.fmp.textblock import TextBlock
 
 from lxml import etree
+from pathlib import Path
+import mimetypes
+
+mimetypes.init()
+image_types = [
+    x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
+]
 
 
 class Page(object):
@@ -17,7 +24,8 @@ class Page(object):
     # XPath Queries
     WORDS_XPATH = etree.XPath("//String/@CONTENT")  # String content
     STRINGS_XPATH = etree.XPath("//String")  # String elements
-    IMAGES_XPATH = etree.XPath("//GraphicalElement")  # Graphical elements
+    GRAPHICS_XPATH = etree.XPath("//GraphicalElement")  # Graphical elements
+    # TODO: for doc, the above was renamed due to images being in the mix
     PAGE_XPATH = etree.XPath("//Page")  # Page
     WC_XPATH = etree.XPath("//String/@WC")  # Word confidence content
     CC_XPATH = etree.XPath("//String/@CC")  # Character confience content
@@ -46,17 +54,26 @@ class Page(object):
         self.width = int(self.page_tree.get("WIDTH"))
         self.height = int(self.page_tree.get("HEIGHT"))
         self.pc = self.page_tree.get("PC")
-        self.page_words = None
-        self.page_strings = None
-        self.page_images = None
-        self.page_wc = None
-        self.page_cc = None
-        self.page_blocks_id = None
+        self._words = None
+        self._strings = None
+        self._graphics = None
+        self._wc = None
+        self._cc = None
+        self._textblock_ids = None
         self.tb = [
             TextBlock(tb, document.code, code, document, self)
             for tb in self.query(Page.TB_XPATH)
         ]
+        self._image = None
         # self.page_tb = None
+
+    # TODO: write this function and get it in the __init__
+    def get_cropped_image(self, x=None, y=None, width=None, height=None):
+        """
+        should return the page image cropped to the provided coord...
+        i.e. test for image
+        """
+        raise NotImplementedError()
 
     def query(self, xpath_query):
         """
@@ -92,84 +109,119 @@ class Page(object):
         :return: words
         :rtype: list(str)
         """
-        if not self.page_words:
-            self.page_words = list(map(str, self.query(Page.WORDS_XPATH)))
-        return self.page_words
+        if not self._words:
+            self._words = list(map(str, self.query(Page.WORDS_XPATH)))
+        return self._words
 
     @property
     def wc(self):
         """
-        Gets all word confidences (wc)  in page. These are then saved in an attribute,
-        so the wc are only retrieved once.
+        Gets all word confidences (wc) in page. These are then saved in an
+        attribute, so the wc are only retrieved once.
 
         :return: wc
         :rtype: list(str)
         """
-        if not self.page_wc:
-            self.page_wc = list(self.query(Page.WC_XPATH))
-
-        return self.page_wc
+        if not self._wc:
+            self._wc = list(self.query(Page.WC_XPATH))
+        return self._wc
 
     @property
     def cc(self):
         """
-        Gets all character confidences (cc)  in page. These are then saved in an attribute,
-        so the cc are only retrieved once.
+        Gets all character confidences (cc) in page. These are then saved in
+        an attribute, so the cc are only retrieved once.
 
         :return: cc
         :rtype: list(str)
         """
-        if not self.page_cc:
-            self.page_cc = list(self.query(Page.CC_XPATH))
-
-        return self.page_cc
+        if not self._cc:
+            self._cc = list(self.query(Page.CC_XPATH))
+        return self._cc
 
     @property
     def strings(self):
         """
-        Gets all strings in page. These are then saved in an attribute,
-        so the strings are only retrieved once.
+        Gets all strings in page. These are then saved in an attribute, so the
+        strings are only retrieved once.
 
         :return: strings
         :rtype: list(lxml.etree._ElementStringResult)
         """
-        if not self.page_strings:
-            self.page_strings = self.query(Page.STRINGS_XPATH)
-        return self.page_strings
+        if not self._strings:
+            self._strings = self.query(Page.STRINGS_XPATH)
+        return self._strings
 
     @property
     def textblock_ids(self):
         """
-        Gets all strings in page. These are then saved in an attribute,
-        so the strings are only retrieved once.
+        Gets all strings in page. These are then saved in an attribute, so the
+        strings are only retrieved once.
 
         :return: strings
         :rtype: list(lxml.etree._ElementStringResult)
         """
-        if not self.page_blocks_id:
-            self.page_blocks_id = list(self.query(Page.TB_XPATH_ID))
-        return self.page_blocks_id
+        if not self._textblock_ids:
+            self._textblock_ids = list(self.query(Page.TB_XPATH_ID))
+        return self._textblock_ids
 
     @property
-    def images(self):
+    def graphics(self):
         """
-        Gets all images in page. These are then saved in an attribute,
-        so the images are only retrieved once.
+        Gets all graphical elements in page. These are then saved in an
+        attribute, so the graphical elements are only retrieved once.
 
         :return: images
         :rtype: list(lxml.etree._Element)
         """
-        if not self.page_images:
-            self.page_images = self.query(Page.IMAGES_XPATH)
-        return self.page_images
+        if not self._graphics:
+            self._graphics = self.query(Page.GRAPHICS_XPATH)
+        return self._graphics
 
     @property
     def content(self):
         """
-        Gets all words in page and contatenates together using ' ' as
+        Gets all words in page and concatenates together using ' ' as
         delimiter.
 
         :return: content
         :rtype: str
         """
         return " ".join(self.words)
+
+    @property
+    def image(self):
+        """
+        Gets the image for the page. This is then saved in an attribute, so
+        the image is only retrieved once.
+
+        :return: page image
+        :rtype: PIL.Image.Image
+        """
+        if not self._image:
+            self._image = self.get_image_name()
+        return self._image
+
+    def get_image_name(self, document_code=None, page_code=None):
+        if not document_code:
+            document_code = self.document.code
+        if not page_code:
+            page_code = self.code
+
+        dir = self.document.archive.filename
+        stem = Path(dir) / f"{document_code}_{page_code}"
+
+        test = [
+            f"{stem}{ext}"
+            for ext in image_types
+            if Path(f"{stem}{ext}").exists()
+        ]
+
+        if len(test) == 1:
+            return test[0]
+        elif len(test) > 1:
+            raise RuntimeError(
+                "Multiple possible images found: " + ", ".join(test)
+            )
+        else:
+            return None
