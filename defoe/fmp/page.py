@@ -3,7 +3,7 @@ Object model representation of a page represented as an XML file in METS/MODS
 format.
 """
 
-from defoe.fmp.textblock import TextBlock
+from .textblock import TextBlock
 
 from lxml import etree
 from pathlib import Path

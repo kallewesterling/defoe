@@ -3,7 +3,7 @@ Object model representation of a document represented as a collection
 of XML files in METS/MODS format.
 """
 
-from defoe.fmp.page import Page
+from .page import Page
 
 # from defoe.fmp.archive import Archive
 
