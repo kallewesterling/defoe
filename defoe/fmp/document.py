@@ -615,6 +615,7 @@ class Document(object):
         sort_results: bool = True,
         sort_reverse: bool = True,
         add_textblock: bool = False,
+        regex: bool = False,
     ) -> list:
         return [
             match
@@ -631,5 +632,6 @@ class Document(object):
                 sort_results=sort_results,
                 sort_reverse=sort_reverse,
                 add_textblock=add_textblock,
+                regex=regex,
             )
         ]

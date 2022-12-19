@@ -13,6 +13,8 @@ from defoe.query_utils import (
 from thefuzz import fuzz
 from typing import Union
 
+import re
+
 from .constants import FUZZ_METHOD, MIN_RATIO
 
 
@@ -285,7 +287,8 @@ class TextBlock(object):
         sort_results: bool = True,
         sort_reverse: bool = True,
         add_textblock: bool = False,
-    ) -> list:
+        regex: bool = False,
+    ):
         if isinstance(token, str):
             match_words = [token]
         elif isinstance(token, list) and all(
@@ -317,46 +320,77 @@ class TextBlock(object):
             for ix, x in enumerate(tokens)
         ]
 
-        if fuzz_method == "partial_ratio":
-            fuzz_func = fuzz.partial_ratio
-        elif fuzz_method == "ratio":
-            fuzz_func = fuzz.ratio
-        elif fuzz_method == "token_sort_ratio":
-            fuzz_func = fuzz.token_sort_ratio
-        elif fuzz_method == "token_set_ratio":
-            fuzz_func = fuzz.token_set_ratio
+        if regex:
+            matches = []
+
+            for match_word in match_words:
+                g = re.compile(match_word, flags=re.IGNORECASE)
+                matches += [
+                    (
+                        nav,
+                        ix,
+                        x,
+                        y,
+                        w,
+                        h,
+                        token,
+                        100 if g.search(token) else 0
+                        # g.match(token, match_word)
+                    )
+                    for nav, ix, x, y, w, h, token in tokens
+                ]
         else:
-            raise SyntaxError(f"Unknown fuzz method provided: {fuzz_method}")
-
-        matches = []
-
-        for match_word in match_words:
-            matches += [
-                (
-                    nav,
-                    ix,
-                    x,
-                    y,
-                    w,
-                    h,
-                    token,
-                    fuzz_func(token, match_word),
+            if fuzz_method == "partial_ratio":
+                fuzz_func = fuzz.partial_ratio
+            elif fuzz_method == "ratio":
+                fuzz_func = fuzz.ratio
+            elif fuzz_method == "token_sort_ratio":
+                fuzz_func = fuzz.token_sort_ratio
+            elif fuzz_method == "token_set_ratio":
+                fuzz_func = fuzz.token_set_ratio
+            else:
+                raise SyntaxError(
+                    f"Unknown fuzz method provided: {fuzz_method}"
                 )
-                for nav, ix, x, y, w, h, token in tokens
-            ]
+
+            matches = []
+
+            for match_word in match_words:
+                matches += [
+                    (
+                        nav,
+                        ix,
+                        x,
+                        y,
+                        w,
+                        h,
+                        token,
+                        fuzz_func(token, match_word),
+                    )
+                    for nav, ix, x, y, w, h, token in tokens
+                ]
 
         if all_results:
             if not sort_results:
                 # we want all results, unsorted
                 return matches
             # we want all results, sorted
+            if regex:
+                return sorted(matches)
+
             return sorted(matches, key=lambda x: x[7], reverse=sort_reverse)
 
-        # let's filter matches at a certain ratio
-        matches = [x for x in matches if x[7] >= min_ratio]
+        # let's match at a certain ratio
+        if regex:
+            matches = [x for x in matches if x[7]]
+        else:
+            matches = [x for x in matches if x[7] >= min_ratio]
 
         if not sort_results:
             return matches
 
         # we want sorted matches
+        if regex:
+            return sorted(matches)
+
         return sorted(matches, key=lambda x: x[7], reverse=sort_reverse)
