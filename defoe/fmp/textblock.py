@@ -285,7 +285,14 @@ class TextBlock(object):
         sort_reverse=True,
         add_textblock=False,
     ):
-        match_word = token
+        if isinstance(token, str):
+            match_words = [token]
+        elif isinstance(token, list) and all(
+            [isinstance(x, str) for x in token]
+        ):
+            match_words = list(set(token))
+        else:
+            raise SyntaxError("Token must be a string or list of strings.")
 
         nav = (
             self.page.document.archive.filename,
@@ -320,29 +327,32 @@ class TextBlock(object):
         else:
             raise SyntaxError(f"Unknown fuzz method provided: {fuzz_method}")
 
-        tokens = [
-            (
-                nav,
-                ix,
-                x,
-                y,
-                w,
-                h,
-                token,
-                fuzz_func(token, match_word),
-            )
-            for nav, ix, x, y, w, h, token in tokens
-        ]
+        matches = []
+
+        for match_word in match_words:
+            matches += [
+                (
+                    nav,
+                    ix,
+                    x,
+                    y,
+                    w,
+                    h,
+                    token,
+                    fuzz_func(token, match_word),
+                )
+                for nav, ix, x, y, w, h, token in tokens
+            ]
 
         if all_results:
             if not sort_results:
                 # we want all results, unsorted
-                return tokens
+                return matches
             # we want all results, sorted
-            return sorted(tokens, key=lambda x: x[7], reverse=sort_reverse)
+            return sorted(matches, key=lambda x: x[7], reverse=sort_reverse)
 
-        # let's match at a certain ratio
-        matches = [x for x in tokens if x[7] >= min_ratio]
+        # let's filter matches at a certain ratio
+        matches = [x for x in matches if x[7] >= min_ratio]
 
         if not sort_results:
             return matches
