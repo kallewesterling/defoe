@@ -5,8 +5,6 @@ of XML files in METS/MODS format.
 
 from .page import Page
 
-# from defoe.fmp.archive import Archive
-
 from lxml import etree
 from lxml.etree import Element
 from typing import Union

@@ -21,8 +21,18 @@ where:
 * <FILE_CODE> is [0-9_]*
 """
 
-from defoe.fmp.archive_combine import AltoArchive
+from .archive_combine import AltoArchive
 from defoe.spark_utils import open_stream
+
+from pathlib import Path
+import mimetypes
+
+mimetypes.init()
+image_types = [
+    type
+    for type, desc in mimetypes.types_map.items()
+    if desc.split("/")[0] == "image"
+]
 
 
 class Archive(AltoArchive):
@@ -121,3 +131,32 @@ class Archive(AltoArchive):
             return open_stream(
                 self.filename + "/" + document_code + "_" + page_code + ".xml"
             )
+
+    def open_image(self, document_code, page_code):
+        """
+        Open image file.
+
+        :param document_code: page file code
+        :type document_code: str
+        :param page_code: file code
+        :type page_code: str
+        :return: stream
+        :rtype: BytesIO
+        """
+
+        stem = self.filename + "/" + document_code + "_" + page_code
+
+        test = [
+            f"{stem}{ext}"
+            for ext in image_types
+            if Path(f"{stem}{ext}").exists()
+        ]
+
+        if len(test) == 1:
+            return test[0]
+        elif len(test) > 1:
+            raise RuntimeError(
+                "Multiple possible images found: " + ", ".join(test)
+            )
+        else:
+            return None
