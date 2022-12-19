@@ -56,7 +56,6 @@ class TextBlock(object):
         self.textblock_cc = self.cc
         self.image_name = self.page.get_image_name()
 
-    # TODO: write this function and get it in the __init__
     def locations_bbox(self):
         xs = [x[0] for x in self.locations] + [
             x[0] + x[2] for x in self.locations
@@ -64,6 +63,10 @@ class TextBlock(object):
         ys = [x[1] for x in self.locations] + [
             x[1] + x[3] for x in self.locations
         ]
+
+        if not xs or not ys:
+            # fallback: return the full page. TODO: Print warning?
+            return [0, 0, self.page.width, self.page.height]
 
         return min(xs), min(ys), max(xs), max(ys)
 
