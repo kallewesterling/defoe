@@ -50,7 +50,7 @@ class TextBlock(object):
         self.textblock_id = self.id
         self.textblock_words = self.words
         self.textblock_strings = self.strings
-        self.textblock_wc = self.wx
+        self.textblock_wc = self.wc
         self.textblock_cc = self.cc
         self.image_name = self.page.get_image_name()
 
