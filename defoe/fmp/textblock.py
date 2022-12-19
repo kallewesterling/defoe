@@ -63,9 +63,6 @@ class TextBlock(object):
         self.image_name = self.page.get_image_name()
 
     def get_locations_bbox(self):
-        # ensure locations are loaded
-        self.locations
-
         xs = [x[0] for x in self.locations] + [
             x[0] + x[2] for x in self.locations
         ]
@@ -171,6 +168,11 @@ class TextBlock(object):
         :return: strings
         :rtype: list(lxml.etree._ElementStringResult)
         """
+        try:
+            self._strings
+        except AttributeError:
+            self._strings = None
+
         if not self._strings:
             self._strings = self.tree.xpath(TextBlock.STRINGS_XPATH)
         return self._strings
