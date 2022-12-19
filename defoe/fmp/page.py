@@ -214,11 +214,17 @@ class Page(object):
 
     @property
     def image(self) -> Image.Image:
-        self.document.archive.open_image(self.document.code, self.code)
+        if not self._image:
+            self._image = self.document.archive.open_image(
+                self.document.code, self.code
+            )
+        return self._image
 
     @property
     def image_path(self) -> Union[str, None]:
-        self.document.archive.get_image_path()
+        if not self._image_path:
+            self._image_path = self.get_image_name()
+        return self._image_path
 
     def get_image_name(self, document_code=None, page_code=None):
         if not document_code:
