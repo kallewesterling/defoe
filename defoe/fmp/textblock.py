@@ -63,6 +63,9 @@ class TextBlock(object):
         self.image_name = self.page.get_image_name()
 
     def get_locations_bbox(self):
+        # ensure locations are loaded
+        self.locations
+
         xs = [x[0] for x in self.locations] + [
             x[0] + x[2] for x in self.locations
         ]
