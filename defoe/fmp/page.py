@@ -60,6 +60,7 @@ class Page(object):
         self._wc = None
         self._cc = None
         self._textblock_ids = None
+        self._image = None
         self.tb = [
             TextBlock(tb, document.code, code, document, self)
             for tb in self.query(Page.TB_XPATH)
@@ -179,7 +180,7 @@ class Page(object):
         return self._graphics
 
     @property
-    def content(self):
+    def content(self) -> str:
         """
         Gets all words in page and concatenates together using ' ' as
         delimiter.

@@ -343,16 +343,16 @@ class Document(object):
             for cc in page.cc:
                 yield page, cc
 
-    def scan_images(self) -> tuple:
+    def scan_graphics(self) -> tuple:
         """
-        Iterate over images in pages.
+        Iterate over graphical elements in pages.
 
-        :return: page and XML fragment with image
+        :return: page and XML fragment with graphical elements
         :rtype: tuple(defoe.alto.page.Page, lxml.etree._Element)
         """
         for page in self:
-            for image in page.images:
-                yield page, image
+            for graphic in page.graphics:
+                yield page, graphic
 
     def strings(self) -> str:
         """
@@ -386,15 +386,15 @@ class Document(object):
         for _, word in self.scan_words():
             yield word
 
-    def images(self) -> Element:
+    def graphics(self) -> Element:
         """
-        Iterate over images.
+        Iterate over graphics.
 
-        :return: XML fragment with image
+        :return: XML fragment with graphics
         :rtype: lxml.etree._Element
         """
-        for _, image in self.scan_images():
-            yield image
+        for _, graphic in self.scan_graphics():
+            yield graphic
 
     def wc(self) -> str:
         """
