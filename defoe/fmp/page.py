@@ -55,7 +55,7 @@ class Page(object):
         self.page_tree = self.single_query(Page.PAGE_XPATH)
         self.width = int(self.page_tree.get("WIDTH"))
         self.height = int(self.page_tree.get("HEIGHT"))
-        self.pc = self.page_tree.get("PC")
+        self.page_confidence = self.page_tree.get("PC")
 
         self.textblocks = [
             TextBlock(tb, document.code, code, document, self)
@@ -75,8 +75,11 @@ class Page(object):
         # Adding backward compatibility
         self.page_words = self.words
         self.page_strings = self.strings
-        self.page_wc = self.wc
-        self.page_cc = self.cc
+        self.cc = self.character_confidences
+        self.wc = self.word_confidences
+        self.page_wc = self.word_confidences
+        self.page_cc = self.character_confidences
+        self.pc = self.page_confidence
         self.tb = self.textblocks
         self.tbs = self.textblocks
 
@@ -142,7 +145,7 @@ class Page(object):
         return self._words
 
     @property
-    def wc(self):
+    def word_confidences(self):
         """
         Gets all word confidences (wc) in page. These are then saved in an
         attribute, so the wc are only retrieved once.
@@ -155,7 +158,7 @@ class Page(object):
         return self._wc
 
     @property
-    def cc(self) -> list:
+    def character_confidences(self) -> list:
         """
         Gets all character confidences (cc) in page. These are then saved in
         an attribute, so the cc are only retrieved once.
