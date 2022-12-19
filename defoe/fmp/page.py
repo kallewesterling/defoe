@@ -77,6 +77,8 @@ class Page(object):
         self._image = None
         self._image_path = None
 
+        print(f"Page set up with _image_path {self._image_path}")
+
     # TODO: write this function and get it in the __init__
     def crop(self, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         """
