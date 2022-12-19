@@ -43,27 +43,18 @@ class Document(object):
         self.model = "fmp"
         self.metadata = self.archive.open_document(self.code)
         self.metadata_tree = etree.parse(self.metadata)
-        self.title = self.single_query("//mods:title/text()")
         self.page_codes = sorted(
             self.archive.document_codes[self.code], key=Document._sorter
         )
         self.num_pages = len(self.page_codes)
 
+        self.title = self.single_query("//mods:title/text()")
         self.publisher = self.single_query("//mods:publisher/text()")
         self.place = self.single_query("//mods:placeTerm/text()")
         self.documentId = self.single_query("//mods:identifier/text()")
         self.date = self.single_query("//mods:dateIssued/text()")
 
-        self.years = Document._parse_year(
-            self.single_query("//mods:dateIssued/text()")
-        )
-        # place may often have a year in.
-        self.years += Document._parse_year(self.place)
-        self.years = sorted(self.years)
-        if self.years:
-            self.year = self.years[0]  # todo: issue warning here?
-        else:
-            self.year = None
+        self.year, self.years = self._get_years()
 
         # See property accessors below
         self._articles = None
@@ -104,6 +95,19 @@ class Document(object):
 
         self.num_articles = len(self.articlesId)
         #######################
+
+    def _get_years(self):
+        years = Document._parse_year(self.date)
+
+        # place may often have a year in.
+        years += Document._parse_year(self.place)
+
+        years = sorted(years)
+
+        # todo: issue warning here if > 0?
+        first_year = years[0] if len(years) else None
+
+        return first_year, years
 
     @staticmethod
     def _parse_year(text: str) -> list:
