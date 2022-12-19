@@ -40,6 +40,12 @@ class TextBlock(object):
         self.id = self.tree.get("ID")
         self.page_name = document_code + "_" + page_code + ".xml"
 
+        self._locations_bbox = self.get_locations_bbox()
+        self.x = self._locations_bbox[0]
+        self.y = self._locations_bbox[1]
+        self.width = self._locations_bbox[2] - self._locations_bbox[0]
+        self.height = self._locations_bbox[3] - self._locations_bbox[1]
+
         # See property accessors below
         self._words = None
         self._strings = None
@@ -56,7 +62,7 @@ class TextBlock(object):
         self.textblock_cc = self.cc
         self.image_name = self.page.get_image_name()
 
-    def locations_bbox(self):
+    def get_locations_bbox(self):
         xs = [x[0] for x in self.locations] + [
             x[0] + x[2] for x in self.locations
         ]
@@ -71,6 +77,12 @@ class TextBlock(object):
         return min(xs), min(ys), max(xs), max(ys)
 
     @property
+    def locations_bbox(self):
+        if not self._locations_bbox:
+            self._locations_bbox = self.get_locations_bbox()
+        return self._locations_bbox
+
+    @property
     def image(self):
         """
         Gets the image for the text block. This is then saved in an attribute,
@@ -81,14 +93,14 @@ class TextBlock(object):
         """
         if not self._image:
             self._image = self.page.image.copy()
-            self._image = self._image.crop(self.locations_bbox())
+            self._image = self._image.crop(self.locations_bbox)
 
         return self._image
 
     def highlight(self, highlight=[], max_width=0, max_height=0):
         image = self.page.highlight(image=self.page.image, highlight=highlight)
 
-        cropped = image.crop(self.locations_bbox())
+        cropped = image.crop(self.locations_bbox)
 
         if max_width and max_height:
             return self.get_resized_image(
