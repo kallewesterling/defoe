@@ -315,19 +315,29 @@ class Document(object):
         return self._publisher
 
     @property
-    def place(self):
-        if not self._place:
-            self._place = self.single_query("//mods:placeTerm/text()")
-        return self._place
-
-    @property
     def id(self):
         if not self._id:
             self._id = self.single_query("//mods:identifier/text()")
         return self._id
 
     @property
+    def place(self):
+        try:
+            self._place
+        except AttributeError:
+            self._place = None
+
+        if not self._place:
+            self._place = self.single_query("//mods:placeTerm/text()")
+        return self._place
+
+    @property
     def date(self):
+        try:
+            self._date
+        except AttributeError:
+            self._date = None
+
         if not self._date:
             self._date = self.single_query("//mods:dateIssued/text()")
         return self._date
