@@ -7,6 +7,7 @@ from defoe.fmp.textblock import TextBlock
 
 from lxml import etree
 from pathlib import Path
+from PIL import Image
 import mimetypes
 
 mimetypes.init()
@@ -61,11 +62,11 @@ class Page(object):
         self._cc = None
         self._textblock_ids = None
         self._image = None
+        self._image_path = None
         self.tb = [
             TextBlock(tb, document.code, code, document, self)
             for tb in self.query(Page.TB_XPATH)
         ]
-        self._image = None
         # self.page_tb = None
 
     # TODO: write this function and get it in the __init__
@@ -200,8 +201,18 @@ class Page(object):
         :rtype: PIL.Image.Image
         """
         if not self._image:
-            self._image = self.get_image_name()
+            if not self.image_path:
+                raise RuntimeError("No image found for page.")
+
+            self._image = Image.open(self.image_path)
+
         return self._image
+
+    @property
+    def image_path(self):
+        if not self._image_path:
+            self._image_path = self.get_image_name()
+        return self._image_path
 
     def get_image_name(self, document_code=None, page_code=None):
         if not document_code:

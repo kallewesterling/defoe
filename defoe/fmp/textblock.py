@@ -3,14 +3,6 @@ Object model representation of a textblock represented as an XML file in
 METS/MODS format.
 """
 
-from pathlib import Path
-import mimetypes
-
-mimetypes.init()
-image_types = [
-    x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
-]
-
 
 class TextBlock(object):
     """
