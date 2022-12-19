@@ -4,7 +4,12 @@ MODS format.
 """
 
 from PIL import ImageOps
-from defoe.query_utils import normalize, normalize_including_numbers, lemmatize
+from defoe.query_utils import (
+    normalize,
+    normalize_including_numbers,
+    lemmatize,
+    stem as stem_word,
+)
 from thefuzz import fuzz
 
 FUZZ_METHOD = "token_set_ratio"
@@ -241,7 +246,7 @@ class TextBlock(object):
         )
 
     def get_processed_locations(
-        self, normalise=True, include_numbers=True, lemmatise=True
+        self, normalise=True, include_numbers=True, lemmatise=True, stem=True
     ):
         tokens = self.locations
 
@@ -260,6 +265,11 @@ class TextBlock(object):
                 (x, y, w, h, lemmatize(token)) for x, y, w, h, token in tokens
             ]
 
+        if stem:
+            tokens = [
+                (x, y, w, h, stem_word(token)) for x, y, w, h, token in tokens
+            ]
+
         return tokens
 
     def match(
@@ -268,6 +278,7 @@ class TextBlock(object):
         normalise=True,
         include_numbers=True,
         lemmatise=True,
+        stem=True,
         fuzz_method=FUZZ_METHOD,
         min_ratio=MIN_RATIO,
         all_results=False,
@@ -287,6 +298,7 @@ class TextBlock(object):
             normalise=normalise,
             include_numbers=include_numbers,
             lemmatise=lemmatise,
+            stem=stem,
         )
 
         tokens = [
