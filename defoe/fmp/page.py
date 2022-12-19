@@ -4,13 +4,11 @@ format.
 """
 
 from .textblock import TextBlock
+from .constants import FUZZ_METHOD, MIN_RATIO, AUTO_FILL, AUTO_OPACITY
 
 from lxml import etree
 from PIL import Image, ImageDraw
 from typing import Union
-
-AUTO_FILL = (200, 100, 0)
-AUTO_OPACITY = 0.25
 
 
 class Page(object):
@@ -285,3 +283,33 @@ class Page(object):
             im = Image.alpha_composite(im, overlay)
 
         return im
+
+    def match(
+        self,
+        token=None,
+        normalise=True,
+        include_numbers=True,
+        lemmatise=True,
+        stem=True,
+        fuzz_method=FUZZ_METHOD,
+        min_ratio=MIN_RATIO,
+        all_results=False,
+        sort_results=True,
+        sort_reverse=True,
+    ):
+        return [
+            match
+            for tb in self.textblocks
+            for match in tb.match(
+                token,
+                normalise=normalise,
+                include_numbers=include_numbers,
+                lemmatise=lemmatise,
+                stem=stem,
+                fuzz_method=fuzz_method,
+                min_ratio=min_ratio,
+                all_results=all_results,
+                sort_results=sort_results,
+                sort_reverse=sort_reverse,
+            )
+        ]

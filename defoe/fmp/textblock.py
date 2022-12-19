@@ -12,8 +12,7 @@ from defoe.query_utils import (
 )
 from thefuzz import fuzz
 
-FUZZ_METHOD = "token_set_ratio"
-MIN_RATIO = 85
+from .constants import FUZZ_METHOD, MIN_RATIO
 
 
 class TextBlock(object):

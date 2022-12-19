@@ -5,6 +5,7 @@ of XML files in METS/MODS format.
 
 from .page import Page
 from .patterns import DATE_PATTERNS, PART_ID
+from .constants import FUZZ_METHOD, MIN_RATIO
 
 from lxml import etree
 from typing import Union
@@ -600,3 +601,33 @@ class Document(object):
                     self.parts_coord[p_id].append(self.page_parts[p_id])
                     articlesInfo[a_id][p_id] = self.parts_coord[p_id]
         return articlesInfo
+
+    def match(
+        self,
+        token=None,
+        normalise=True,
+        include_numbers=True,
+        lemmatise=True,
+        stem=True,
+        fuzz_method=FUZZ_METHOD,
+        min_ratio=MIN_RATIO,
+        all_results=False,
+        sort_results=True,
+        sort_reverse=True,
+    ):
+        return [
+            match
+            for tb in self.textblocks
+            for match in tb.match(
+                token,
+                normalise=normalise,
+                include_numbers=include_numbers,
+                lemmatise=lemmatise,
+                stem=stem,
+                fuzz_method=fuzz_method,
+                min_ratio=min_ratio,
+                all_results=all_results,
+                sort_results=sort_results,
+                sort_reverse=sort_reverse,
+            )
+        ]
