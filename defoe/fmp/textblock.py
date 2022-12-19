@@ -51,7 +51,7 @@ class TextBlock(object):
         self.page_name = document_code + "_" + page_code + ".xml"
 
         self._tokens_bbox = self.get_tokens_bbox()
-        self.x, self.y, x1, y1 = self._tokens_bbox[0]
+        self.x, self.y, x1, y1 = self._tokens_bbox
         self.width = x1 - self.x
         self.height = y1 - self.y
 
