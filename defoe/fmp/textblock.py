@@ -240,6 +240,28 @@ class TextBlock(object):
             + "\n- ".join(test)
         )
 
+    def get_processed_locations(
+        self, normalise=True, include_numbers=True, lemmatise=True
+    ):
+        tokens = self.locations
+
+        if normalise and include_numbers:
+            tokens = [
+                (x, y, w, h, normalize(token)) for x, y, w, h, token in tokens
+            ]
+        elif normalise and not include_numbers:
+            tokens = [
+                (x, y, w, h, normalize_including_numbers(token))
+                for x, y, w, h, token in tokens
+            ]
+
+        if lemmatise:
+            tokens = [
+                (x, y, w, h, lemmatize(token)) for x, y, w, h, token in tokens
+            ]
+
+        return tokens
+
     def match(
         self,
         token=None,
