@@ -58,7 +58,7 @@ class Document(object):
         self._date = None
 
         # TODO: the following slows down, but needed for now!
-        self.textblocks = list(self.tb())
+        self.textblocks = list(self.tbs())
 
         # [
         #   'art0001',
