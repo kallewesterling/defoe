@@ -82,8 +82,25 @@ class TextBlock(object):
 
         return self._image
 
-    def get_resized_image(self, max_width: int = 500, max_height: int = 500):
-        return ImageOps.contain(self.image, (max_width, max_height))
+    def highlight(self, highlight=[], max_width=0, max_height=0):
+        image = self.page.highlight(image=self.page.image, highlight=highlight)
+
+        cropped = image.crop(self.locations_bbox())
+
+        if not max_width and max_height:
+            return cropped
+
+        return self.get_resized_image(
+            max_width=max_width, max_height=max_height, image=cropped
+        )
+
+    def get_resized_image(
+        self, max_width: int = 500, max_height: int = 500, image=None
+    ):
+        if not image:
+            image = self.image
+
+        return ImageOps.contain(image, (max_width, max_height))
 
     @property
     def words(self):

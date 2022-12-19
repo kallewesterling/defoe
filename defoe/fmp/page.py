@@ -6,8 +6,11 @@ format.
 from .textblock import TextBlock
 
 from lxml import etree
-from PIL import Image
+from PIL import Image, ImageDraw
 from typing import Union
+
+AUTO_FILL = (200, 100, 0)
+AUTO_OPACITY = 0.25
 
 
 class Page(object):
@@ -233,3 +236,47 @@ class Page(object):
             page_code = self.code
 
         return self.document.archive.get_image_path(document_code, page_code)
+
+    def highlight(self, image=None, highlight=[]):
+        """
+        image: (optional) image
+        highlight: [(x0, y0, x1, y1, "")]
+        """
+
+        if not image:
+            image = self.image
+
+        if not isinstance(image, Image.Image):
+            raise TypeError("Image needs to be of type PIL.Image.Image")
+
+        # create a copy of im
+        im = image.copy().convert("RGBA")
+
+        # create overlay
+        for rect in highlight:
+            x0, y0, x1, y1, *others = rect
+            if len(others) == 0:
+                fill = AUTO_FILL
+                opacity = AUTO_OPACITY
+            elif len(others) == 1:
+                fill = others[0]
+                opacity = AUTO_OPACITY
+            elif len(others) == 2:
+                fill = others[0]
+                opacity = others[1]
+            else:
+                raise SyntaxError(
+                    f"Too many arguments passed to highlight function: {rect}"
+                )
+
+            overlay = Image.new("RGBA", im.size, fill + (0,))
+
+            opacity = int(255 * opacity)
+            fill = fill + (opacity,)
+
+            draw = ImageDraw.Draw(overlay)
+            draw.rectangle(((x0, y0), (x1, y1)), fill=fill)
+
+            im = Image.alpha_composite(im, overlay)
+
+        return im
