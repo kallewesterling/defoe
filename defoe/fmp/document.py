@@ -7,17 +7,18 @@ from defoe.fmp.page import Page
 
 # from defoe.fmp.archive import Archive
 
-from typing import Union
 from lxml import etree
-import re
-from zipfile import ZipInfo
 from lxml.etree import Element
+from typing import Union
+from zipfile import ZipInfo
+
+import re
 
 
 class Document(object):
     """
-    Object model representation of a document represented as a
-    collection of XML files in METS/MODS format.
+    Object model representation of a document represented as a collection of
+    XML files in METS/MODS format.
     """
 
     def __init__(
@@ -68,6 +69,7 @@ class Document(object):
         else:
             self.year = None
 
+        # See property accessors below
         self._articles = None
 
         # TODO: the following slows down, but needed for now!

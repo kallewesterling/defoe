@@ -23,7 +23,9 @@ from itertools import product
 import os
 
 
-def get_highlight_coords(target_loc: WordLocation, keyword_loc: WordLocation) -> list:
+def get_highlight_coords(
+    target_loc: WordLocation, keyword_loc: WordLocation
+) -> list:
     """
     Parses out the coordinates for highlights around target words and keywords.
     """
@@ -55,7 +57,10 @@ def check_word(word, lst, fuzzy=False) -> bool:
 
 
 def get_word_data(
-    loc: TextBlock.locations, document: Document, article_id: str, textblock: TextBlock
+    loc: TextBlock.locations,
+    document: Document,
+    article_id: str,
+    textblock: TextBlock,
 ) -> WordLocation:
     """
     Combines data from a tb.location object, a Document, its article, and TextBlock.
@@ -70,7 +75,7 @@ def get_word_data(
         document=document,
         year=document.year,
         article=article_id,
-        textblock_id=textblock.textblock_id,
+        textblock_id=textblock.id,
         textblock_coords=textblock.textblock_coords,
         textblock_page_area=textblock.textblock_page_area,
         textblock_page_name=textblock.page_name,
@@ -156,7 +161,9 @@ def find_closest(
                         distance=distance,
                         words=tb.words,
                         preprocessed=preprocessed_locations,
-                        highlight=get_highlight_coords(target_loc, keyword_loc),
+                        highlight=get_highlight_coords(
+                            target_loc, keyword_loc
+                        ),
                     )
                 )
 
@@ -231,7 +238,10 @@ def do_query(
     '''
 
     def parse(input_words):
-        if not "targets" in input_words.keys() or not "keywords" in input_words.keys():
+        if (
+            not "targets" in input_words.keys()
+            or not "keywords" in input_words.keys()
+        ):
             raise RuntimeError(
                 f"Your data file ({data_file}) must contain two lists: targets and keywords."
             )
@@ -244,11 +254,17 @@ def do_query(
             )
 
         target_words = set(
-            [preprocess_word(word, preprocess_type) for word in input_words["targets"]]
+            [
+                preprocess_word(word, preprocess_type)
+                for word in input_words["targets"]
+            ]
         )
 
         keywords = set(
-            [preprocess_word(word, preprocess_type) for word in input_words["keywords"]]
+            [
+                preprocess_word(word, preprocess_type)
+                for word in input_words["keywords"]
+            ]
         )
 
         # target_list = ",".join(target_words)
@@ -261,7 +277,9 @@ def do_query(
     # Setup settings
     config = query_utils.get_config(config_file)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
     fuzzy_keyword = query_utils.extract_fuzzy(config, "keyword")
@@ -273,7 +291,9 @@ def do_query(
         get_highlight = lambda _: []
     else:
         highlight_results = config["highlight"]
-        get_highlight = lambda match: match.highlight if highlight_results else []
+        get_highlight = (
+            lambda match: match.highlight if highlight_results else []
+        )
 
     optional_crop = (
         lambda match: segment_image(
@@ -292,7 +312,9 @@ def do_query(
 
     # Retrieve documents from each archive
     documents = archives.flatMap(
-        lambda arch: [doc for doc in arch if int(year_min) <= doc.year <= int(year_max)]
+        lambda arch: [
+            doc for doc in arch if int(year_min) <= doc.year <= int(year_max)
+        ]
     )
 
     # log("1/3 Documents retrieved from archive.", "info")
@@ -301,7 +323,12 @@ def do_query(
     # keyword) and record their distance
     filtered_words = documents.flatMap(
         lambda doc: find_closest(
-            doc, target_words, keywords, preprocess_type, fuzzy_target, fuzzy_keyword
+            doc,
+            target_words,
+            keywords,
+            preprocess_type,
+            fuzzy_target,
+            fuzzy_keyword,
         )
     )
 

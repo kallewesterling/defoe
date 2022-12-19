@@ -1,6 +1,6 @@
 """
-Object model representation of a page represented as an XML file in
-METS/MODS format.
+Object model representation of a page represented as an XML file in METS/MODS
+format.
 """
 
 from defoe.fmp.textblock import TextBlock
@@ -8,18 +8,21 @@ from defoe.fmp.textblock import TextBlock
 from lxml import etree
 from pathlib import Path
 from PIL import Image
+from typing import Union
 import mimetypes
 
 mimetypes.init()
 image_types = [
-    x for x, y in mimetypes.types_map.items() if y.split("/")[0] == "image"
+    type
+    for type, desc in mimetypes.types_map.items()
+    if desc.split("/")[0] == "image"
 ]
 
 
 class Page(object):
     """
-    Object model representation of a page represented as an XML file
-    in METS/MODS format.
+    Object model representation of a page represented as an XML file in METS/
+    MODS format.
     """
 
     # XPath Queries
@@ -47,14 +50,24 @@ class Page(object):
         :type source: zipfile.ZipExt or another file-like object
         """
         if not source:
-            source = document.archive.open_page(document.code, code)
+            self.source = document.archive.open_page(document.code, code)
+        else:
+            self.source = source
         self.document = document
         self.code = code
-        self.tree = etree.parse(source)
+        self.tree = etree.parse(self.source)
         self.page_tree = self.single_query(Page.PAGE_XPATH)
         self.width = int(self.page_tree.get("WIDTH"))
         self.height = int(self.page_tree.get("HEIGHT"))
         self.pc = self.page_tree.get("PC")
+
+        self.tb = [
+            TextBlock(tb, document.code, code, document, self)
+            for tb in self.query(Page.TB_XPATH)
+        ]
+        # self.page_tb = None
+
+        # See property accessors below
         self._words = None
         self._strings = None
         self._graphics = None
@@ -63,19 +76,30 @@ class Page(object):
         self._textblock_ids = None
         self._image = None
         self._image_path = None
-        self.tb = [
-            TextBlock(tb, document.code, code, document, self)
-            for tb in self.query(Page.TB_XPATH)
-        ]
-        # self.page_tb = None
 
     # TODO: write this function and get it in the __init__
-    def get_cropped_image(self, x=None, y=None, width=None, height=None):
+    def crop(self, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         """
         should return the page image cropped to the provided coord...
         i.e. test for image
         """
-        raise NotImplementedError()
+
+        if not all(
+            [
+                isinstance(x, int),
+                isinstance(y, int),
+                isinstance(width, int),
+                isinstance(height, int),
+            ]
+        ):
+            raise SyntaxError(
+                "X, Y, width, and height integer values must all be provided."
+            )
+
+        if width <= 0 or height <= 0:
+            raise SyntaxError("Width and height must be over 0.")
+
+        return self.image.crop([x, y, x + width, y + height])
 
     def query(self, xpath_query):
         """
@@ -103,7 +127,7 @@ class Page(object):
         return result[0]
 
     @property
-    def words(self):
+    def words(self) -> list:
         """
         Gets all words in page. These are then saved in an attribute,
         so the words are only retrieved once.
@@ -129,7 +153,7 @@ class Page(object):
         return self._wc
 
     @property
-    def cc(self):
+    def cc(self) -> list:
         """
         Gets all character confidences (cc) in page. These are then saved in
         an attribute, so the cc are only retrieved once.
@@ -142,7 +166,7 @@ class Page(object):
         return self._cc
 
     @property
-    def strings(self):
+    def strings(self) -> list:
         """
         Gets all strings in page. These are then saved in an attribute, so the
         strings are only retrieved once.
@@ -155,7 +179,7 @@ class Page(object):
         return self._strings
 
     @property
-    def textblock_ids(self):
+    def textblock_ids(self) -> list:
         """
         Gets all strings in page. These are then saved in an attribute, so the
         strings are only retrieved once.
@@ -168,7 +192,7 @@ class Page(object):
         return self._textblock_ids
 
     @property
-    def graphics(self):
+    def graphics(self) -> list:
         """
         Gets all graphical elements in page. These are then saved in an
         attribute, so the graphical elements are only retrieved once.
@@ -192,7 +216,7 @@ class Page(object):
         return " ".join(self.words)
 
     @property
-    def image(self):
+    def image(self) -> Image.Image:
         """
         Gets the image for the page. This is then saved in an attribute, so
         the image is only retrieved once.
@@ -209,7 +233,7 @@ class Page(object):
         return self._image
 
     @property
-    def image_path(self):
+    def image_path(self) -> Union[str, None]:
         if not self._image_path:
             self._image_path = self.get_image_name()
         return self._image_path

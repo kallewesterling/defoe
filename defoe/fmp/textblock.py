@@ -1,13 +1,13 @@
 """
-Object model representation of a textblock represented as an XML file in
-METS/MODS format.
+Object model representation of a textblock represented as an XML file in METS/
+MODS format.
 """
 
 
 class TextBlock(object):
     """
-    Object model representation of a textblock represented as an XML file
-    in METS/MODS format.
+    Object model representation of a textblock represented as an XML file in
+    METS/MODS format.
     """
 
     # XPath Queries
@@ -22,17 +22,12 @@ class TextBlock(object):
         """
         Constructor.
         """
-        self.textblock_tree = textblock_tree
+        self.tree = textblock_tree
         self.document_code = document_code
         self.page_code = page_code
         self.document = document
         self.page = page
-        self._words = None
-        self._strings = None
-        self.textblock_images = None
-        self._wc = None
-        self._cc = None
-        self._image = None
+
         self.textblock_shape = None  # this is set by defoe.fmp.document
         # Note that the attribute `textblock_coords` is only set when
         # iterating through a Document.articles.
@@ -40,14 +35,31 @@ class TextBlock(object):
         # instead.
         self.textblock_coords = None  # this is set by defoe.fmp.document
         self.textblock_page_area = None
-        self.textblock_id = self.textblock_tree.get("ID")
+        self.id = self.tree.get("ID")
         self.page_name = document_code + "_" + page_code + ".xml"
         self.image_name = self.get_image_name(document_code, page_code)
 
+        # See property accessors below
+        self._words = None
+        self._strings = None
+        self.textblock_images = None
+        self._wc = None
+        self._cc = None
+        self._image = None
+
+        # Adding backward compatibility
+        self.textblock_id = self.id
+
     # TODO: write this function and get it in the __init__
-    def get_textblock_coords(self):
-        """this should get minX maxX minY maxY"""
-        raise NotImplementedError()
+    def locations_bbox(self):
+        xs = [x[0] for x in self.locations] + [
+            x[0] + x[2] for x in self.locations
+        ]
+        ys = [x[1] for x in self.locations] + [
+            x[1] + x[3] for x in self.locations
+        ]
+
+        return min(xs), min(ys), max(xs), max(ys)
 
     @property
     def image(self):
@@ -59,19 +71,10 @@ class TextBlock(object):
         :rtype: PIL.Image.Image
         """
         if not self._image:
-            self._image = self.get_image_name()
+            self._image = self.page.image.copy()
+            self._image = self._image.crop(self.locations_bbox())
+
         return self._image
-
-    # TODO: write this function and get it in the __init__
-    def get_cropped_image(self):
-        """
-        should return the image cropped to this TextBlock...
-        i.e. test for image, test for textblock_coords
-        """
-        raise NotImplementedError()
-
-    def get_image_name(self, document_code=None, page_code=None):
-        return self.page.image
 
     @property
     def words(self):
@@ -84,7 +87,7 @@ class TextBlock(object):
         """
         if not self._words:
             self._words = list(
-                map(str, self.textblock_tree.xpath(TextBlock.WORDS_XPATH))
+                map(str, self.tree.xpath(TextBlock.WORDS_XPATH))
             )
         return self._words
 
@@ -98,7 +101,7 @@ class TextBlock(object):
         :rtype: list(str)
         """
         if not self._wc:
-            self._wc = list(self.textblock_tree.xpath(TextBlock.WC_XPATH))
+            self._wc = list(self.tree.xpath(TextBlock.WC_XPATH))
         return self._wc
 
     @property
@@ -111,7 +114,7 @@ class TextBlock(object):
         :rtype: list(str)
         """
         if not self._cc:
-            self._cc = list(self.textblock_tree.xpath(TextBlock.CC_XPATH))
+            self._cc = list(self.tree.xpath(TextBlock.CC_XPATH))
 
         return self._cc
 
@@ -125,7 +128,7 @@ class TextBlock(object):
         :rtype: list(lxml.etree._ElementStringResult)
         """
         if not self._strings:
-            self._strings = self.textblock_tree.xpath(TextBlock.STRINGS_XPATH)
+            self._strings = self.tree.xpath(TextBlock.STRINGS_XPATH)
         return self._strings
 
     @property
@@ -164,7 +167,7 @@ class TextBlock(object):
         test = [
             id
             for id, textblock_ids in self.document.articlesParts.items()
-            if self.textblock_id in textblock_ids
+            if self.id in textblock_ids
         ]
 
         if len(test) == 1:
