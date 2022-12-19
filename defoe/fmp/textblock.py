@@ -282,86 +282,42 @@ class TextBlock(object):
             self.page.code,
             self.id,
         )
+
+        tokens = self.get_processed_locations(
+            normalise=normalise,
+            include_numbers=include_numbers,
+            lemmatise=lemmatise,
+        )
+
         tokens = [
             (nav, ix, x[0], x[1], x[2], x[3], x[4])
-            for ix, x in enumerate(self.locations)
+            for ix, x in enumerate(tokens)
         ]
 
-        if normalise and include_numbers:
-            tokens = [
-                (nav, ix, x, y, w, h, normalize(token))
-                for nav, ix, x, y, w, h, token in tokens
-            ]
-        elif normalise and not include_numbers:
-            tokens = [
-                (nav, ix, x, y, w, h, normalize_including_numbers(token))
-                for nav, ix, x, y, w, h, token in tokens
-            ]
-
-        if lemmatise:
-            tokens = [
-                (nav, ix, x, y, w, h, lemmatize(token))
-                for nav, ix, x, y, w, h, token in tokens
-            ]
-
         if fuzz_method == "partial_ratio":
-            tokens = [
-                (
-                    nav,
-                    ix,
-                    x,
-                    y,
-                    w,
-                    h,
-                    token,
-                    fuzz.partial_ratio(token, match_word),
-                )
-                for nav, ix, x, y, w, h, token in tokens
-            ]
+            fuzz_func = fuzz.partial_ratio
         elif fuzz_method == "ratio":
-            tokens = [
-                (
-                    nav,
-                    ix,
-                    x,
-                    y,
-                    w,
-                    h,
-                    token,
-                    fuzz.partial_ratio(token, match_word),
-                )
-                for nav, ix, x, y, w, h, token in tokens
-            ]
+            fuzz_func = fuzz.ratio
         elif fuzz_method == "token_sort_ratio":
-            tokens = [
-                (
-                    nav,
-                    ix,
-                    x,
-                    y,
-                    w,
-                    h,
-                    token,
-                    fuzz.token_sort_ratio(token, match_word),
-                )
-                for nav, ix, x, y, w, h, token in tokens
-            ]
+            fuzz_func = fuzz.token_sort_ratio
         elif fuzz_method == "token_set_ratio":
-            tokens = [
-                (
-                    nav,
-                    ix,
-                    x,
-                    y,
-                    w,
-                    h,
-                    token,
-                    fuzz.token_set_ratio(token, match_word),
-                )
-                for nav, ix, x, y, w, h, token in tokens
-            ]
+            fuzz_func = fuzz.token_set_ratio
         else:
             raise SyntaxError(f"Unknown fuzz method provided: {fuzz_method}")
+
+        tokens = [
+            (
+                nav,
+                ix,
+                x,
+                y,
+                w,
+                h,
+                token,
+                fuzz_func(token, match_word),
+            )
+            for nav, ix, x, y, w, h, token in tokens
+        ]
 
         if all_results:
             if not sort_results:
