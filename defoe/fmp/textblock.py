@@ -90,12 +90,12 @@ class TextBlock(object):
 
         cropped = image.crop(self.locations_bbox())
 
-        if not max_width and max_height:
-            return cropped
+        if max_width and max_height:
+            return self.get_resized_image(
+                max_width=max_width, max_height=max_height, image=cropped
+            )
 
-        return self.get_resized_image(
-            max_width=max_width, max_height=max_height, image=cropped
-        )
+        return cropped
 
     def get_resized_image(
         self, max_width: int = 500, max_height: int = 500, image=None
