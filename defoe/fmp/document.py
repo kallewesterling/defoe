@@ -614,6 +614,7 @@ class Document(object):
         all_results=False,
         sort_results=True,
         sort_reverse=True,
+        add_textblock=False,
     ):
         return [
             match
@@ -629,5 +630,6 @@ class Document(object):
                 all_results=all_results,
                 sort_results=sort_results,
                 sort_reverse=sort_reverse,
+                add_textblock=add_textblock,
             )
         ]
