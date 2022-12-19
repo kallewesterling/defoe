@@ -108,6 +108,7 @@ class Document(object):
         self.documentId = self.id
         self.partsCoord = self.parts_coord
         self.document_type = self.type
+        self.tb = self.tbs
 
     def _get_years(self):
         years = Document._parse_year(self.date)
@@ -418,11 +419,9 @@ class Document(object):
         for _, string in self.scan_strings():
             yield string
 
-    def tb(self) -> str:
+    def tbs(self) -> str:
         """
         Iterate over textblocks.
-        # TODO: Shouldn't this be called tbs (to be consistent with strings,
-        # words, or images)?
 
         :return: string
         :rtype: str
