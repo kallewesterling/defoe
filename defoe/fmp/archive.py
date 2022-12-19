@@ -146,15 +146,11 @@ class Archive(AltoArchive):
 
         stem = self.filename + document_code + "_" + page_code
 
-        print(image_types)
-        print([f"{stem}{ext}" for ext in image_types])
-
         test = [
             f"{stem}{ext}"
             for ext in image_types
             if Path(f"{stem}{ext}").exists()
         ]
-        print(test)
 
         if len(test) == 1:
             return test[0]
