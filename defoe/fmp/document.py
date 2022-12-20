@@ -266,7 +266,7 @@ class Document(object):
         Iterate over strings in pages.
 
         :return: page and string
-        :rtype: tuple(defoe.alto.page.Page, str)
+        :rtype: tuple(defoe.alto.page.Page, lxml.etree._Element)
         """
         for page in self:
             for string in page.strings:
@@ -277,7 +277,7 @@ class Document(object):
         Iterate over textblocks in pages
 
         :return: page and textblock
-        :rtype: tuple(defoe.alto.page.Page, str)
+        :rtype: tuple(defoe.alto.page.Page, TextBlock)
         """
         for page in self:
             for tb in page.tb:
@@ -428,7 +428,7 @@ class Document(object):
         :return: string
         :rtype: str
         """
-        for _, tb in self.scan_tb():
+        for _, tb in self.scan_textblocks():
             yield tb
 
     def words(self) -> str:
