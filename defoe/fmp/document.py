@@ -680,22 +680,20 @@ class Document(object):
                         area_id, area_type, area_category = area.values()
                         file_pointers = area.find("mets:fptr", NAMESPACES)
                         for file_pointer in file_pointers:
-                            (
-                                original_image,
-                                coord_type,
-                                coords,
-                            ) = file_pointer.values()
+                            img, type, coords = file_pointer.values()
+
                             art_id = art_id_lookup[area_id]
+                            coords = [int(x) for x in coords.split(",")]
+                            page = self.get_page(page_code)
 
                             self._areas[area_id] = {
-                                "art_id": art_id_lookup[area_id],
+                                "art_id": art_id,
                                 "area_type": area_type,
                                 "area_category": area_category,
-                                "original_image": original_image,
-                                "coord_type": coord_type,
+                                "original_image": img,
+                                "type": type,
                                 "coords": coords,
-                                "page_code": page_code,
-                                "page": self.get_page(page_code),
+                                "page": page,
                             }
 
         return self._areas
