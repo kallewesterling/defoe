@@ -13,6 +13,7 @@ class Article(object):
         coord_type,
         coords,
     ):
+        self.archive = archive
         self.document_code = document_code
         self.document = Document(document_code, archive)
         self.area_id = area_id

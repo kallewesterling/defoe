@@ -181,8 +181,11 @@ class Archive(AltoArchive):
         return Image.open(path)
 
     @property
-    def articles(self):
-        for document_code in self.document_codes:
+    def articles(self, document_codes=[]):
+        if not document_codes:
+            document_codes = self.document_codes
+
+        for document_code in document_codes:
             metadata = self.open_document(document_code)
             metadata_tree = etree.parse(metadata)
 
@@ -214,3 +217,6 @@ class Archive(AltoArchive):
                                 coord_type,
                                 coords,
                             )
+
+    def get_articles(self, document_codes=[]):
+        return self.articles(document_codes=document_codes)
