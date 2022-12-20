@@ -205,6 +205,8 @@ class Archive(AltoArchive):
                             original_image, coord_type, coords = fp.values()
 
                             yield Article(
+                                self,
+                                document_code,
                                 area_id,
                                 area_type,
                                 area_category,

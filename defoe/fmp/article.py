@@ -1,7 +1,11 @@
+from .document import Document
+
+
 class Article(object):
     def __init__(
         self,
-        document,
+        archive,
+        document_code,
         area_id,
         area_type,
         area_category,
@@ -9,7 +13,8 @@ class Article(object):
         coord_type,
         coords,
     ):
-        self.document = document
+        self.document_code = document_code
+        self.document = Document(document_code, archive)
         self.area_id = area_id
         self.area_type = area_type
         self.area_category = area_category
