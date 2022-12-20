@@ -70,6 +70,7 @@ class Page(object):
         self._textblock_ids = None
         self._image = None
         self._image_path = None
+        self._areas = None
 
         # Adding backward compatibility
         self.page_words = self.words
@@ -133,7 +134,13 @@ class Page(object):
         return result[0]
 
     @property
-    def textblocks(self):
+    def areas(self):
+        if not self._areas:
+            self._areas = self.document.get_areas(page_code=self.code)
+        return self._areas
+
+    @property
+    def textblocks(self) -> TextBlock:
         for tb in self.query(Page.TB_XPATH):
             yield TextBlock(tb, self)
 
