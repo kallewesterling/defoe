@@ -48,6 +48,7 @@ class Document(object):
         self._publisher = None
         self._place = None
         self._date = None
+        self._areas = None
 
         # [
         #   'art0001',
@@ -393,18 +394,18 @@ class Document(object):
         :return: dictionary with the ID of each part as a keyword. For each
         part, it gets the shape and coord.
         :rtype: dictionary
-        {
-            'pa0001001': [
-                'RECT', '1220,5,2893,221'
-            ],
-            'pa0001003': [
-                'RECT', '2934,14,3709,211'
-            ],
-            'pa0004044': [
-                'RECT', '5334,2088,5584,2121'
-            ]
-        }
         """
+        # {
+        #     'pa0001001': [
+        #         'RECT', '1220,5,2893,221'
+        #     ],
+        #     'pa0001003': [
+        #         'RECT', '2934,14,3709,211'
+        #     ],
+        #     'pa0004044': [
+        #         'RECT', '5334,2088,5584,2121'
+        #     ]
+        # }
         partsCoord = dict()
         elem = self.metadata_tree.find(
             'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
@@ -449,31 +450,28 @@ class Document(object):
                  2) A dictionary with parts/textblocks ids as keys, and page
                     and area as values.
         :rtype: two dictionaries
-        {
-            '#art0001':[
-                '#pa0001001',
-                '#pa0001002',
-                '#pa0001003',
-                ...
-            ],
-            '#art0002': [
-                '#pa0001008',
-                '#pa0001009'
-                ..
-            ]
-        }
-        {
-            'pa0001001': 'page1 area1',
-            'pa0001003': 'page1 area3'
-        }
         """
+        # {
+        #     '#art0001':[
+        #         '#pa0001001',
+        #         '#pa0001002',
+        #         '#pa0001003',
+        #         ...
+        #     ],
+        #     '#art0002': [
+        #         '#pa0001008',
+        #         '#pa0001009'
+        #         ..
+        #     ]
+        # }
+        # {
+        #     'pa0001001': 'page1 area1',
+        #     'pa0001003': 'page1 area3'
+        # }
         articles_parts = dict()
         page_parts = dict()
         elem = self.metadata_tree.findall("mets:structLink", NAMESPACES)
         for smlinkgrp in elem:
-            # TODO: following line is not accessed so commented out
-            # (note: test this)
-            # parts = smlinkgrp.findall("mets:smLinkGrp", NAMESPACES)
             for linklocator in smlinkgrp:
                 linkl = linklocator.findall("mets:smLocatorLink", NAMESPACES)
                 article_parts = []
@@ -494,7 +492,8 @@ class Document(object):
         has has a dictionary of parts/textblocks as values, with all the parts
         information (shape, coords and page_area).
         :rtype: dictionary
-        #{
+        """
+        # {
         #   'art0001 {
         #       'pa0001001': [
         #           'RECT', '1220,5,2893,221', 'page1 area1'
@@ -505,7 +504,6 @@ class Document(object):
         #       ...
         #    }
         # }
-        """
         articlesInfo = dict()
         for a_id in self.articles_ids:
             articlesInfo[a_id] = dict()
@@ -630,3 +628,86 @@ class Document(object):
         """
         for page_code in self.page_codes:
             yield self.get_page(page_code)
+
+    @property
+    def areas(self):
+        if not self._areas:
+            struct_map_physical = self.metadata_tree.find(
+                'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
+            )
+
+            struct_link = self.metadata_tree.find(
+                "mets:structLink", NAMESPACES
+            )
+
+            _parts = {}
+            _links = {}
+            for link_group in struct_link:
+                links = link_group.findall("mets:smLocatorLink", NAMESPACES)
+                _tmp = []
+
+                for link in links:
+                    link_id, page_area, _ = link.values()
+                    link_id = PART_ID.sub("", link_id)
+                    _links[link_id] = page_area
+                    _tmp.append(link_id)
+
+                _parts[_tmp[0]] = _tmp[1:]
+
+            # {x: y for x, y in _parts.items() if "pa0001014" in y}
+            art_id_lookup = dict()
+            for art_id, lst in _parts.items():
+                for pa_id in lst:
+                    art_id_lookup[pa_id] = art_id
+
+            self._areas = dict()
+            for div in struct_map_physical:
+                pages = div.findall('mets:div[@TYPE="page"]', NAMESPACES)
+                for page in pages:
+                    _, page_no, _, _ = page.values()
+                    if not page_no:
+                        _, _, page_no, _ = page.values()
+
+                        if not page_no:
+                            raise RuntimeError(
+                                "No page number found in metadata XML."
+                            )
+
+                    page_code = f"{page_no}".zfill(4)
+
+                    page_metadata = page.findall("mets:div", NAMESPACES)
+                    for area in page_metadata:
+                        area_id, area_type, area_category = area.values()
+                        file_pointers = area.find("mets:fptr", NAMESPACES)
+                        for file_pointer in file_pointers:
+                            (
+                                original_image,
+                                coord_type,
+                                coords,
+                            ) = file_pointer.values()
+                            art_id = art_id_lookup[area_id]
+
+                            self._areas[area_id] = {
+                                "art_id": art_id_lookup[area_id],
+                                "area_type": area_type,
+                                "area_category": area_category,
+                                "original_image": original_image,
+                                "coord_type": coord_type,
+                                "coords": coords,
+                                "page_code": page_code,
+                                "page": self.get_page(page_code),
+                            }
+
+        return self._areas
+
+    def get_areas(self, page_code=None):
+        """
+        Page code, eg. "0001"
+        """
+
+        if not page_code:
+            return self.areas
+
+        return {
+            k: v for k, v in self.areas.items() if v["page_code"] == page_code
+        }
