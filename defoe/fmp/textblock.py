@@ -138,6 +138,13 @@ class TextBlock(object):
         """
         if not self._wc:
             self._wc = list(self.tree.xpath(TextBlock.WC_XPATH))
+
+        # Attempt to set word confidence to floating point
+        try:
+            self._wc = [float(x) for x in self._wc]
+        except ValueError:
+            pass
+
         return self._wc
 
     @property
@@ -151,6 +158,12 @@ class TextBlock(object):
         """
         if not self._cc:
             self._cc = list(self.tree.xpath(TextBlock.CC_XPATH))
+
+        # Attempt to set word confidence to floating point
+        try:
+            self._cc = [float(x) for x in self._cc]
+        except ValueError:
+            pass
 
         return self._cc
 

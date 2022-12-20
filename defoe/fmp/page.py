@@ -55,6 +55,12 @@ class Page(object):
         self.height = int(self.page_tree.get("HEIGHT"))
         self.page_confidence = self.page_tree.get("PC")
 
+        # Try setting page_confidence to float
+        try:
+            self.page_confidence = float(self.page_confidence)
+        except ValueError:
+            pass
+
         self.textblocks = [
             TextBlock(tb, document.code, code, document, self)
             for tb in self.query(Page.TB_XPATH)
@@ -153,6 +159,13 @@ class Page(object):
         """
         if not self._wc:
             self._wc = list(self.query(Page.WC_XPATH))
+
+        # Attempt to set word confidence to floating point
+        try:
+            self._wc = [float(x) for x in self._wc]
+        except ValueError:
+            pass
+
         return self._wc
 
     @property
@@ -166,6 +179,13 @@ class Page(object):
         """
         if not self._cc:
             self._cc = list(self.query(Page.CC_XPATH))
+
+        # Attempt to set character confidence to floating point
+        try:
+            self._cc = [float(x) for x in self._cc]
+        except ValueError:
+            pass
+
         return self._cc
 
     @property
