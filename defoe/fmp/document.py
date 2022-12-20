@@ -59,7 +59,7 @@ class Document(object):
         self._date = None
 
         # TODO: the following slows down, but needed for now!
-        self.textblocks = list(self.tbs())
+        # self.textblocks = list(self.tbs())
 
         # [
         #   'art0001',
@@ -109,218 +109,33 @@ class Document(object):
         self.documentId = self.id
         self.partsCoord = self.parts_coord
         self.document_type = self.type
-        self.tb = self.tbs
+        self.tb = self.textblocks
+        self.tbs = self.textblocks
         self.scan_tb = self.scan_textblocks
-
-    def _get_years(self):
-        years = Document._parse_year(self.date)
-
-        # place may often have a year in.
-        years += Document._parse_year(self.place)
-
-        years = sorted(years)
-
-        # todo: issue warning here if > 0?
-        first_year = years[0] if len(years) else None
-
-        return first_year, years
-
-    @staticmethod
-    def _parse_year(text: str) -> list:
-        """
-        Parse text to extract years of form 16xx to 19xx.
-
-        Any date of form NN following a year of form CCYY to CCYY
-        is used to derive a date CCNN.
-
-        As an exception to this rule, single years are parsed
-        from dates precisely matching the format YYYY-MM-DD.
-
-        For example:
-
-        * "1862, [1861]" returns [1861, 1862]
-        * "1847 [1846, 47]" returns [1846, 1847]
-        * "1873-80" returns [1873, 1880]
-        * "1870-09-01" returns [1870]
-
-        :param text: text to parse
-        :type text: str
-        :return: years
-        :rtype: set(int)
-        """
-        try:
-            if DATE_PATTERNS.standard.match(text):
-                return [int(text[0:4])]
-
-            results = []
-            chunks = iter(DATE_PATTERNS.long.split(text)[1:])
-            for year, rest in zip(chunks, chunks):
-                results.append(int(year))
-                century = year[0:2]
-                short_years = DATE_PATTERNS.short.findall(rest)
-
-                for short_year in short_years:
-                    results.append(int(century + short_year))
-
-            return sorted(set(results))
-
-        except TypeError:
-            return []
-
-    @staticmethod
-    def _sorter(page_code: str) -> list:
-        """
-        Given a page code of form [0-9]*(_[0-9]*), split this
-        into the sub-codes. For example, given 123_456, return
-        [123, 456]
-
-        :param page_code: page code
-        :type page_code: str
-        :return: list of page codes
-        :rtype: list(int)
-        """
-        codes = list(map(int, page_code.split("_")))
-        return codes
-
-    def query(self, query: str) -> Union[list, None]:
-        """
-        Run XPath query.
-
-        :param query: XPath query
-        :type query: str
-        :return: list of query results or None if none
-        :rtype: list(lxml.etree.<MODULE>) (depends on query)
-        """
-        return self.metadata_tree.xpath(query, namespaces=self.namespaces)
-
-    def single_query(self, query: str) -> Union[str, None]:
-        """
-        Run XPath query and return first result.
-
-        :param query: XPath query
-        :type query: str
-        :return: query result or None if none
-        :rtype: str
-        """
-        result = self.query(query)
-        if not result:
-            return None
-        return str(result[0])
-
-    def page(self, code: str) -> Page:
-        """
-        Given a page code, return a new Page object.
-
-        :param code: page code
-        :type code: str
-        :return: Page object
-        :rtype: defoe.alto.page.Page
-        """
-        return Page(self, code)
-
-    def get_document_info(self) -> Union[ZipInfo, None]:
-        """
-        Gets information from ZIP file about metadata file
-        corresponding to this document.
-
-        :return: information
-        :rtype: zipfile.ZipInfo
-        """
-        return self.archive.get_document_info(self.code)
-
-    def get_page_info(self, page_code: str) -> Union[ZipInfo, None]:
-        """
-        Gets information from ZIP file about a page file within
-        this document.
-
-        :param page_code: file code
-        :type page_code: str
-        :return: information
-        :rtype: zipfile.ZipInfo
-        """
-        return self.archive.get_page_info(self.code, page_code)
-
-    def __getitem__(self, index: int) -> Page:
-        """
-        Given a page index, return a new Page object.
-
-        :param index: page index
-        :type index: int
-        :return: Page object
-        :rtype: defoe.alto.page.Page
-        """
-        return self.page(self.page_codes[index])
-
-    def __iter__(self) -> Page:
-        """
-        Iterate over page codes, returning new Page objects.
-
-        :return: Page object
-        :rtype: defoe.alto.page.Page
-        """
-        for page_code in self.page_codes:
-            yield self.page(page_code)
-
-    def scan_strings(self) -> tuple:
-        """
-        Iterate over strings in pages.
-
-        :return: page and string
-        :rtype: tuple(defoe.alto.page.Page, lxml.etree._Element)
-        """
-        for page in self:
-            for string in page.strings:
-                yield page, string
-
-    def scan_textblocks(self) -> tuple:
-        """
-        Iterate over textblocks in pages
-
-        :return: page and textblock
-        :rtype: tuple(defoe.alto.page.Page, TextBlock)
-        """
-        for page in self:
-            for tb in page.tb:
-                yield page, tb
-
-    def scan_words(self) -> tuple:
-        """
-        Iterate over words in pages.
-
-        :return: page and word
-        :rtype: tuple(defoe.alto.page.Page, str)
-        """
-        for page in self:
-            for word in page.words:
-                yield page, word
-
-    def scan_wc(self) -> tuple:
-        """
-        Iterate over words qualities in pages.
-
-        :return: page and wc
-        :rtype: tuple(defoe.alto.page.Page, str)
-        """
-        for page in self:
-            for wc in page.wc:
-                yield page, wc
+        self.scan_wc = self.scan_word_confidences
+        self.scan_cc = self.scan_character_confidences
+        self.wc = self.word_confidences
+        self.cc = self.character_confidences
+        self.query = self._query
+        self.single_query = self._single_query
+        self.page = self.get_page
 
     @property
     def title(self):
         if not self._title:
-            self._title = self.single_query("//mods:title/text()")
+            self._title = self._single_query("//mods:title/text()")
         return self._title
 
     @property
     def publisher(self):
         if not self._publisher:
-            self._publisher = self.single_query("//mods:publisher/text()")
+            self._publisher = self._single_query("//mods:publisher/text()")
         return self._publisher
 
     @property
     def id(self):
         if not self._id:
-            self._id = self.single_query("//mods:identifier/text()")
+            self._id = self._single_query("//mods:identifier/text()")
         return self._id
 
     @property
@@ -331,7 +146,7 @@ class Document(object):
             self._place = None
 
         if not self._place:
-            self._place = self.single_query("//mods:placeTerm/text()")
+            self._place = self._single_query("//mods:placeTerm/text()")
         return self._place
 
     @property
@@ -342,7 +157,7 @@ class Document(object):
             self._date = None
 
         if not self._date:
-            self._date = self.single_query("//mods:dateIssued/text()")
+            self._date = self._single_query("//mods:dateIssued/text()")
         return self._date
 
     @property
@@ -389,7 +204,51 @@ class Document(object):
 
         return self._articles
 
-    def scan_cc(self) -> tuple:
+    def scan_strings(self) -> tuple:
+        """
+        Iterate over strings in pages.
+
+        :return: page and string
+        :rtype: tuple(defoe.alto.page.Page, lxml.etree._Element)
+        """
+        for page in self:
+            for string in page.strings:
+                yield page, string
+
+    def scan_textblocks(self) -> tuple:
+        """
+        Iterate over textblocks in pages
+
+        :return: page and textblock
+        :rtype: tuple(defoe.alto.page.Page, TextBlock)
+        """
+        for page in self:
+            for tb in page.tb:
+                yield page, tb
+
+    def scan_words(self) -> tuple:
+        """
+        Iterate over words in pages.
+
+        :return: page and word
+        :rtype: tuple(defoe.alto.page.Page, str)
+        """
+        for page in self:
+            for word in page.words:
+                yield page, word
+
+    def scan_word_confidences(self) -> tuple:
+        """
+        Iterate over words' words confidences in pages.
+
+        :return: page and wc
+        :rtype: tuple(defoe.alto.page.Page, str)
+        """
+        for page in self:
+            for wc in page.wc:
+                yield page, wc
+
+    def scan_character_confidences(self) -> tuple:
         """
         Iterate over characters qualities in pages.
 
@@ -421,7 +280,7 @@ class Document(object):
         for _, string in self.scan_strings():
             yield string
 
-    def tbs(self) -> str:
+    def textblocks(self) -> str:
         """
         Iterate over textblocks.
 
@@ -451,25 +310,92 @@ class Document(object):
         for _, graphic in self.scan_graphics():
             yield graphic
 
-    def wc(self) -> str:
+    def word_confidences(self) -> str:
         """
         Iterate over words qualities.
 
         :return: wc
         :rtype: str
         """
-        for _, wc in self.scan_wc():
+        for _, wc in self.scan_word_confidences():
             yield wc
 
-    def cc(self) -> str:
+    def character_confidences(self) -> str:
         """
         Iterate over characters qualities.
 
         :return: wc
         :rtype: str
         """
-        for _, cc in self.scan_cc():
+        for _, cc in self.scan_character_confidences():
             yield cc
+
+    def get_page(self, code: str) -> Page:
+        """
+        Given a page code, return a new Page object.
+
+        :param code: page code
+        :type code: str
+        :return: Page object
+        :rtype: defoe.alto.page.Page
+        """
+        return Page(self, code)
+
+    def get_document_info(self) -> Union[ZipInfo, None]:
+        """
+        Gets information from ZIP file about metadata file
+        corresponding to this document.
+
+        :return: information
+        :rtype: zipfile.ZipInfo
+        """
+        return self.archive.get_document_info(self.code)
+
+    def get_page_info(self, page_code: str) -> Union[ZipInfo, None]:
+        """
+        Gets information from ZIP file about a page file within
+        this document.
+
+        :param page_code: file code
+        :type page_code: str
+        :return: information
+        :rtype: zipfile.ZipInfo
+        """
+        return self.archive.get_page_info(self.code, page_code)
+
+    def match(
+        self,
+        token: Union[str, list] = [],
+        normalise: bool = True,
+        include_numbers: bool = True,
+        lemmatise: bool = True,
+        stem: bool = True,
+        fuzz_method: str = FUZZ_METHOD,
+        min_ratio: float = MIN_RATIO,
+        all_results: bool = False,
+        sort_results: bool = True,
+        sort_reverse: bool = True,
+        add_textblock: bool = False,
+        regex: bool = False,
+    ) -> list:
+        return [
+            match
+            for tb in self.textblocks
+            for match in tb.match(
+                token,
+                normalise=normalise,
+                include_numbers=include_numbers,
+                lemmatise=lemmatise,
+                stem=stem,
+                fuzz_method=fuzz_method,
+                min_ratio=min_ratio,
+                all_results=all_results,
+                sort_results=sort_results,
+                sort_reverse=sort_reverse,
+                add_textblock=add_textblock,
+                regex=regex,
+            )
+        ]
 
     def _get_parts_coord(self) -> dict:
         """
@@ -603,36 +529,118 @@ class Document(object):
                     articlesInfo[a_id][p_id] = self.parts_coord[p_id]
         return articlesInfo
 
-    def match(
-        self,
-        token: Union[str, list] = [],
-        normalise: bool = True,
-        include_numbers: bool = True,
-        lemmatise: bool = True,
-        stem: bool = True,
-        fuzz_method: str = FUZZ_METHOD,
-        min_ratio: float = MIN_RATIO,
-        all_results: bool = False,
-        sort_results: bool = True,
-        sort_reverse: bool = True,
-        add_textblock: bool = False,
-        regex: bool = False,
-    ) -> list:
-        return [
-            match
-            for tb in self.textblocks
-            for match in tb.match(
-                token,
-                normalise=normalise,
-                include_numbers=include_numbers,
-                lemmatise=lemmatise,
-                stem=stem,
-                fuzz_method=fuzz_method,
-                min_ratio=min_ratio,
-                all_results=all_results,
-                sort_results=sort_results,
-                sort_reverse=sort_reverse,
-                add_textblock=add_textblock,
-                regex=regex,
-            )
-        ]
+    def _get_years(self):
+        years = Document._parse_year(self.date)
+
+        # place may often have a year in.
+        years += Document._parse_year(self.place)
+
+        years = sorted(years)
+
+        # todo: issue warning here if > 0?
+        first_year = years[0] if len(years) else None
+
+        return first_year, years
+
+    @staticmethod
+    def _parse_year(text: str) -> list:
+        """
+        Parse text to extract years of form 16xx to 19xx.
+
+        Any date of form NN following a year of form CCYY to CCYY
+        is used to derive a date CCNN.
+
+        As an exception to this rule, single years are parsed
+        from dates precisely matching the format YYYY-MM-DD.
+
+        For example:
+
+        * "1862, [1861]" returns [1861, 1862]
+        * "1847 [1846, 47]" returns [1846, 1847]
+        * "1873-80" returns [1873, 1880]
+        * "1870-09-01" returns [1870]
+
+        :param text: text to parse
+        :type text: str
+        :return: years
+        :rtype: set(int)
+        """
+        try:
+            if DATE_PATTERNS.standard.match(text):
+                return [int(text[0:4])]
+
+            results = []
+            chunks = iter(DATE_PATTERNS.long.split(text)[1:])
+            for year, rest in zip(chunks, chunks):
+                results.append(int(year))
+                century = year[0:2]
+                short_years = DATE_PATTERNS.short.findall(rest)
+
+                for short_year in short_years:
+                    results.append(int(century + short_year))
+
+            return sorted(set(results))
+
+        except TypeError:
+            return []
+
+    @staticmethod
+    def _sorter(page_code: str) -> list:
+        """
+        Given a page code of form [0-9]*(_[0-9]*), split this
+        into the sub-codes. For example, given 123_456, return
+        [123, 456]
+
+        :param page_code: page code
+        :type page_code: str
+        :return: list of page codes
+        :rtype: list(int)
+        """
+        codes = list(map(int, page_code.split("_")))
+        return codes
+
+    def _query(self, query: str) -> Union[list, None]:
+        """
+        Run XPath query.
+
+        :param query: XPath query
+        :type query: str
+        :return: list of query results or None if none
+        :rtype: list(lxml.etree.<MODULE>) (depends on query)
+        """
+        return self.metadata_tree.xpath(query, namespaces=self.namespaces)
+
+    def _single_query(self, query: str) -> Union[str, None]:
+        """
+        Run XPath query and return first result.
+
+        :param query: XPath query
+        :type query: str
+        :return: query result or None if none
+        :rtype: str
+        """
+        result = self._query(query)
+        if not result:
+            return None
+        return str(result[0])
+
+    def __getitem__(self, index: int) -> Page:
+        """
+        Given a page index, return a new Page object.
+
+        :param index: page index
+        :type index: int
+        :return: Page object
+        :rtype: defoe.alto.page.Page
+        """
+        return self.get_page(self.page_codes[index])
+
+    def __iter__(self) -> Page:
+        """
+        Iterate over page codes, returning new Page objects.
+
+        :return: Page object
+        :rtype: defoe.alto.page.Page
+        """
+        for page_code in self.page_codes:
+            yield self.get_page(page_code)

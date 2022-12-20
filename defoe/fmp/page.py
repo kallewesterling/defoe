@@ -70,8 +70,8 @@ class Page(object):
         self._words = None
         self._strings = None
         self._graphics = None
-        self._wc = None
-        self._cc = None
+        self._word_confidences = None
+        self._character_confidences = None
         self._textblock_ids = None
         self._image = None
         self._image_path = None
@@ -81,6 +81,8 @@ class Page(object):
         self.page_strings = self.strings
         self.cc = self.character_confidences
         self.wc = self.word_confidences
+        self._cc = self._character_confidences
+        self._wc = self._word_confidences
         self.page_wc = self.word_confidences
         self.page_cc = self.character_confidences
         self.pc = self.page_confidence
@@ -157,16 +159,16 @@ class Page(object):
         :return: wc
         :rtype: list(str)
         """
-        if not self._wc:
-            self._wc = list(self.query(Page.WC_XPATH))
+        if not self._word_confidences:
+            self._word_confidences = list(self.query(Page.WC_XPATH))
 
         # Attempt to set word confidence to floating point
         try:
-            self._wc = [float(x) for x in self._wc]
+            self._word_confidences = [float(x) for x in self._word_confidences]
         except ValueError:
             pass
 
-        return self._wc
+        return self._word_confidences
 
     @property
     def character_confidences(self) -> list:
@@ -177,16 +179,18 @@ class Page(object):
         :return: cc
         :rtype: list(str)
         """
-        if not self._cc:
-            self._cc = list(self.query(Page.CC_XPATH))
+        if not self._character_confidences:
+            self._character_confidences = list(self.query(Page.CC_XPATH))
 
         # Attempt to set character confidence to floating point
         try:
-            self._cc = [float(x) for x in self._cc]
+            self._character_confidences = [
+                float(x) for x in self._character_confidences
+            ]
         except ValueError:
             pass
 
-        return self._cc
+        return self._character_confidences
 
     @property
     def strings(self) -> list:
