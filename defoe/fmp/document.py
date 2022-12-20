@@ -110,6 +110,7 @@ class Document(object):
         self.partsCoord = self.parts_coord
         self.document_type = self.type
         self.tb = self.tbs
+        self.scan_tb = self.scan_textblocks
 
     def _get_years(self):
         years = Document._parse_year(self.date)
@@ -271,7 +272,7 @@ class Document(object):
             for string in page.strings:
                 yield page, string
 
-    def scan_tb(self) -> tuple:
+    def scan_textblocks(self) -> tuple:
         """
         Iterate over textblocks in pages
 
