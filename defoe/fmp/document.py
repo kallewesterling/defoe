@@ -5,7 +5,7 @@ of XML files in METS/MODS format.
 
 from .page import Page
 from .patterns import DATE_PATTERNS, PART_ID
-from .constants import FUZZ_METHOD, MIN_RATIO
+from .constants import FUZZ_METHOD, MIN_RATIO, NAMESPACES
 
 from lxml import etree
 from typing import Union
@@ -28,15 +28,6 @@ class Document(object):
         :param archive: archive to which this document belongs
         :type archive: defoe.alto.archive.Archive
         """
-        self.namespaces = {
-            "mods": "http://www.loc.gov/mods/v3",
-            "mets": "http://www.loc.gov/METS/",
-            "xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "premis": "info:lc/xmlns/premis-v2",
-            "dcterms": "http://purl.org/dc/terms/",
-            "fits": "http://hul.harvard.edu/ois/xml/ns/fits/fits_output",
-            "xlink": "http://www.w3.org/1999/xlink",
-        }
         self.archive = archive
         self.code = code
         self.type = "newspaper"
@@ -58,15 +49,12 @@ class Document(object):
         self._place = None
         self._date = None
 
-        # TODO: the following slows down, but needed for now!
-        # self.textblocks = list(self.tbs())
-
         # [
         #   'art0001',
         #   'art0002',
         #   'art0003'
         # ]
-        self.articles_ids = self._parse_structMap_Logical()
+        self.articles_ids = self._articles_ids()
         self.num_articles = len(self.articles_ids)
 
         # {
@@ -119,6 +107,8 @@ class Document(object):
         self.query = self._query
         self.single_query = self._single_query
         self.page = self.get_page
+        self._parse_structMap_Logical = self._articles_ids
+        self.namespaces = NAMESPACES
 
     @property
     def title(self):
@@ -417,14 +407,14 @@ class Document(object):
         """
         partsCoord = dict()
         elem = self.metadata_tree.find(
-            'mets:structMap[@TYPE="PHYSICAL"]', self.namespaces
+            'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
         )
         for physic in elem:
-            parts = physic.findall('mets:div[@TYPE="page"]', self.namespaces)
+            parts = physic.findall('mets:div[@TYPE="page"]', NAMESPACES)
             for part in parts:
-                metadata_parts = part.findall("mets:div", self.namespaces)
+                metadata_parts = part.findall("mets:div", NAMESPACES)
                 for metadata in metadata_parts:
-                    fptr = metadata.find("mets:fptr", self.namespaces)
+                    fptr = metadata.find("mets:fptr", NAMESPACES)
                     for fp in fptr:
                         partsCoord[list(metadata.values())[0]] = [
                             list(fp.values())[1],
@@ -432,7 +422,7 @@ class Document(object):
                         ]
         return partsCoord
 
-    def _parse_structMap_Logical(self) -> list:
+    def _articles_ids(self) -> list:
         """
         Parse the structMap Logical information
         :return: list of articlesID that conforms each document/issue. It only
@@ -442,12 +432,10 @@ class Document(object):
         """
         articlesId = []
         elem = self.metadata_tree.find(
-            'mets:structMap[@TYPE="LOGICAL"]', self.namespaces
+            'mets:structMap[@TYPE="LOGICAL"]', NAMESPACES
         )
         for logic in elem:
-            articles = logic.findall(
-                'mets:div[@TYPE="ARTICLE"]', self.namespaces
-            )
+            articles = logic.findall('mets:div[@TYPE="ARTICLE"]', NAMESPACES)
             for article in articles:
                 articlesId.append(list(article.values())[0])
         return articlesId
@@ -481,15 +469,13 @@ class Document(object):
         """
         articles_parts = dict()
         page_parts = dict()
-        elem = self.metadata_tree.findall("mets:structLink", self.namespaces)
+        elem = self.metadata_tree.findall("mets:structLink", NAMESPACES)
         for smlinkgrp in elem:
             # TODO: following line is not accessed so commented out
             # (note: test this)
-            # parts = smlinkgrp.findall("mets:smLinkGrp", self.namespaces)
+            # parts = smlinkgrp.findall("mets:smLinkGrp", NAMESPACES)
             for linklocator in smlinkgrp:
-                linkl = linklocator.findall(
-                    "mets:smLocatorLink", self.namespaces
-                )
+                linkl = linklocator.findall("mets:smLocatorLink", NAMESPACES)
                 article_parts = []
 
                 for link in linkl:
@@ -608,7 +594,7 @@ class Document(object):
         :return: list of query results or None if none
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
-        return self.metadata_tree.xpath(query, namespaces=self.namespaces)
+        return self.metadata_tree.xpath(query, namespaces=NAMESPACES)
 
     def _single_query(self, query: str) -> Union[str, None]:
         """
