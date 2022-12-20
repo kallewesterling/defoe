@@ -22,8 +22,11 @@ where:
 """
 
 from .archive_combine import AltoArchive
+from .constants import NAMESPACES
+from .article import Article
 from defoe.spark_utils import open_stream
 
+from lxml import etree
 from pathlib import Path
 from PIL import Image
 import mimetypes
@@ -176,3 +179,36 @@ class Archive(AltoArchive):
 
         path = self.get_image_path(document_code, page_code)
         return Image.open(path)
+
+    @property
+    def articles(self):
+        for document_code in self.document_codes:
+            metadata = self.open_document(document_code)
+            metadata_tree = etree.parse(metadata)
+
+            struct_map = metadata_tree.find(
+                'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
+            )
+
+            for div in struct_map:
+                parts = div.findall('mets:div[@TYPE="page"]', NAMESPACES)
+                for part in parts:
+                    metadata_parts = part.findall("mets:div", NAMESPACES)
+                    for metadata_part in metadata_parts:
+                        (
+                            area_id,
+                            area_type,
+                            area_category,
+                        ) = metadata_part.values()
+                        fptr = metadata_part.find("mets:fptr", NAMESPACES)
+                        for fp in fptr:
+                            original_image, coord_type, coords = fp.values()
+
+                            yield Article(
+                                area_id,
+                                area_type,
+                                area_category,
+                                original_image,
+                                coord_type,
+                                coords,
+                            )
