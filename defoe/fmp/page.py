@@ -61,11 +61,6 @@ class Page(object):
         except ValueError:
             pass
 
-        self.textblocks = [
-            TextBlock(tb, document.code, code, document, self)
-            for tb in self.query(Page.TB_XPATH)
-        ]
-
         # See property accessors below
         self._words = None
         self._strings = None
@@ -136,6 +131,11 @@ class Page(object):
         if not result:
             return None
         return result[0]
+
+    @property
+    def textblocks(self):
+        for tb in self.query(Page.TB_XPATH):
+            yield TextBlock(tb, self)
 
     @property
     def words(self) -> list:

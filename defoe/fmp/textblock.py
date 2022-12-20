@@ -30,16 +30,14 @@ class TextBlock(object):
     CC_XPATH = "TextLine/String/@CC"  # Character confidence content
     WORDS_XPATH = "TextLine/String/@CONTENT"  # Word content
 
-    def __init__(
-        self, textblock_tree, document_code, page_code, document, page
-    ):
+    def __init__(self, textblock_tree, page):
         """
         Constructor.
         """
         self.tree = textblock_tree
-        self.document_code = document_code
-        self.page_code = page_code
-        self.document = document
+        self.document_code = page.document.code
+        self.page_code = page.code
+        self.document = page.document
         self.page = page
 
         self.textblock_shape = None  # this is set by defoe.fmp.document
@@ -50,7 +48,7 @@ class TextBlock(object):
         self.textblock_coords = None  # this is set by defoe.fmp.document
         self.textblock_page_area = None
         self.id = self.tree.get("ID")
-        self.page_name = document_code + "_" + page_code + ".xml"
+        self.page_name = self.document_code + "_" + self.page_code + ".xml"
 
         self._tokens_bbox = self.get_tokens_bbox()
         self.x, self.y, x1, y1 = self._tokens_bbox
