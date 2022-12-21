@@ -677,33 +677,39 @@ class Document(object):
                     self._art_id_lookup[pa_id] = art_id
         return self._art_id_lookup
 
-    def scan_areas(self, selected_page_code=None):
-        metadata = self.pages_metadata
-        if selected_page_code:
-            metadata = {selected_page_code: metadata[selected_page_code]}
+    @property
+    def page_codes(self) -> list:
+        return list(self.metadata.keys())
+
+    def _select_metadata(self, selected_page_code=None) -> dict:
+        if not selected_page_code:
+            return self.pages_metadata
+        return {selected_page_code: self.pages_metadata[selected_page_code]}
+
+    def scan_areas(self, selected_page_code=None) -> Area:
+        metadata = self._select_metadata(selected_page_code)
 
         for page_code, page_metadata in metadata.items():
             for area in page_metadata.findall("mets:div", NAMESPACES):
                 for file_pointer in area.find("mets:fptr", NAMESPACES):
                     yield Area(self, page_code, area, file_pointer)
 
-    def areas(self):
-        if not self._areas:
-            self._areas = self.get_areas()
-        return self._areas
-
     def get_areas(self, selected_page_code=None):
-        metadata = self.pages_metadata
-        if selected_page_code:
-            metadata = {selected_page_code: metadata[selected_page_code]}
-
-        areas_by_page_code = {}
+        metadata = self._select_metadata(selected_page_code)
         page_codes = list(metadata.keys())
+
+        areas_by_page_code = {page_code: [] for page_code in page_codes}
+
         for page_code in page_codes:
-            areas_by_page_code[page_code] = []
             page = self.get_page(page_code)
             for area in self.scan_areas(page_code):
                 area._page = page
                 areas_by_page_code[page_code].append(area)
 
         return areas_by_page_code
+
+    @property
+    def areas(self):
+        if not self._areas:
+            self._areas = self.get_areas()
+        return self._areas
