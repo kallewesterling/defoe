@@ -49,6 +49,7 @@ class Document(object):
         self._place = None
         self._date = None
         self._areas = None
+        self._pages_metadata = None
 
         # [
         #   'art0001',
@@ -639,12 +640,15 @@ class Document(object):
     def struct_link(self):
         return self.metadata_tree.find("mets:structLink", NAMESPACES)
 
-    def get_pages_metadata(self):
-        return {
-            y.values()[1].zfill(4): y
-            for x in self.struct_map_physical
-            for y in x.findall('mets:div[@TYPE="page"]', NAMESPACES)
-        }
+    @property
+    def pages_metadata(self):
+        if not self._pages_metadata:
+            self._pages_metadata = {
+                y.values()[1].zfill(4): y
+                for x in self.struct_map_physical
+                for y in x.findall('mets:div[@TYPE="page"]', NAMESPACES)
+            }
+        return self._pages_metadata
 
     def get_art_id_lookup(self):
         _parts = {}
