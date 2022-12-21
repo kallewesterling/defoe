@@ -651,6 +651,11 @@ class Document(object):
 
     @property
     def pages_metadata(self):
+        try:
+            self._pages_metadata
+        except AttributeError:
+            self._pages_metadata = None
+
         if not self._pages_metadata:
             self._pages_metadata = {
                 y.values()[1].zfill(4): y
