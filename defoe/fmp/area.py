@@ -12,9 +12,13 @@ class Area:
         area_element: etree._Element,
         file_pointer_element: etree._Element,
         art_id_lookup: Union[dict, None] = None,
+        page_parts: Union[dict, None] = None,
     ):
         if not art_id_lookup:
             art_id_lookup = document.art_id_lookup
+
+        if not page_parts:
+            page_parts = document.page_parts
 
         self.document = document
         self.page_code = page_code
@@ -28,6 +32,9 @@ class Area:
 
         # Get article_id
         self.article_id = art_id_lookup[self.id]
+
+        # Get page part
+        self.page_part = page_parts[self.id]
 
         # See property accessors below
         self._page = None
