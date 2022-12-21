@@ -415,21 +415,11 @@ class Document(object):
         #     ]
         # }
 
-        # TODO: There is now a shortcut to the pages metadata:
-        # --> See `pages_metadata` (and replace logic below)
-        partsCoord = {}
-        for elem in self.struct_map_physical:
-            pages = elem.findall('mets:div[@TYPE="page"]', NAMESPACES)
-            for part in pages:
-                metadata_parts = part.findall("mets:div", NAMESPACES)
-                for metadata in metadata_parts:
-                    fptr = metadata.find("mets:fptr", NAMESPACES)
-                    for fp in fptr:
-                        partsCoord[list(metadata.values())[0]] = [
-                            list(fp.values())[1],
-                            list(fp.values())[2],
-                        ]
-        return partsCoord
+        return {
+            area.id: [area.type, ",".join(map(str, area.coords))]
+            for areas in self.areas.values()
+            for area in areas
+        }
 
     def _articles_ids(self) -> list:
         """
