@@ -20,11 +20,7 @@ class Area:
         self.page_code = page_code
 
         # Extract element values
-        (
-            self.id,
-            self.type,
-            self.area_category,
-        ) = area_element.values()
+        self.id, self.type, self.category = area_element.values()
         self.img, self.type, _coords = file_pointer_element.values()
 
         # Correct coords
