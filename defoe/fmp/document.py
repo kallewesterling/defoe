@@ -697,6 +697,7 @@ class Document(object):
             self._areas = self.get_areas_by_page_code()
         return self._areas
 
+    @property
     def article_id_to_area_lookup(self):
         area_lookup = {y.id: y for x in self.areas.values() for y in x}
 
