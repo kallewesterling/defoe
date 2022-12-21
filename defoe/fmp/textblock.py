@@ -12,6 +12,8 @@ from defoe.query_utils import (
 )
 from thefuzz import fuzz
 from typing import Union
+from spellchecker import SpellChecker
+
 
 import re
 
@@ -212,6 +214,21 @@ class TextBlock(object):
         :rtype: str
         """
         return " ".join(self.words)
+
+    @property
+    def spellchecked_content(self):
+        """
+        Gets all words in textblock and concatenates together using ' ' as
+        delimiter, followed by a spell checker using a Levenshtein Distance
+        algorithm to find permutations within an edit distance of 2 from the
+        original word.
+
+        :return: content
+        :rtype: str
+        """
+        spell = SpellChecker()
+
+        return [word for word in spell.correction(self.words)]
 
     @property
     def tokens(self):
