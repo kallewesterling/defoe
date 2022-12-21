@@ -159,27 +159,6 @@ class Document(object):
                 art_id: [area.textblock for area in areas if area.textblock]
             }
 
-        # if not self._articles:
-        #     self._articles = {}
-        #     articles_info = self._articles_info()
-        #     for page in self:
-        #         for tb in page.tb:
-        #             for art_id in articles_info:
-        #                 for part_id in articles_info[art_id]:
-        #                     if part_id == tb.textblock_id:
-        #                         if art_id not in self._articles:
-        #                             self._articles[art_id] = []
-        #                         tb.textblock_shape = articles_info[art_id][
-        #                             part_id
-        #                         ][0]
-        #                         tb.textblock_coords = articles_info[art_id][
-        #                             part_id
-        #                         ][1]
-        #                         tb.textblock_page_area = articles_info[art_id][
-        #                             part_id
-        #                         ][2]
-        #                         self._articles[art_id].append(tb)
-
         return self._articles
 
     def scan_strings(self) -> tuple:
