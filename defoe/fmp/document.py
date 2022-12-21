@@ -50,7 +50,7 @@ class Document(object):
         self._pages_metadata = None
         self._art_id_lookup = None
         self._parts_coord = None
-        self._articles_ids = self.articles_ids
+        self._articles_ids = None
 
         # TODO docs: `num_articles` only includes ID starting with "art"
         self.num_articles = len(self.articles_ids)
@@ -394,6 +394,11 @@ class Document(object):
         returns the articles ID, no other type of elements.
         :rtype: list
         """
+        try:
+            self._articles_ids
+        except AttributeError:
+            self._articles_ids = None
+
         if not self._articles_ids:
             self._articles_ids = sorted(
                 list(
