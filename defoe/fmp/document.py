@@ -694,6 +694,7 @@ class Document(object):
                                 "type": type,
                                 "coords": coords,
                                 "page": page,
+                                "page_code": page_code,
                             }
 
         return self._areas
@@ -706,7 +707,6 @@ class Document(object):
         if not page_code:
             return self.areas
 
-        print(self.areas)
         return {
             k: v for k, v in self.areas.items() if v["page_code"] == page_code
         }
