@@ -39,16 +39,26 @@ class TextBlock(object):
         self.page_code = page.code
         self.document = page.document
         self.page = page
-
-        self.textblock_shape = None  # this is set by defoe.fmp.document
-        # Note that the attribute `textblock_coords` is only set when
-        # iterating through a Document.articles.
-        # TODO: The attribute `textblock_coords` should be set on the object
-        # instead.
-        self.textblock_coords = None  # this is set by defoe.fmp.document
-        self.textblock_page_area = None
-        self.id = self.tree.get("ID")
         self.page_name = self.document_code + "_" + self.page_code + ".xml"
+
+        self.id = self.tree.get("ID")
+
+        self.shape = None
+        self.coords = None
+        self.page_area = None
+
+        # Try to set `self.shape`, `self.coords`, `self.page_area`
+        area = [area for area in self.page.areas if area.id == self.id]
+        if len(area) > 1:
+            raise RuntimeError(
+                f"TextBlock {self.id} looks like it belongs to multiple areas:\n \
+                ({','.join([x.id for x in area])})"  # noqa
+            )
+        if len(area) == 1:
+            area = area[0]
+            self.shape = area.type
+            self.coords = area.coords
+            self.page_area = area.page_part
 
         self._tokens_bbox = self.get_tokens_bbox()
         self.x, self.y, x1, y1 = self._tokens_bbox
@@ -69,6 +79,9 @@ class TextBlock(object):
         self.textblock_strings = self.strings
         self.textblock_wc = self.word_confidences
         self.textblock_cc = self.character_confidences
+        self.textblock_shape = self.shape
+        self.textblock_coords = self.coords
+        self.textblock_page_area = self.page_area
         self.image_name = self.page.get_image_name()
         self.locations = self.tokens
         self.get_locations_bbox = self.get_tokens_bbox
