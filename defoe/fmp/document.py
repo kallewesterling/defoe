@@ -59,24 +59,6 @@ class Document(object):
         self.num_articles = len(self.articles_ids)
 
         # {
-        #   '#art0001': [
-        #       '#pa0001001',
-        #       '#pa0001002',
-        #        ...
-        #   ],
-        #   '#art0002': [
-        #       '#pa0001008',
-        #       '#pa0001009' ..
-        #   ]
-        # }
-
-        # {
-        #   'pa0001001': 'page1 area1',
-        #   'pa0001003': 'page1 area3'
-        # }
-        self.articles_parts, self.page_parts = self._get_struct_link()
-
-        # {
         #   'pa0001001': [
         #       'RECT', '1220,5,2893,221'
         #   ],
@@ -92,7 +74,6 @@ class Document(object):
         # Adding backward compatibility
         self._parse_structMap_Physical = self._get_parts_coord
         self._parse_structLink = self._get_struct_link
-        self.articlesParts = self.articles_parts
         self.partsPage = self.page_parts
         self.articlesId = self.articles_ids
         self.documentId = self.id
@@ -110,6 +91,8 @@ class Document(object):
         self.page = self.get_page
         self._parse_structMap_Logical = self._articles_ids
         self.namespaces = NAMESPACES
+        self.articles_parts = self.locators
+        self.articlesParts = self.locators
 
         # Deprecated
         #
@@ -118,6 +101,11 @@ class Document(object):
         # self.page_codes = sorted(
         #     self.archive.document_codes[self.code], key=Document._sorter
         # )
+        #
+        # `self.articles_parts` is now called `self.locators` (added backward
+        # compatibility above), `self.page_parts` has accessor below.
+        # `self._get_struct_link` still exists as a shortcut method below.
+        # self.articles_parts, self.page_parts = self._get_struct_link()
 
     @property
     def title(self):
