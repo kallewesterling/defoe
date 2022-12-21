@@ -439,12 +439,17 @@ class Document(object):
         :rtype: list
         [art0001, art0002, art0003]
         """
-        articlesId = []
-        for elem in self.struct_map_logical:
-            articles = elem.findall('mets:div[@TYPE="ARTICLE"]', NAMESPACES)
-            for article in articles:
-                articlesId.append(list(article.values())[0])
-        return articlesId
+
+        return list(
+            set(
+                [
+                    area.article_id
+                    for _, areas in self.areas.items()
+                    for area in areas
+                    if area.article_id.startswith("art")
+                ]
+            )
+        )
 
     def _get_struct_link(self) -> tuple:
         """
