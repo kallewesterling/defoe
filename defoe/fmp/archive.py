@@ -22,11 +22,8 @@ where:
 """
 
 from .archive_combine import AltoArchive
-from .constants import NAMESPACES
-from .article import Article
 from defoe.spark_utils import open_stream
 
-from lxml import etree
 from pathlib import Path
 from PIL import Image
 import mimetypes

@@ -3,6 +3,7 @@ Object model representation of a document represented as a collection
 of XML files in METS/MODS format.
 """
 
+from .area import Area
 from .page import Page
 from .patterns import DATE_PATTERNS, PART_ID
 from .constants import FUZZ_METHOD, MIN_RATIO, NAMESPACES
@@ -50,6 +51,7 @@ class Document(object):
         self._date = None
         self._areas = None
         self._pages_metadata = None
+        self._art_id_lookup = None
 
         # [
         #   'art0001',
@@ -174,7 +176,7 @@ class Document(object):
         }
         """
         if not self._articles:
-            self._articles = dict()
+            self._articles = {}
             articlesInfo = self._articles_info()
             for page in self:
                 for tb in page.tb:
@@ -407,13 +409,13 @@ class Document(object):
         #         'RECT', '5334,2088,5584,2121'
         #     ]
         # }
-        partsCoord = dict()
-        elem = self.metadata_tree.find(
-            'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
-        )
-        for physic in elem:
-            parts = physic.findall('mets:div[@TYPE="page"]', NAMESPACES)
-            for part in parts:
+
+        # TODO: There is now a shortcut to the pages metadata:
+        # --> See `pages_metadata` (and replace logic below)
+        partsCoord = {}
+        for elem in self.struct_map_physical:
+            pages = elem.findall('mets:div[@TYPE="page"]', NAMESPACES)
+            for part in pages:
                 metadata_parts = part.findall("mets:div", NAMESPACES)
                 for metadata in metadata_parts:
                     fptr = metadata.find("mets:fptr", NAMESPACES)
@@ -433,11 +435,8 @@ class Document(object):
         [art0001, art0002, art0003]
         """
         articlesId = []
-        elem = self.metadata_tree.find(
-            'mets:structMap[@TYPE="LOGICAL"]', NAMESPACES
-        )
-        for logic in elem:
-            articles = logic.findall('mets:div[@TYPE="ARTICLE"]', NAMESPACES)
+        for elem in self.struct_map_logical:
+            articles = elem.findall('mets:div[@TYPE="ARTICLE"]', NAMESPACES)
             for article in articles:
                 articlesId.append(list(article.values())[0])
         return articlesId
@@ -469,10 +468,9 @@ class Document(object):
         #     'pa0001001': 'page1 area1',
         #     'pa0001003': 'page1 area3'
         # }
-        articles_parts = dict()
-        page_parts = dict()
-        elem = self.metadata_tree.findall("mets:structLink", NAMESPACES)
-        for smlinkgrp in elem:
+        articles_parts, page_parts = {}, {}
+
+        for smlinkgrp in self.struct_link:
             for linklocator in smlinkgrp:
                 linkl = linklocator.findall("mets:smLocatorLink", NAMESPACES)
                 article_parts = []
@@ -505,9 +503,9 @@ class Document(object):
         #       ...
         #    }
         # }
-        articlesInfo = dict()
+        articlesInfo = {}
         for a_id in self.articles_ids:
-            articlesInfo[a_id] = dict()
+            articlesInfo[a_id] = {}
             for p_id in self.articles_parts[a_id]:
                 if p_id in self.parts_coord:
                     self.parts_coord[p_id].append(self.page_parts[p_id])
@@ -637,6 +635,12 @@ class Document(object):
         )
 
     @property
+    def struct_map_logical(self):
+        return self.metadata_tree.find(
+            'mets:structMap[@TYPE="LOGICAL"]', NAMESPACES
+        )
+
+    @property
     def struct_link(self):
         return self.metadata_tree.find("mets:structLink", NAMESPACES)
 
@@ -650,74 +654,56 @@ class Document(object):
             }
         return self._pages_metadata
 
-    def get_art_id_lookup(self):
-        _parts = {}
-        _links = {}
-        print("Linking parts")
-        for link_group in self.struct_link:
-            links = link_group.findall("mets:smLocatorLink", NAMESPACES)
-            _tmp = []
-
-            for link in links:
-                link_id, page_area, _ = link.values()
-                link_id = PART_ID.sub("", link_id)
-                _links[link_id] = page_area
-                _tmp.append(link_id)
-
-            _parts[_tmp[0]] = _tmp[1:]
-
-        print("Creating lookups for parts")
-        # {x: y for x, y in _parts.items() if "pa0001014" in y}
-        art_id_lookup = dict()
-        for art_id, lst in _parts.items():
-            for pa_id in lst:
-                art_id_lookup[pa_id] = art_id
-
-        return art_id_lookup
-
     @property
+    def art_id_lookup(self):
+        if not self._art_id_lookup:
+            _parts = {}
+            _links = {}
+            for link_group in self.struct_link:
+                links = link_group.findall("mets:smLocatorLink", NAMESPACES)
+                _tmp = []
+
+                for link in links:
+                    link_id, page_area, _ = link.values()
+                    link_id = PART_ID.sub("", link_id)
+                    _links[link_id] = page_area
+                    _tmp.append(link_id)
+
+                _parts[_tmp[0]] = _tmp[1:]
+
+            self._art_id_lookup = {}
+            for art_id, lst in _parts.items():
+                for pa_id in lst:
+                    self._art_id_lookup[pa_id] = art_id
+        return self._art_id_lookup
+
+    def scan_areas(self, selected_page_code=None):
+        metadata = self.pages_metadata
+        if selected_page_code:
+            metadata = {selected_page_code: metadata[selected_page_code]}
+
+        for page_code, page_metadata in metadata.items():
+            for area in page_metadata.findall("mets:div", NAMESPACES):
+                for file_pointer in area.find("mets:fptr", NAMESPACES):
+                    yield Area(self, page_code, area, file_pointer)
+
     def areas(self):
         if not self._areas:
-            art_id_lookup = self.get_art_id_lookup()
-
-            print("Creating areas")
-            pages_metadata = self.pages_metadata()
-            self._areas = dict()
-
-            for page_code, page_metadata in pages_metadata.items():
-                for area in page_metadata:
-                    area_id, area_type, area_category = area.values()
-
-                    print("Looping over file pointers...")
-                    file_pointers = area.find("mets:fptr", NAMESPACES)
-                    for file_pointer in file_pointers:
-                        img, type, coords = file_pointer.values()
-
-                        art_id = art_id_lookup[area_id]
-                        coords = [int(x) for x in coords.split(",")]
-                        page = self.get_page(page_code)
-
-                        self._areas[area_id] = {
-                            "art_id": art_id,
-                            "area_type": area_type,
-                            "area_category": area_category,
-                            "original_image": img,
-                            "type": type,
-                            "coords": coords,
-                            "page": page,
-                            "page_code": page_code,
-                        }
-
+            self._areas = self.get_areas()
         return self._areas
 
-    def get_areas(self, page_code=None):
-        """
-        Page code, eg. "0001"
-        """
+    def get_areas(self, selected_page_code=None):
+        metadata = self.pages_metadata
+        if selected_page_code:
+            metadata = {selected_page_code: metadata[selected_page_code]}
 
-        if not page_code:
-            return self.areas
+        areas_by_page_code = {}
+        page_codes = list(metadata.keys())
+        for page_code in page_codes:
+            areas_by_page_code[page_code] = []
+            page = self.get_page(page_code)
+            for area in self.scan_areas(page_code):
+                area._page = page
+                areas_by_page_code[page_code].append(area)
 
-        return {
-            k: v for k, v in self.areas.items() if v["page_code"] == page_code
-        }
+        return areas_by_page_code
