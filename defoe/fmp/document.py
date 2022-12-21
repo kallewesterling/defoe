@@ -49,31 +49,15 @@ class Document(object):
         self._areas = None
         self._pages_metadata = None
         self._art_id_lookup = None
+        self._parts_coord = None
+        self._articles_ids = self.articles_ids
 
-        # [
-        #   'art0001',
-        #   'art0002',
-        #   'art0003'
-        # ]
-        self.articles_ids = self._articles_ids()
+        # TODO docs: `num_articles` only includes ID starting with "art"
         self.num_articles = len(self.articles_ids)
-
-        # {
-        #   'pa0001001': [
-        #       'RECT', '1220,5,2893,221'
-        #   ],
-        #   'pa0001003': [
-        #       'RECT', '2934,14,3709,211'
-        #   ],
-        #   'pa0004044': [
-        #       'RECT', '5334,2088,5584,2121'
-        #   ]
-        # }
-        self.parts_coord = self._get_parts_coord()
 
         # Adding backward compatibility
         self.metadata = self.source
-        self._parse_structMap_Physical = self._get_parts_coord
+        self._parse_structMap_Physical = self.parts_coord
         self._parse_structLink = self._get_struct_link
         self.partsPage = self.page_parts
         self.articlesId = self.articles_ids
@@ -90,10 +74,11 @@ class Document(object):
         self.query = self._query
         self.single_query = self._single_query
         self.page = self.get_page
-        self._parse_structMap_Logical = self._articles_ids
+        self._parse_structMap_Logical = self.articles_ids
         self.namespaces = NAMESPACES
         self.articles_parts = self.locators
         self.articlesParts = self.locators
+        self._get_parts_coord = self.parts_coord
 
         # Deprecated
         #
@@ -169,28 +154,18 @@ class Document(object):
             ...
         }
         """
-        if not self._articles:
-            self._articles = {}
-            articlesInfo = self._articles_info()
-            for page in self:
-                for tb in page.tb:
-                    for articleId in articlesInfo:
-                        for partId in articlesInfo[articleId]:
-                            if partId == tb.textblock_id:
-                                if articleId not in self._articles:
-                                    self._articles[articleId] = []
-                                tb.textblock_shape = articlesInfo[articleId][
-                                    partId
-                                ][0]
-                                tb.textblock_coords = articlesInfo[articleId][
-                                    partId
-                                ][1]
-                                tb.textblock_page_area = articlesInfo[
-                                    articleId
-                                ][partId][2]
-                                self._articles[articleId].append(tb)
 
-        return self._articles
+        return {
+            art_id: {
+                area.id: [
+                    area.type,
+                    ",".join(map(str, area.coords)),
+                    area.page_part,
+                ]
+                for area in areas
+            }
+            for art_id, areas in self.article_id_to_area_lookup.items()
+        }
 
     def scan_strings(self) -> tuple:
         """
@@ -385,38 +360,44 @@ class Document(object):
             )
         ]
 
-    def _get_parts_coord(self) -> dict:
+    @property
+    def parts_coord(self) -> dict:
         """
         Parse the structMap Physical information
         :return: dictionary with the ID of each part as a keyword. For each
         part, it gets the shape and coord.
         :rtype: dictionary
         """
-        return {
-            area.id: [area.type, ",".join(map(str, area.coords))]
-            for areas in self.areas.values()
-            for area in areas
-        }
+        if not self._parts_coord:
+            self._parts_coord = {
+                area.id: [area.type, ",".join(map(str, area.coords))]
+                for areas in self.areas.values()
+                for area in areas
+            }
+        return self._parts_coord
 
-    def _articles_ids(self) -> list:
+    @property
+    def articles_ids(self) -> list:
         """
         Parse the structMap Logical information
         :return: list of articlesID that conforms each document/issue. It only
         returns the articles ID, no other type of elements.
         :rtype: list
         """
-        return sorted(
-            list(
-                set(
-                    [
-                        area.article_id
-                        for _, areas in self.areas.items()
-                        for area in areas
-                        if area.article_id.startswith("art")
-                    ]
+        if not self._articles_ids:
+            self._articles_ids = sorted(
+                list(
+                    set(
+                        [
+                            area.article_id
+                            for _, areas in self.areas.items()
+                            for area in areas
+                            if area.article_id.startswith("art")
+                        ]
+                    )
                 )
             )
-        )
+        return self._articles_ids
 
     @staticmethod
     def _clean_id(string):
