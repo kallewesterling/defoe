@@ -33,8 +33,8 @@ class Document(object):
         self.code = code
         self.type = "newspaper"
         self.model = "fmp"
-        self.metadata = self.archive.open_document(self.code)
-        self.metadata_tree = etree.parse(self.metadata)
+        self.source = self.archive.open_document(self.code)
+        self.tree = etree.parse(self.source)
         self.num_pages = len(self.page_codes)
 
         self.year, self.years = self._get_years()
@@ -72,6 +72,7 @@ class Document(object):
         self.parts_coord = self._get_parts_coord()
 
         # Adding backward compatibility
+        self.metadata = self.source
         self._parse_structMap_Physical = self._get_parts_coord
         self._parse_structLink = self._get_struct_link
         self.partsPage = self.page_parts
@@ -406,14 +407,16 @@ class Document(object):
         :rtype: list
         """
 
-        return list(
-            set(
-                [
-                    area.article_id
-                    for _, areas in self.areas.items()
-                    for area in areas
-                    if area.article_id.startswith("art")
-                ]
+        return sorted(
+            list(
+                set(
+                    [
+                        area.article_id
+                        for _, areas in self.areas.items()
+                        for area in areas
+                        if area.article_id.startswith("art")
+                    ]
+                )
             )
         )
 
@@ -574,7 +577,7 @@ class Document(object):
         :return: list of query results or None if none
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
-        return self.metadata_tree.xpath(query, namespaces=NAMESPACES)
+        return self.tree.xpath(query, namespaces=NAMESPACES)
 
     def _single_query(self, query: str) -> Union[str, None]:
         """
@@ -613,19 +616,15 @@ class Document(object):
 
     @property
     def struct_map_physical(self):
-        return self.metadata_tree.find(
-            'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
-        )
+        return self.tree.find('mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES)
 
     @property
     def struct_map_logical(self):
-        return self.metadata_tree.find(
-            'mets:structMap[@TYPE="LOGICAL"]', NAMESPACES
-        )
+        return self.tree.find('mets:structMap[@TYPE="LOGICAL"]', NAMESPACES)
 
     @property
     def struct_link(self):
-        return self.metadata_tree.find("mets:structLink", NAMESPACES)
+        return self.tree.find("mets:structLink", NAMESPACES)
 
     @property
     def pages_metadata(self):
