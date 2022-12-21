@@ -35,9 +35,6 @@ class Document(object):
         self.model = "fmp"
         self.metadata = self.archive.open_document(self.code)
         self.metadata_tree = etree.parse(self.metadata)
-        self.page_codes = sorted(
-            self.archive.document_codes[self.code], key=Document._sorter
-        )
         self.num_pages = len(self.page_codes)
 
         self.year, self.years = self._get_years()
@@ -113,6 +110,14 @@ class Document(object):
         self.page = self.get_page
         self._parse_structMap_Logical = self._articles_ids
         self.namespaces = NAMESPACES
+
+        # Deprecated
+        #
+        # `self.page_codes` now comes from the metadata instead (see property
+        #                   below)
+        # self.page_codes = sorted(
+        #     self.archive.document_codes[self.code], key=Document._sorter
+        # )
 
     @property
     def title(self):
