@@ -646,30 +646,35 @@ class Document(object):
             for y in x.findall('mets:div[@TYPE="page"]', NAMESPACES)
         }
 
+    def get_art_id_lookup(self):
+        _parts = {}
+        _links = {}
+        print("Linking parts")
+        for link_group in self.struct_link:
+            links = link_group.findall("mets:smLocatorLink", NAMESPACES)
+            _tmp = []
+
+            for link in links:
+                link_id, page_area, _ = link.values()
+                link_id = PART_ID.sub("", link_id)
+                _links[link_id] = page_area
+                _tmp.append(link_id)
+
+            _parts[_tmp[0]] = _tmp[1:]
+
+        print("Creating lookups for parts")
+        # {x: y for x, y in _parts.items() if "pa0001014" in y}
+        art_id_lookup = dict()
+        for art_id, lst in _parts.items():
+            for pa_id in lst:
+                art_id_lookup[pa_id] = art_id
+
+        return art_id_lookup
+
     @property
     def areas(self):
         if not self._areas:
-            _parts = {}
-            _links = {}
-            print("Linking parts")
-            for link_group in self.struct_link:
-                links = link_group.findall("mets:smLocatorLink", NAMESPACES)
-                _tmp = []
-
-                for link in links:
-                    link_id, page_area, _ = link.values()
-                    link_id = PART_ID.sub("", link_id)
-                    _links[link_id] = page_area
-                    _tmp.append(link_id)
-
-                _parts[_tmp[0]] = _tmp[1:]
-
-            print("Creating lookups for parts")
-            # {x: y for x, y in _parts.items() if "pa0001014" in y}
-            art_id_lookup = dict()
-            for art_id, lst in _parts.items():
-                for pa_id in lst:
-                    art_id_lookup[pa_id] = art_id
+            art_id_lookup = self.get_art_id_lookup()
 
             print("Creating areas")
             pages_metadata = self.pages_metadata()
