@@ -1,25 +1,35 @@
+from typing import Union
+from lxml import etree
+
+
 class Area:
     def __init__(
         self,
         document,
-        page_code,
-        area_element,
-        file_pointer_element,
-        art_id_lookup,
+        page_code: str,
+        area_element: etree._Element,
+        file_pointer_element: etree._Element,
+        art_id_lookup: Union[dict, None] = None,
     ):
         if not art_id_lookup:
             art_id_lookup = document.art_id_lookup
 
         self.document = document
         self.page_code = page_code
+
+        # Extract element values
         (
             self.area_id,
             self.area_type,
             self.area_category,
         ) = area_element.values()
         self.img, self.type, _coords = file_pointer_element.values()
-        self.article_id = art_id_lookup[self.area_id]
+
+        # Correct coords
         self.coords = [int(x) for x in _coords.split(",")]
+
+        # Get article_id
+        self.article_id = art_id_lookup[self.area_id]
 
         # See property accessors below
         self._page = None

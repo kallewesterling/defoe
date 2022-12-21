@@ -1,8 +1,8 @@
 """
-Object model representation of a ZIP or UNZIP archive of files in
-Find My Past Newspapers-compliant ALTO format.
+Object model representation of archive of files in ALTO format compliant with
+Find My Past's newspapers.
 
-A archive corresponds to a document and each file to a page.
+An archive corresponds to a document and each file to a page.
 
 The archive is assumed to hold the following files:
 
@@ -38,8 +38,8 @@ image_types = [
 
 class Archive(AltoArchive):
     """
-    Object model representation of archive of files in
-    Find My Past Newspapers-compliant ALTO format.
+    Object model representation of archive of files in ALTO format compliant
+    with Find My Past's newspapers.
     """
 
     def __init__(self, filename):
@@ -59,7 +59,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str
         """
-        return "([0-9]*?_[0-9]*?)_mets\.xml"  # pylint: disable=anomalous-backslash-in-string # noqa
+        return r"([0-9]*?_[0-9]*?)_mets\.xml"
 
     def get_page_pattern(self):
         """
@@ -68,7 +68,7 @@ class Archive(AltoArchive):
         :return: pattern
         :rtype: str
         """
-        return "([0-9]*?_[0-9]*?)_([0-9_]*)\.xml"  # pylint: disable=anomalous-backslash-in-string  # noqa
+        return r"([0-9]*?_[0-9]*?)_([0-9_]*)\.xml"
 
     def get_document_info(self, document_code):
         """
