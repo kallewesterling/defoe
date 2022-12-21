@@ -226,9 +226,26 @@ class TextBlock(object):
         :return: content
         :rtype: str
         """
+
         spell = SpellChecker()
 
-        return " ".join([word for word in spell.correction(self.words)])
+        words = [(ix, spell[word]) for ix, word in enumerate(self.words)]
+        suggestion = [
+            (word[0], spell.correction(self.words[word[0]]))
+            for word in words
+            if word[1] == 0
+        ]
+        suggestion = [x for x in suggestion if x[1]]
+
+        words = []
+        for ix, word in enumerate(self.words):
+            yes_suggestion = [x for x in suggestion if x[0] == ix]
+            if len(yes_suggestion) == 1:
+                words.append(yes_suggestion[0][1])
+            else:
+                words.append(word)
+
+        return " ".join(words)
 
     @property
     def tokens(self):
