@@ -33,7 +33,7 @@ class Area:
         self.width = self.x1 - self.x0
         self.height = self.y1 - self.y0
         self.x = self.x0
-        self.y0 = self.y0
+        self.y = self.y0
 
         # Get article_id
         self.article_id = art_id_lookup[self.id]
