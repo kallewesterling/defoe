@@ -403,17 +403,6 @@ class Document(object):
         part, it gets the shape and coord.
         :rtype: dictionary
         """
-        # {
-        #     'pa0001001': [
-        #         'RECT', '1220,5,2893,221'
-        #     ],
-        #     'pa0001003': [
-        #         'RECT', '2934,14,3709,211'
-        #     ],
-        #     'pa0004044': [
-        #         'RECT', '5334,2088,5584,2121'
-        #     ]
-        # }
 
         return {
             area.id: [area.type, ",".join(map(str, area.coords))]
@@ -427,7 +416,6 @@ class Document(object):
         :return: list of articlesID that conforms each document/issue. It only
         returns the articles ID, no other type of elements.
         :rtype: list
-        [art0001, art0002, art0003]
         """
 
         return list(
@@ -441,49 +429,56 @@ class Document(object):
             )
         )
 
+    @staticmethod
+    def _clean_id(string):
+        return PART_ID.sub("", string)
+
+    @property
+    def page_parts(self) -> dict:
+        """
+        Parses the structLink information from the METS document.
+        :return: A dictionary with parts/textblocks IDs as keys, and page and
+        area as values.
+        :rtype: dict
+        """
+        return {
+            self._clean_id(link.values()[0]): link.values()[1]
+            for x in self.struct_link
+            for link in x.findall("mets:smLocatorLink", NAMESPACES)
+        }
+
+    @property
+    def locators(self) -> dict:
+        """
+        Parses the structLink information from the METS document.
+        :return: A dictionary with articles IDs as keys. And per article ID, we
+        have a list of parts/textblocks IDs that conform each article.
+        :rtype: dict
+        """
+        locators = {}
+        for x in self.struct_link:
+            for link in x.findall("mets:smLocatorLink", NAMESPACES):
+                locator = self._clean_id(link.values()[0])
+                if not locator.startswith("pa") and not locator.startswith(
+                    "phys"
+                ):
+                    current = locator
+                    locators[current] = []
+                else:
+                    locators[current].append(locator)
+        return locators
+
     def _get_struct_link(self) -> tuple:
         """
-        Parse the structLink information from the METS document.
-        :return: 1) A dictionary with articles IDs as keys. And per article
-                    ID, we have a list of parts/textblokcs ids that conform
-                    each article.
-                 2) A dictionary with parts/textblocks ids as keys, and page
-                    and area as values.
-        :rtype: two dictionaries
+        Shortcut that returns the dictionary from `Document.locators` and
+        `Document.page_parts`.
+        :returns: Two dictionaries. First one with parts/textblocks IDs as
+        keys and page and area as values. Second one with articles IDs as
+        keys. And per article ID, we have a list of parts/textblocks IDs
+        that conform each article.
+        :rtype: tuple
         """
-        # {
-        #     '#art0001':[
-        #         '#pa0001001',
-        #         '#pa0001002',
-        #         '#pa0001003',
-        #         ...
-        #     ],
-        #     '#art0002': [
-        #         '#pa0001008',
-        #         '#pa0001009'
-        #         ..
-        #     ]
-        # }
-        # {
-        #     'pa0001001': 'page1 area1',
-        #     'pa0001003': 'page1 area3'
-        # }
-        articles_parts, page_parts = {}, {}
-        elem = self.metadata_tree.findall("mets:structLink", NAMESPACES)
-        for smlinkgrp in elem:
-            for linklocator in smlinkgrp:
-                linkl = linklocator.findall("mets:smLocatorLink", NAMESPACES)
-                article_parts = []
-
-                for link in linkl:
-                    id_str = list(link.values())[0]
-                    part_id = PART_ID.sub("", id_str)
-                    article_parts.append(part_id)
-                    page_parts[part_id] = list(link.values())[1]
-
-                articles_parts[article_parts[0]] = article_parts[1:]
-
-        return articles_parts, page_parts
+        return (self.locators, self.page_parts)
 
     def _articles_info(self) -> dict:
         """
@@ -663,15 +658,13 @@ class Document(object):
     def art_id_lookup(self):
         if not self._art_id_lookup:
             _parts = {}
-            _links = {}
             for link_group in self.struct_link:
                 links = link_group.findall("mets:smLocatorLink", NAMESPACES)
                 _tmp = []
 
                 for link in links:
-                    link_id, page_area, _ = link.values()
-                    link_id = PART_ID.sub("", link_id)
-                    _links[link_id] = page_area
+                    link_id, *_ = link.values()
+                    link_id = self._clean_id(link_id)
                     _tmp.append(link_id)
 
                 _parts[_tmp[0]] = _tmp[1:]
