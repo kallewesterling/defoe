@@ -363,6 +363,9 @@ class Page(object):
             areas = [x for x in areas if x.id in include_areas]
 
         return {
-            area.id: self.crop(area.x, area.y, area.width, area.height)
+            area.id: {
+                "area": area,
+                "image": self.crop(area.x, area.y, area.width, area.height),
+            }
             for area in areas
         }
