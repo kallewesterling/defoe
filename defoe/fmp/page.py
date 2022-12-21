@@ -136,7 +136,12 @@ class Page(object):
     @property
     def areas(self):
         if not self._areas:
-            self._areas = self.document.get_areas(selected_page_code=self.code)
+            self._areas = self.document.get_areas_by_page_code(
+                selected_page_code=self.code
+            )
+
+            # Select this page's areas, as we get back a dict
+            self._areas = self._areas[self.code]
         return self._areas
 
     @property

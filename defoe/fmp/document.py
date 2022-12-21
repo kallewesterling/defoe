@@ -704,7 +704,7 @@ class Document(object):
                 for file_pointer in area.find("mets:fptr", NAMESPACES):
                     yield Area(self, page_code, area, file_pointer)
 
-    def get_areas(self, selected_page_code=None):
+    def get_areas_by_page_code(self, selected_page_code=None) -> dict:
         metadata = self._select_metadata(selected_page_code)
         page_codes = list(metadata.keys())
 
@@ -719,7 +719,7 @@ class Document(object):
         return areas_by_page_code
 
     @property
-    def areas(self):
+    def areas(self) -> dict:
         if not self._areas:
-            self._areas = self.get_areas()
+            self._areas = self.get_areas_by_page_code()
         return self._areas
