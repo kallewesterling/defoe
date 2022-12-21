@@ -194,6 +194,16 @@ class Document(object):
             for word in page.words:
                 yield page, word
 
+    def scan_page_confidences(self) -> tuple:
+        """
+        Iterate over page confidences in pages.
+
+        :return: page and pc
+        :rtype: tuple(defoe.alto.page.Page, str)
+        """
+        for page in self:
+            yield page, page.page_confidence
+
     def scan_word_confidences(self) -> tuple:
         """
         Iterate over words' words confidences in pages.
@@ -266,6 +276,16 @@ class Document(object):
         """
         for _, graphic in self.scan_graphics():
             yield graphic
+
+    def page_confidences(self) -> str:
+        """
+        Iterate over page qualities.
+
+        :return: pc
+        :rtype: str
+        """
+        for _, pc in self.scan_page_confidences():
+            yield pc
 
     def word_confidences(self) -> str:
         """
