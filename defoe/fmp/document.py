@@ -340,7 +340,7 @@ class Document(object):
         """
         return [
             match
-            for tb in self.textblocks
+            for tb in self.textblocks()
             for match in tb.match(
                 token,
                 normalise=normalise,
