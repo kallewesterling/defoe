@@ -630,22 +630,29 @@ class Document(object):
             yield self.get_page(page_code)
 
     @property
+    def struct_map_physical(self):
+        return self.metadata_tree.find(
+            'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
+        )
+
+    @property
+    def struct_link(self):
+        return self.metadata_tree.find("mets:structLink", NAMESPACES)
+
+    def get_pages_metadata(self):
+        return {
+            y.values()[1].zfill(4): y
+            for x in self.struct_map_physical
+            for y in x.findall('mets:div[@TYPE="page"]', NAMESPACES)
+        }
+
+    @property
     def areas(self):
         if not self._areas:
-            print("Finding struct_map_physical...")
-            struct_map_physical = self.metadata_tree.find(
-                'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
-            )
-
-            print("Finding struct_link...")
-            struct_link = self.metadata_tree.find(
-                "mets:structLink", NAMESPACES
-            )
-
             _parts = {}
             _links = {}
             print("Linking parts")
-            for link_group in struct_link:
+            for link_group in self.struct_link:
                 links = link_group.findall("mets:smLocatorLink", NAMESPACES)
                 _tmp = []
 
@@ -665,47 +672,32 @@ class Document(object):
                     art_id_lookup[pa_id] = art_id
 
             print("Creating areas")
+            pages_metadata = self.pages_metadata()
             self._areas = dict()
-            for div in struct_map_physical:
-                pages = div.findall('mets:div[@TYPE="page"]', NAMESPACES)
 
-                print("Looping over pages...")
-                for page in pages:
-                    _, page_no, _, _ = page.values()
-                    if not page_no:
-                        _, _, page_no, _ = page.values()
+            for page_code, page_metadata in pages_metadata.items():
+                for area in page_metadata:
+                    area_id, area_type, area_category = area.values()
 
-                        if not page_no:
-                            raise RuntimeError(
-                                "No page number found in metadata XML."
-                            )
+                    print("Looping over file pointers...")
+                    file_pointers = area.find("mets:fptr", NAMESPACES)
+                    for file_pointer in file_pointers:
+                        img, type, coords = file_pointer.values()
 
-                    page_code = f"{page_no}".zfill(4)
+                        art_id = art_id_lookup[area_id]
+                        coords = [int(x) for x in coords.split(",")]
+                        page = self.get_page(page_code)
 
-                    print("Looping over page metadata...")
-                    page_metadata = page.findall("mets:div", NAMESPACES)
-                    for area in page_metadata:
-                        area_id, area_type, area_category = area.values()
-
-                        print("Looping over file pointers...")
-                        file_pointers = area.find("mets:fptr", NAMESPACES)
-                        for file_pointer in file_pointers:
-                            img, type, coords = file_pointer.values()
-
-                            art_id = art_id_lookup[area_id]
-                            coords = [int(x) for x in coords.split(",")]
-                            page = self.get_page(page_code)
-
-                            self._areas[area_id] = {
-                                "art_id": art_id,
-                                "area_type": area_type,
-                                "area_category": area_category,
-                                "original_image": img,
-                                "type": type,
-                                "coords": coords,
-                                "page": page,
-                                "page_code": page_code,
-                            }
+                        self._areas[area_id] = {
+                            "art_id": art_id,
+                            "area_type": area_type,
+                            "area_category": area_category,
+                            "original_image": img,
+                            "type": type,
+                            "coords": coords,
+                            "page": page,
+                            "page_code": page_code,
+                        }
 
         return self._areas
 
