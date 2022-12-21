@@ -1,3 +1,5 @@
+from .textblock import TextBlock
+from .page import Page
 from typing import Union
 from lxml import etree
 
@@ -35,15 +37,16 @@ class Area:
         self._page = None
         self._textblock = None
         self._page_textblocks = None
+        self._content = None
 
     @property
-    def page(self):
+    def page(self) -> Page:
         if not self._page:
             self._page = self.document.page(self.page_code)
         return self._page
 
     @property
-    def textblock(self):
+    def textblock(self) -> TextBlock:
         if not self._textblock:
             for tb in self.page_textblocks:
                 if self._textblock:
@@ -53,7 +56,20 @@ class Area:
         return self._textblock
 
     @property
-    def page_textblocks(self):
+    def page_textblocks(self) -> list:
         if not self._page_textblocks:
             self._page_textblocks = list(self.page.textblocks)
         return self._page_textblocks
+
+    @property
+    def content(self) -> str:
+        """
+        Shortcut to self.textblock.content
+        """
+        if not self._content:
+            if self.textblock:
+                self._content = self.textblock.content
+            else:
+                self._content = ""
+
+        return self._content
