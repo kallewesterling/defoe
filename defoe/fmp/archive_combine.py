@@ -86,7 +86,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         return len(self.document_codes)
 
     @abc.abstractmethod
-    def get_document_pattern(self) ->:
+    def get_document_pattern(self):
         """
         Gets pattern to find metadata filename which has information about
         the document as a whole.
