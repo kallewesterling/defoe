@@ -21,7 +21,7 @@ class Area:
 
         # Extract element values
         (
-            self.area_id,
+            self.id,
             self.area_type,
             self.area_category,
         ) = area_element.values()
@@ -31,7 +31,7 @@ class Area:
         self.coords = [int(x) for x in _coords.split(",")]
 
         # Get article_id
-        self.article_id = art_id_lookup[self.area_id]
+        self.article_id = art_id_lookup[self.id]
 
         # See property accessors below
         self._page = None
@@ -51,7 +51,7 @@ class Area:
             for tb in self.page_textblocks:
                 if self._textblock:
                     continue
-                if tb.id == self.area_id:
+                if tb.id == self.id:
                     self._textblock = tb
         return self._textblock
 
