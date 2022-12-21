@@ -632,16 +632,19 @@ class Document(object):
     @property
     def areas(self):
         if not self._areas:
+            print("Finding struct_map_physical...")
             struct_map_physical = self.metadata_tree.find(
                 'mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES
             )
 
+            print("Finding struct_link...")
             struct_link = self.metadata_tree.find(
                 "mets:structLink", NAMESPACES
             )
 
             _parts = {}
             _links = {}
+            print("Linking parts")
             for link_group in struct_link:
                 links = link_group.findall("mets:smLocatorLink", NAMESPACES)
                 _tmp = []
@@ -654,15 +657,19 @@ class Document(object):
 
                 _parts[_tmp[0]] = _tmp[1:]
 
+            print("Creating lookups for parts")
             # {x: y for x, y in _parts.items() if "pa0001014" in y}
             art_id_lookup = dict()
             for art_id, lst in _parts.items():
                 for pa_id in lst:
                     art_id_lookup[pa_id] = art_id
 
+            print("Creating areas")
             self._areas = dict()
             for div in struct_map_physical:
                 pages = div.findall('mets:div[@TYPE="page"]', NAMESPACES)
+
+                print("Looping over pages...")
                 for page in pages:
                     _, page_no, _, _ = page.values()
                     if not page_no:
@@ -675,9 +682,12 @@ class Document(object):
 
                     page_code = f"{page_no}".zfill(4)
 
+                    print("Looping over page metadata...")
                     page_metadata = page.findall("mets:div", NAMESPACES)
                     for area in page_metadata:
                         area_id, area_type, area_category = area.values()
+
+                        print("Looping over file pointers...")
                         file_pointers = area.find("mets:fptr", NAMESPACES)
                         for file_pointer in file_pointers:
                             img, type, coords = file_pointer.values()
