@@ -154,18 +154,28 @@ class Document(object):
             ...
         }
         """
+        if not self._articles:
+            self._articles = {}
+            articlesInfo = self._articles_info()
+            for page in self:
+                for tb in page.tb:
+                    for articleId in articlesInfo:
+                        for partId in articlesInfo[articleId]:
+                            if partId == tb.textblock_id:
+                                if articleId not in self._articles:
+                                    self._articles[articleId] = []
+                                tb.textblock_shape = articlesInfo[articleId][
+                                    partId
+                                ][0]
+                                tb.textblock_coords = articlesInfo[articleId][
+                                    partId
+                                ][1]
+                                tb.textblock_page_area = articlesInfo[
+                                    articleId
+                                ][partId][2]
+                                self._articles[articleId].append(tb)
 
-        return {
-            art_id: {
-                area.id: [
-                    area.type,
-                    ",".join(map(str, area.coords)),
-                    area.page_part,
-                ]
-                for area in areas
-            }
-            for art_id, areas in self.article_id_to_area_lookup.items()
-        }
+        return self._articles
 
     def scan_strings(self) -> tuple:
         """
@@ -384,18 +394,20 @@ class Document(object):
         returns the articles ID, no other type of elements.
         :rtype: list
         """
-        return sorted(
-            list(
-                set(
-                    [
-                        area.article_id
-                        for _, areas in self.areas.items()
-                        for area in areas
-                        if area.article_id.startswith("art")
-                    ]
+        if not self._articles_ids:
+            self._articles_ids = sorted(
+                list(
+                    set(
+                        [
+                            area.article_id
+                            for _, areas in self.areas.items()
+                            for area in areas
+                            if area.article_id.startswith("art")
+                        ]
+                    )
                 )
             )
-        )
+        return self._articles_ids
 
     @staticmethod
     def _clean_id(string):
@@ -455,17 +467,18 @@ class Document(object):
         information (shape, coords and page_area).
         :rtype: dictionary
         """
-        # {
-        #   'art0001 {
-        #       'pa0001001': [
-        #           'RECT', '1220,5,2893,221', 'page1 area1'
-        #       ],
-        #       'pa0001003': [
-        #           'RECT', '2934,14,3709,211', 'page1 area3'
-        #       ],
-        #       ...
-        #    }
-        # }
+        return {
+            art_id: {
+                area.id: [
+                    area.type,
+                    ",".join(map(str, area.coords)),
+                    area.page_part,
+                ]
+                for area in areas
+            }
+            for art_id, areas in self.article_id_to_area_lookup.items()
+        }
+
         articlesInfo = {}
         for a_id in self.articles_ids:
             articlesInfo[a_id] = {}
