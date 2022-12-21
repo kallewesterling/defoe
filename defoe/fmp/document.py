@@ -384,20 +384,18 @@ class Document(object):
         returns the articles ID, no other type of elements.
         :rtype: list
         """
-        if not self._articles_ids:
-            self._articles_ids = sorted(
-                list(
-                    set(
-                        [
-                            area.article_id
-                            for _, areas in self.areas.items()
-                            for area in areas
-                            if area.article_id.startswith("art")
-                        ]
-                    )
+        return sorted(
+            list(
+                set(
+                    [
+                        area.article_id
+                        for _, areas in self.areas.items()
+                        for area in areas
+                        if area.article_id.startswith("art")
+                    ]
                 )
             )
-        return self._articles_ids
+        )
 
     @staticmethod
     def _clean_id(string):
