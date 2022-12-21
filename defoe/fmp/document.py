@@ -684,7 +684,7 @@ class Document(object):
 
     @property
     def page_codes(self) -> list:
-        return list(self.metadata.keys())
+        return list(self.pages_metadata.keys())
 
     def _select_metadata(self, selected_page_code=None) -> dict:
         if not selected_page_code:
