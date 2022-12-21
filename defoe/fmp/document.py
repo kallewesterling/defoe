@@ -392,7 +392,6 @@ class Document(object):
         part, it gets the shape and coord.
         :rtype: dictionary
         """
-
         return {
             area.id: [area.type, ",".join(map(str, area.coords))]
             for areas in self.areas.values()
@@ -406,7 +405,6 @@ class Document(object):
         returns the articles ID, no other type of elements.
         :rtype: list
         """
-
         return sorted(
             list(
                 set(
@@ -698,3 +696,15 @@ class Document(object):
         if not self._areas:
             self._areas = self.get_areas_by_page_code()
         return self._areas
+
+    def article_id_to_area_lookup(self):
+        area_lookup = {y.id: y for x in self.areas.values() for y in x}
+
+        return {
+            art_id: [
+                area_lookup[k]
+                for k, v in self.art_id_lookup.items()
+                if v == art_id
+            ]
+            for art_id in self.articles_ids
+        }
