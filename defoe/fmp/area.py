@@ -29,6 +29,11 @@ class Area:
 
         # Correct coords
         self.coords = [int(x) for x in _coords.split(",")]
+        self.x0, self.y0, self.x1, self.y1 = self.coords
+        self.width = self.x1 - self.x0
+        self.height = self.y1 - self.y0
+        self.x = self.x0
+        self.y0 = self.y0
 
         # Get article_id
         self.article_id = art_id_lookup[self.id]
