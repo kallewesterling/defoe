@@ -228,7 +228,7 @@ class TextBlock(object):
         """
         spell = SpellChecker()
 
-        return [word for word in spell.correction(self.words)]
+        return " ".join([word for word in spell.correction(self.words)])
 
     @property
     def tokens(self):
