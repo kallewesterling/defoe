@@ -335,6 +335,9 @@ class Page(object):
         add_textblock: bool = False,
         regex: bool = False,
     ) -> list:
+        """
+        This method runs match on each textblock for the Page.
+        """
         return [
             match
             for tb in self.textblocks

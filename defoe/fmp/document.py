@@ -356,6 +356,9 @@ class Document(object):
         add_textblock: bool = False,
         regex: bool = False,
     ) -> list:
+        """
+        This method runs match on each textblock for the Document.
+        """
         return [
             match
             for tb in self.textblocks
