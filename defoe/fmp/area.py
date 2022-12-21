@@ -22,7 +22,7 @@ class Area:
         # Extract element values
         (
             self.id,
-            self.area_type,
+            self.type,
             self.area_category,
         ) = area_element.values()
         self.img, self.type, _coords = file_pointer_element.values()
