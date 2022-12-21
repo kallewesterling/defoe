@@ -154,26 +154,31 @@ class Document(object):
             ...
         }
         """
-        if not self._articles:
-            self._articles = {}
-            articlesInfo = self._articles_info()
-            for page in self:
-                for tb in page.tb:
-                    for articleId in articlesInfo:
-                        for partId in articlesInfo[articleId]:
-                            if partId == tb.textblock_id:
-                                if articleId not in self._articles:
-                                    self._articles[articleId] = []
-                                tb.textblock_shape = articlesInfo[articleId][
-                                    partId
-                                ][0]
-                                tb.textblock_coords = articlesInfo[articleId][
-                                    partId
-                                ][1]
-                                tb.textblock_page_area = articlesInfo[
-                                    articleId
-                                ][partId][2]
-                                self._articles[articleId].append(tb)
+        for art_id, areas in self.article_id_to_area_lookup.items():
+            yield {
+                art_id: [area.textblock for area in areas if area.textblock]
+            }
+
+        # if not self._articles:
+        #     self._articles = {}
+        #     articles_info = self._articles_info()
+        #     for page in self:
+        #         for tb in page.tb:
+        #             for art_id in articles_info:
+        #                 for part_id in articles_info[art_id]:
+        #                     if part_id == tb.textblock_id:
+        #                         if art_id not in self._articles:
+        #                             self._articles[art_id] = []
+        #                         tb.textblock_shape = articles_info[art_id][
+        #                             part_id
+        #                         ][0]
+        #                         tb.textblock_coords = articles_info[art_id][
+        #                             part_id
+        #                         ][1]
+        #                         tb.textblock_page_area = articles_info[art_id][
+        #                             part_id
+        #                         ][2]
+        #                         self._articles[art_id].append(tb)
 
         return self._articles
 
@@ -483,15 +488,6 @@ class Document(object):
             }
             for art_id, areas in self.article_id_to_area_lookup.items()
         }
-
-        articlesInfo = {}
-        for a_id in self.articles_ids:
-            articlesInfo[a_id] = {}
-            for p_id in self.articles_parts[a_id]:
-                if p_id in self.parts_coord:
-                    self.parts_coord[p_id].append(self.page_parts[p_id])
-                    articlesInfo[a_id][p_id] = self.parts_coord[p_id]
-        return articlesInfo
 
     def _get_years(self):
         years = Document._parse_year(self.date)
