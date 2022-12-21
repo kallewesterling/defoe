@@ -469,8 +469,8 @@ class Document(object):
         #     'pa0001003': 'page1 area3'
         # }
         articles_parts, page_parts = {}, {}
-
-        for smlinkgrp in self.struct_link:
+        elem = self.metadata_tree.findall("mets:structLink", NAMESPACES)
+        for smlinkgrp in elem:
             for linklocator in smlinkgrp:
                 linkl = linklocator.findall("mets:smLocatorLink", NAMESPACES)
                 article_parts = []
