@@ -5,6 +5,7 @@ Object model representation of an XML document.
 from defoe.spark_utils import open_stream
 
 from lxml import etree
+from typing import Optional
 import os
 
 
@@ -16,14 +17,14 @@ NO_NS_SCHEMA_LOCATION = etree.QName(XSI_NS, "noNamespaceSchemaLocation")
 class Document(object):
     """
     Object model representation of an XML document.
+
+    :param filename: XML filename
+    :type: filename: str
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         """
-        Constructor.
-
-        :param filename: XML filename
-        :type: filename: str or unicode
+        Constructor method.
         """
         self.filename = filename
         self.filesize = os.path.getsize(filename)
@@ -41,16 +42,18 @@ class Document(object):
             self.schema_locations = self.schema_locations.split(" ")
         else:
             self.schema_locations = []
-        self.no_ns_schema_location = self.root_element.get(NO_NS_SCHEMA_LOCATION.text)
+        self.no_ns_schema_location = self.root_element.get(
+            NO_NS_SCHEMA_LOCATION.text
+        )
 
-    def query(self, query):
+    def query(self, query: str) -> list:
         """
         Run XPath query.
 
         :param query: XPath query
-        :type query: str or unicode
-        :return: list of query results or an empty list if the object
-        represents an empty document or any errors arose
+        :type query: str
+        :return: List of query results or an empty list if the object
+            represents an empty document or any errors arose
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         if not self.document_tree:
@@ -60,15 +63,15 @@ class Document(object):
         except AssertionError:
             return []
 
-    def single_query(self, query):
+    def single_query(self, query: str) -> Optional[str]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str or unicode
-        :return: query results or None if the object represents an
-        empty document or any errors arose
-        :rtype: str or unicode
+        :type query: str
+        :return: query result or None if the object represents an
+            empty document or any errors arose
+        :rtype: Optional[str]
         """
         result = self.query(query)
         if not result:

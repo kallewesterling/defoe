@@ -1,14 +1,21 @@
-.. Defoe documentation master file, created by
-   sphinx-quickstart on Tue Dec 20 12:07:40 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to Defoe's documentation!
 =================================
 
+**Defoe** is a Python package that facilitates the analysis of historical books and newspapers datasets using Apache Spark. It includes a number of APIs for interpreting and manipulating different XML-coded files as Python objects.
+
+.. note::
+
+   This project is under active development.
+
+
+Contents
+--------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   api/index
+   spark/index
 
 
 

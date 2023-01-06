@@ -3,29 +3,36 @@ Abstract base class for object model representation of an archive
 of files in ALTO format.
 """
 
-from defoe.fmp.document import Document
-from defoe.spark_utils import open_stream
+from __future__ import annotations
 
-from os import listdir
-from os.path import isfile, join
+from .document import Document
+
+from defoe.spark_utils import open_stream
+from pathlib import Path
+from typing import TYPE_CHECKING
+
 import abc
 import re
 import zipfile
+
+if TYPE_CHECKING:
+    from typing import BinaryIO
 
 
 class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
     """
     Abstract base class for object model representation of ZIP|UNZIP archive
     of files in ALTO format.
+
+    :param filename: archive filename
+    :type: filename: str
     """
 
     def __init__(self, filename):
         """
-        Constructor
-
-        :param filename: archive filename
-        :type: filename: str
+        Constructor method.
         """
+
         self.filename = filename
         if ".zip" in self.filename:
             stream = open_stream(self.filename)
@@ -33,9 +40,9 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
             self.filenames = [entry.filename for entry in self.zip.infolist()]
         else:
             self.filenames = [
-                entry
-                for entry in listdir(self.filename)
-                if isfile(join(self.filename, entry))
+                entry.name
+                for entry in Path(self.filename).glob("*")
+                if entry.is_file()
             ]
         document_pattern = re.compile(self.get_document_pattern())
         page_pattern = re.compile(self.get_page_pattern())
@@ -55,7 +62,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         for match in page_matches:
             self.document_codes[match.group(1)].append(match.group(2))
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> Document:
         """
         Given a document index, return a new Document object.
 
@@ -66,7 +73,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         return Document(list(self.document_codes.keys())[index], self)
 
-    def __iter__(self):
+    def __iter__(self) -> Document:
         """
         Iterate over document codes, creating Document objects.
 
@@ -76,7 +83,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         for document in self.document_codes:
             yield Document(document, self)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Gets number of documents in ZIP archive.
 
@@ -86,7 +93,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         return len(self.document_codes)
 
     @abc.abstractmethod
-    def get_document_pattern(self):
+    def get_document_pattern(self) -> str:
         """
         Gets pattern to find metadata filename which has information about
         the document as a whole.
@@ -94,20 +101,20 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         :return: pattern
         :rtype: str
         """
-        return
+        return r""
 
     @abc.abstractmethod
-    def get_page_pattern(self):
+    def get_page_pattern(self) -> str:
         """
         Gets pattern to find filenames corresponding to individual pages.
 
         :return: pattern
         :rtype: str
         """
-        return
+        return r""
 
     @abc.abstractmethod
-    def get_document_info(self, document_code):
+    def get_document_info(self, document_code: str) -> zipfile.ZipInfo:
         """
         Gets information from ZIP file about metadata file.
 
@@ -119,7 +126,9 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         return
 
     @abc.abstractmethod
-    def get_page_info(self, document_code, page_code):
+    def get_page_info(
+        self, document_code: str, page_code: str
+    ) -> zipfile.ZipInfo:
         """
         Gets information from ZIP file about a page file.
 
@@ -133,7 +142,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         return
 
     @abc.abstractmethod
-    def open_document(self, document_code):
+    def open_document(self, document_code: str) -> BinaryIO:
         """
         Opens metadata file.
 
@@ -145,7 +154,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         return
 
     @abc.abstractmethod
-    def open_page(self, document_code, page_code):
+    def open_page(self, document_code: str, page_code: str) -> BinaryIO:
         """
         Opens page file.
 

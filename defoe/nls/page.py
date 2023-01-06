@@ -1,32 +1,36 @@
 """
-Object model representation of a page represented as an XML file in
-METS/MODS format.
+Object model representation of a page represented as an XML file in METS/MODS
+format.
 """
-
+from __future__ import annotations
 
 from lxml import etree
+from typing import BinaryIO, TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from .document import Document
 
 
 class Page(object):
     """
-    Object model representation of a page represented as an XML file
-    in METS/MODS format.
+    Object model representation of a page represented as an XML file in
+    METS/MODS format.
+
+    :param document: Document object corresponding to document to
+        which this page belongs
+    :type document: defoe.nls.document.Document
+    :param code: Identifier for this page within an archive
+    :type code: str
+    :param source: Stream. If None then an attempt is made to
+        open the file holding the page via the given ``Document``
+    :type source: zipfile.ZipExt or another file-like object
     """
 
-    """ XPath query for Caracther Confidence content """
-
-    def __init__(self, document, code, source=None):
+    def __init__(
+        self, document: Document, code: str, source: Optional[BinaryIO] = None
+    ):
         """
-        Constructor.
-
-        :param document: Document object corresponding to document to
-        which this page belongs
-        :type document: defoe.alto.document.Document
-        :param code: identifier for this page within an archive
-        :type code: str or unicode
-        :param source: stream. If None then an attempt is made to
-        open the file holding the page via the given "document"
-        :type source: zipfile.ZipExt or another file-like object
+        Constructor method.
         """
         if not source:
             source = document.archive.open_page(document.code, code)
@@ -44,90 +48,101 @@ class Page(object):
         self.page_wc = None
         self.page_cc = None
 
-    def alto_parse(self, source):
+    def alto_parse(self, source: BinaryIO):
         xml = etree.parse(source)
         xmlns = xml.getroot().tag.split("}")[0].strip("{")
         return xml, xmlns
 
-    def alto_page(self):
+    def alto_page(self) -> int:
         try:
             return self.tree.find("//{%s}Page" % self.namespaces)
-        except:
+        except:  # TODO: Make except clause explicit
             return 0
 
-    def alto_page_width(self):
+    def alto_page_width(self) -> int:
         try:
             return int(self.page_tree.attrib.get("WIDTH"))
-        except:
+        except:  # TODO: Make except clause explicit
             return 0
 
-    def alto_page_id(self):
+    def alto_page_id(self) -> str:
         try:
             return self.page_tree.attrib.get("ID")
-        except:
+        except:  # TODO: Make except clause explicit
             return "0"
 
-    def alto_image_nr(self):
+    def alto_image_nr(self) -> str:
         try:
             return self.page_tree.attrib.get("PHYSICAL_IMG_NR")
-        except:
+        except:  # TODO: Make except clause explicit
             return "0"
 
-    def alto_page_height(self):
+    def alto_page_height(self) -> int:
         try:
             return int(self.page_tree.attrib.get("HEIGHT"))
-        except:
+        except:  # TODO: Make except clause explicit
             return 0
 
-    def alto_page_pc(self):
+    def alto_page_pc(self) -> str:
         try:
             return self.page_tree.attrib.get("PC")
-        except:
+        except:  # TODO: Make except clause explicit
             return "0"
 
     @property
-    def words(self):
+    def words(self) -> list[Optional[str]]:
         if not self.page_words:
-            page_words = []
-            for lines in self.tree.iterfind(".//{%s}TextLine" % self.namespaces):
+            self.page_words = []
+            for lines in self.tree.iterfind(
+                ".//{%s}TextLine" % self.namespaces
+            ):
                 for line in lines.findall("{%s}String" % self.namespaces):
                     text = line.attrib.get("CONTENT")
-                    page_words.append(text)
-            self.page_words = list(map(str, page_words))
+                    self.page_words.append(text)
+            self.page_words = list(map(str, self.page_words))
         return self.page_words
 
     @property
-    def wc(self):
+    def wc(self) -> list[str]:
         if not self.page_wc:
+            self.page_wc = []
             try:
-                for lines in self.tree.iterfind(".//{%s}TextLine" % self.namespaces):
+                for lines in self.tree.iterfind(
+                    ".//{%s}TextLine" % self.namespaces
+                ):
                     for line in lines.findall("{%s}String" % self.namespaces):
                         text = line.attrib.get("WC")
                         self.page_wc.append(text)
-            except:
+            except:  # TODO: Make except clause explicit
                 pass
         return self.page_wc
 
     @property
-    def cc(self):
+    def cc(self) -> list[str]:
         if not self.page_cc:
+            self.page_cc = []
             try:
-                for lines in self.tree.iterfind(".//{%s}TextLine" % self.namespaces):
+                for lines in self.tree.iterfind(
+                    ".//{%s}TextLine" % self.namespaces
+                ):
                     for line in lines.findall("{%s}String" % self.namespaces):
                         text = line.attrib.get("CC")
                         self.page_cc.append(text)
-            except:
+            except:  # TODO: Make except clause explicit
                 pass
         return self.page_cc
 
     @property
-    def strings(self):
+    def strings(self) -> list[str]:
         if not self.page_strings:
+            self.page_strings = []
             try:
-                for lines in self.tree.iterfind(".//{%s}TextLine" % self.namespaces):
+                for lines in self.tree.iterfind(
+                    ".//{%s}TextLine" % self.namespaces
+                ):
                     for line in lines.findall("{%s}String" % self.namespaces):
                         self.page_strings.append(line)
-            except:
+            except:  # TODO: Make except clause explicit
                 pass
         return self.page_strings
 
@@ -150,16 +165,17 @@ class Page(object):
                     )
                     graphical_elements = graphical_id + "=" + graphical_coords
                     self.page_images.append(graphical_elements)
-            except:
+            except:  # TODO: Make except clause explicit
                 pass
         return self.page_images
 
     @property
-    def content(self):
+    def content(self) -> str:
         """
-        Gets all words in page and contatenates together using ' ' as
+        Returns all words in page, contatenated together using ' ' as
         delimiter.
-        :return: content
-        :rtype: str or unicode
+
+        :return: Text content of page
+        :rtype: str
         """
         return " ".join(self.words)

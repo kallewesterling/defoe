@@ -1,25 +1,21 @@
-"""
-Given a filename create a defoe.books.archive.Archive.
-"""
-
 from defoe.books.archive import Archive
+from typing import Union, Optional
 
 
-def filename_to_object(filename):
+def filename_to_object(
+    filename: str,
+) -> tuple[Union[Archive, str], Optional[str]]:
     """
-    Given a filename create a defoe.books.archive.Archive.  If an error
-    arises during its creation this is caught and returned as a
-    string.
+    Given a filename, creates a defoe.books.archive.Archive.  If an error
+    arises during its creation this is caught and returned as a string.
 
     :param filename: filename
-    :type filename: str or unicode
+    :type filename: str
     :return: tuple of form (Archive, None) or (filename, error message),
-    if there was an error creating Archive
-    :rtype: tuple(defoe.books.archive.Archive | str or unicode, str or unicode)
+        if there was an error creating Archive
+    :rtype: tuple(defoe.books.archive.Archive | str, str)
     """
     try:
-        result = (Archive(filename), None)
+        return (Archive(filename), None)
     except Exception as exception:
-        result = (filename, str(exception))
-
-    return result
+        return (filename, str(exception))

@@ -15,26 +15,33 @@ Or newspapers conforming to the following DTDs:
 * LTO_issue.md
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from lxml import etree
-
 from defoe.papers.article import Article
 from defoe.spark_utils import open_stream
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Iterator
 
 
 class Issue(object):
     """
     Object model representation of an issue of a newspaper represented
     as an XML document.
+
+    :param filename: XML filename. If the filename cannot be parsed into valid
+        XML an empty document is created.
+    :type: filename: str
+    :raises Exception: Raises an Exception if the XML does not have an
+        ``issue`` element.
     """
 
     def __init__(self, filename):
         """
-        Constructor. If the filename cannot be parsed into valid XML
-        an empty document is created.
-
-        :param filename: XML filename
-        :type: filename: str or unicode
+        Constructor method.
         """
         self.filename = filename
         stream = open_stream(self.filename)
@@ -63,12 +70,15 @@ class Issue(object):
         newspaper_id = self.single_query("//issue/id/text()")
         if newspaper_id is None:
             # LTO_issue.md
-            newspaper_id = self.single_query("//issue/metadatainfo/PSMID/text()")
+            newspaper_id = self.single_query(
+                "//issue/metadatainfo/PSMID/text()"
+            )
         if newspaper_id is not None:
             self.newspaper_id = newspaper_id
 
         self.articles = [
-            Article(article, self.filename) for article in self.query(".//article")
+            Article(article, self.filename)
+            for article in self.query(".//article")
         ]
 
         # bl_ncnp_issue_apex.dtd, GALENP.dtd, LTO_issue.dtd
@@ -86,14 +96,14 @@ class Issue(object):
         except Exception:
             pass
 
-    def query(self, query):
+    def query(self, query: str) -> list:
         """
         Run XPath query.
 
         :param query: XPath query
-        :type query: str or unicode
+        :type query: str
         :return: list of query results or an empty list if the object
-        represents an empty document or any errors arose
+            represents an empty document
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         if not self.issue_tree:
@@ -103,38 +113,38 @@ class Issue(object):
         except AssertionError:
             return []
 
-    def single_query(self, query):
+    def single_query(self, query: str) -> str:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str or unicode
-        :return: query results or None if the object represents an
-        empty document or any errors arose
-        :rtype: str or unicode
+        :type query: str
+        :return: Query results or None if the object represents an empty
+            document
+        :rtype: str
         """
         result = self.query(query)
         if not result:
             return None
         return str(result[0])
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Article:
         """
         Given an article index, return the requested article.
 
-        :param index: article index
+        :param index: Article index
         :type index: int
         :return: Article object
-        :rtype: defoe.alto.article.Article
+        :rtype: defoe.papers.article.Article
         """
-        return self.articles(index)
+        return self.articles[index]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Article]:
         """
         Iterate over articles.
 
         :return: Article object
-        :rtype: defoe.alto.article.Article
+        :rtype: Iterator[defoe.papers.article.Article]
         """
         for article in self.articles:
             yield article

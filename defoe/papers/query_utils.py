@@ -31,7 +31,7 @@ def get_article_matches(
     tuple per keyword.
 
     :param issue: issue
-    :type issue: defoe.alto.issue.Issue
+    :type issue: defoe.papers.issue.Issue
     :param keywords: keywords
     :type keywords: list(str or unicode)
     :param preprocess_type: how words should be preprocessed
@@ -44,13 +44,23 @@ def get_article_matches(
     for keysentence in keysentences:
         for article in issue:
             sentence_match = None
-            clean_article = clean_article_as_string(article, defoe_path, os_type)
+            clean_article = clean_article_as_string(
+                article, defoe_path, os_type
+            )
             preprocess_article = preprocess_clean_article(
                 clean_article, preprocess_type
             )
-            sentence_match = get_sentences_list_matches(preprocess_article, keysentence)
+            sentence_match = get_sentences_list_matches(
+                preprocess_article, keysentence
+            )
             if sentence_match:
-                match = (issue.date.date(), issue, article, keysentence, clean_article)
+                match = (
+                    issue.date.date(),
+                    issue,
+                    article,
+                    keysentence,
+                    clean_article,
+                )
                 matches.append(match)
     return matches
 
@@ -102,7 +112,9 @@ def article_contains_word(
     return False
 
 
-def article_stop_words_removal(article, preprocess_type=PreprocessWordType.LEMMATIZE):
+def article_stop_words_removal(
+    article, preprocess_type=PreprocessWordType.LEMMATIZE
+):
     """
     Remove the stop words of an article.
 
@@ -123,7 +135,9 @@ def article_stop_words_removal(article, preprocess_type=PreprocessWordType.LEMMA
     return article_words
 
 
-def get_article_as_string(article, preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_article_as_string(
+    article, preprocess_type=PreprocessWordType.LEMMATIZE
+):
     """
     Return an article as a single string.
 
@@ -225,7 +239,9 @@ def get_concordance(
 
     concordance_words = []
     for word in article.words[start_idx:end_idx]:
-        concordance_words.append(query_utils.preprocess_word(word, preprocess_type))
+        concordance_words.append(
+            query_utils.preprocess_word(word, preprocess_type)
+        )
     return concordance_words
 
 
@@ -250,7 +266,9 @@ def clean_article_as_string(article, defoe_path, os_type):
     article_combined = "".join(article_separete)
 
     if (len(article_combined) > 1) and ("f" in article_combined):
-        article_clean = longsfix_sentence(article_combined, defoe_path, os_type)
+        article_clean = longsfix_sentence(
+            article_combined, defoe_path, os_type
+        )
         return article_clean
     else:
         return article_combined
@@ -275,7 +293,7 @@ def get_sentences_list_matches(text, keysentence):
     """
     Check which key-sentences from occurs within a string
     and return the list of matches.
-    
+
     Term count: The query counts as a “hint” every time that finds a term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated 10 times in an article, it will be counted as 10. In this way, we are basically calculating the “frequency of terms” over time.
 
     :param text: text
@@ -302,7 +320,7 @@ def get_sentences_list_matches(text, keysentence):
 
 def get_articles_list_matches(text, keysentence):
     """
-    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time. 
+    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time.
 
     Check which key-sentences from occurs within a string
     and return the list of matches.
@@ -331,7 +349,7 @@ def get_articles_list_matches(text, keysentence):
 
 def get_articles_text_matches(text, keysentence):
     """
-    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time. 
+    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time.
 
     Check which key-sentences from occurs within a string
     and return the list of matches.

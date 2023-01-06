@@ -1,26 +1,22 @@
-"""
-Given a filename create a defoe.generic_xml.document.Document.
-"""
-
 from defoe.generic_xml.document import Document
+from typing import Union, Optional
 
 
-def filename_to_object(filename):
+def filename_to_object(
+    filename: str,
+) -> tuple[Union[Document, str], Optional[str]]:
     """
     Given a filename create a defoe.generic_xml.document.Document. If
     an error arises during its creation this is caught and returned as
     a string.
 
     :param filename: filename
-    :type filename: str or unicode
+    :type filename: str
     :return: tuple of form (Document, None) or (filename, error message),
-    if there was an error creating Document
-    :rtype: tuple(defoe.generic_xml.document.Document | str or
-    unicode, str or unicode)
+        if there was an error creating Document
+    :rtype: tuple(defoe.generic_xml.document.Document | str, str)
     """
     try:
-        result = (Document(filename), None)
+        return (Document(filename), None)
     except Exception as exception:
-        result = (filename, str(exception))
-
-    return result
+        return (filename, str(exception))

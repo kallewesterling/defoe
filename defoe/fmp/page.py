@@ -3,18 +3,34 @@ Object model representation of a page represented as an XML file in METS/MODS
 format.
 """
 
+from __future__ import annotations
+
 from .textblock import TextBlock
 from .constants import FUZZ_METHOD, MIN_RATIO, AUTO_FILL, AUTO_OPACITY
 
 from lxml import etree
 from PIL import Image, ImageDraw
-from typing import Union
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .area import Area
+    from .document import Document
+    from typing import BinaryIO, Union, Iterator, Optional
 
 
 class Page(object):
     """
-    Object model representation of a page represented as an XML file in METS/
-    MODS format.
+    Object model representation of a page represented as an XML file in
+    METS/MODS format.
+
+    :param document: ``defoe.fmp.document.Document`` object corresponding to
+        document to which this page belongs
+    :type document: defoe.fmp.document.Document
+    :param code: Identifier for this page within an archive
+    :type code: str
+    :param source: File stream, defaults to the file stream from the file
+        holding the page via the given ``defoe.fmp.document.Document``
+    :type source: :class:`zipfile.ZipExt` or another file-like object, optional
     """
 
     # XPath Queries
@@ -28,18 +44,9 @@ class Page(object):
     TB_XPATH_ID = etree.XPath("//TextBlock/@ID")  # Textblock ID
     TB_XPATH = etree.XPath("//TextBlock")  # Textblock content
 
-    def __init__(self, document, code, source=None):
+    def __init__(self, document: Document, code: str, source: BinaryIO = None):
         """
-        Constructor.
-
-        :param document: Document object corresponding to document to
-        which this page belongs
-        :type document: defoe.alto.document.Document
-        :param code: identifier for this page within an archive
-        :type code: str
-        :param source: stream. If None then an attempt is made to
-        open the file holding the page via the given "document"
-        :type source: zipfile.ZipExt or another file-like object
+        Constructor method.
         """
 
         self.document = document
@@ -51,9 +58,27 @@ class Page(object):
 
         self.tree = etree.parse(self.source)
         self.page_tree = self.single_query(Page.PAGE_XPATH)
+
         self.width = int(self.page_tree.get("WIDTH"))
+        """
+        Returns ``defoe.fmp.page.Page``'s width in pixels
+
+        :rtype: int
+        """
+
         self.height = int(self.page_tree.get("HEIGHT"))
+        """
+        Returns ``defoe.fmp.page.Page``'s height in pixels
+
+        :rtype: int
+        """
+
         self.page_confidence = self.page_tree.get("PC")
+        """
+        Returns ``defoe.fmp.page.Page``'s confidence
+
+        :rtype: str
+        """
 
         # Try setting page_confidence to float
         try:
@@ -84,11 +109,29 @@ class Page(object):
         self.pc = self.page_confidence
         self.tb = self.textblocks
         self.tbs = self.textblocks
+        self.get_image_name = self.get_image_path
 
-    def crop(self, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
+    def crop(
+        self, x: int = 0, y: int = 0, width: int = 0, height: int = 0
+    ) -> Image.Image:
         """
-        should return the page image cropped to the provided coord...
-        i.e. test for image
+        Crops the page's image to the provided coordinates.
+
+        :param x: X coordinate in pixels of crop rectangle's start, defaults
+            to 0
+        :type x: int, optional
+        :param y: Y coordinate in pixels of crop rectangle's start, defaults
+            to 0
+        :type y: int, optional
+        :param width: Width in pixels of crop rectangle
+        :type width: int
+        :param height: Height in pixels of crop rectangle
+        :type height: int
+        :raises SyntaxError: If not the correct values (integers for ``x``,
+            ``y``, ``width`` and ``height``) where ``width`` and ``height`` is
+            over 0, a ``SyntaxError`` will be raised
+        :return: The ``defoe.fmp.page.Page``'s image, cropped
+        :rtype: PIL.Image.Image
         """
 
         if not all(
@@ -108,25 +151,31 @@ class Page(object):
 
         return self.image.crop([x, y, x + width, y + height])
 
-    def query(self, xpath_query):
+    def query(
+        self, xpath_query
+    ) -> list[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query.
 
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: list of query results or None if none
-        :rtype: list(lxml.etree.<MODULE>) (depends on query)
+        :return: A list of query results or an empty list if no result is
+            returned from query
+        :rtype: list[Union[etree._ElementUnicodeResult, etree._Element]],
+            depending on the query
         """
         return xpath_query(self.tree)
 
-    def single_query(self, xpath_query):
+    def single_query(
+        self, xpath_query
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: query result or None if none
-        :rtype: lxml.etree.<MODULE> (depends on query)
+        :return: The query's result or None if no result is returned
+        :rtype: Union[etree._ElementUnicodeResult, etree._Element] or None
         """
         result = self.query(xpath_query)
         if not result:
@@ -134,29 +183,46 @@ class Page(object):
         return result[0]
 
     @property
-    def areas(self):
+    def areas(self) -> list[Area]:
+        """
+        Returns a list of the ``defoe.fmp.page.Page``'s :class:`defoe.fmp.area.Area` objects.
+
+        (Calls :func:`~defoe.fmp.document.Document.get_areas_by_page_code`
+        with the current ``defoe.fmp.page.Page``'s code as its argument)
+
+        :return: The ``defoe.fmp.page.Page``'s areas as a list.
+        :rtype: list[:class:`defoe.fmp.area.Area`]
+        """
         if not self._areas:
             self._areas = self.document.get_areas_by_page_code(
                 selected_page_code=self.code
             )
 
-            # Select this page's areas, as we get back a dict
+            # Select this page's areas, as we get back a dict with one key--
+            # this page's code
             self._areas = self._areas[self.code]
+
         return self._areas
 
     @property
-    def textblocks(self) -> TextBlock:
+    def textblocks(self) -> Iterator[TextBlock]:
+        """
+        Iterate over textblocks.
+
+        :return: The ``defoe.fmp.page.Page``'s Textblocks
+        :rtype: Iterator[:class:`defoe.fmp.textblock.TextBlock`]
+        """
         for tb in self.query(Page.TB_XPATH):
             yield TextBlock(tb, self)
 
     @property
-    def words(self) -> list:
+    def words(self) -> list[str]:
         """
-        Gets all words in page. These are then saved in an attribute,
-        so the words are only retrieved once.
+        Gets all the words in the ``defoe.fmp.page.Page``. These are then saved in an
+        attribute, so the words are only retrieved once.
 
-        :return: words
-        :rtype: list(str)
+        :return: List of words on ``defoe.fmp.page.Page``
+        :rtype: list[str]
         """
         if not self._words:
             self._words = list(map(str, self.query(Page.WORDS_XPATH)))
@@ -165,11 +231,11 @@ class Page(object):
     @property
     def word_confidences(self):
         """
-        Gets all word confidences (wc) in page. These are then saved in an
-        attribute, so the wc are only retrieved once.
+        Returns all the word confidences in the ``defoe.fmp.page.Page``. These are then saved
+        in an attribute, so the word confidences are only retrieved once.
 
-        :return: wc
-        :rtype: list(str)
+        :return: List of word confidences on ``defoe.fmp.page.Page``
+        :rtype: list[float]
         """
         if not self._word_confidences:
             self._word_confidences = list(self.query(Page.WC_XPATH))
@@ -183,13 +249,14 @@ class Page(object):
         return self._word_confidences
 
     @property
-    def character_confidences(self) -> list:
+    def character_confidences(self) -> list[float]:
         """
-        Gets all character confidences (cc) in page. These are then saved in
-        an attribute, so the cc are only retrieved once.
+        Returns all the character confidences in the ``defoe.fmp.page.Page``. These are then
+        saved in an attribute, so the character confidences are only retrieved
+        once.
 
-        :return: cc
-        :rtype: list(str)
+        :return: List of character confidences on ``defoe.fmp.page.Page``
+        :rtype: list[float]
         """
         if not self._character_confidences:
             self._character_confidences = list(self.query(Page.CC_XPATH))
@@ -207,11 +274,11 @@ class Page(object):
     @property
     def strings(self) -> list:
         """
-        Gets all strings in page. These are then saved in an attribute, so the
-        strings are only retrieved once.
+        Returns all strings in the ``defoe.fmp.page.Page``. These are then saved in an
+        attribute, so the strings are only retrieved once.
 
-        :return: strings
-        :rtype: list(lxml.etree._ElementStringResult)
+        :return: List of strings on ``defoe.fmp.page.Page``
+        :rtype: list[lxml.etree._ElementStringResult]
         """
         if not self._strings:
             self._strings = self.query(Page.STRINGS_XPATH)
@@ -220,11 +287,11 @@ class Page(object):
     @property
     def textblock_ids(self) -> list:
         """
-        Gets all strings in page. These are then saved in an attribute, so the
-        strings are only retrieved once.
+        Returns all strings in the ``defoe.fmp.page.Page``. These are then saved in an
+        attribute, so the strings are only retrieved once.
 
-        :return: strings
-        :rtype: list(lxml.etree._ElementStringResult)
+        :return: List of strings on ``defoe.fmp.page.Page``
+        :rtype: list[lxml.etree._ElementStringResult]
         """
         if not self._textblock_ids:
             self._textblock_ids = list(self.query(Page.TB_XPATH_ID))
@@ -233,11 +300,11 @@ class Page(object):
     @property
     def graphics(self) -> list:
         """
-        Gets all graphical elements in page. These are then saved in an
-        attribute, so the graphical elements are only retrieved once.
+        Returns all graphical elements in the ``defoe.fmp.page.Page``. These are then saved
+        in an attribute, so the graphical elements are only retrieved once.
 
-        :return: images
-        :rtype: list(lxml.etree._Element)
+        :return: List of graphical elements on ``defoe.fmp.page.Page``
+        :rtype: list[lxml.etree._Element]
         """
         if not self._graphics:
             self._graphics = self.query(Page.GRAPHICS_XPATH)
@@ -246,16 +313,22 @@ class Page(object):
     @property
     def content(self) -> str:
         """
-        Gets all words in page and concatenates together using ' ' as
-        delimiter.
+        Returns all the words in the ``defoe.fmp.page.Page``, concatenated together using ' '
+        as delimiter.
 
-        :return: content
+        :return: Content
         :rtype: str
         """
         return " ".join(self.words)
 
     @property
     def image(self) -> Image.Image:
+        """
+        Returns the ``defoe.fmp.page.Page``'s image.
+
+        :return: Page image
+        :rtype: PIL.Image.Image
+        """
         if not self._image:
             self._image = self.document.archive.open_image(
                 self.document.code, self.code
@@ -264,11 +337,29 @@ class Page(object):
 
     @property
     def image_path(self) -> Union[str, None]:
+        """
+        Returns the path to the ``defoe.fmp.page.Page``'s image. (Calls
+        :func:`~defoe.fmp.page.Page.get_image_path`)
+
+        :return: Page image path
+        :rtype: str
+        """
         if not self._image_path:
-            self._image_path = self.get_image_name()
+            self._image_path = self.get_image_path()
         return self._image_path
 
-    def get_image_name(self, document_code=None, page_code=None):
+    def get_image_path(self, document_code=None, page_code=None):
+        """
+        Returns the path to a given ``defoe.fmp.document.Document``'s ``defoe.fmp.page.Page``'s image.
+        (Calls :func:`~defoe.fmp.archive.Archive.get_image_path`)
+
+        :param document_code: Page file code,
+        :type document_code: str, optional
+        :param page_code: File code
+        :type page_code: str, optional
+        :return: Page image path
+        :rtype: str
+        """
         if not document_code:
             document_code = self.document.code
         if not page_code:
@@ -278,8 +369,17 @@ class Page(object):
 
     def highlight(self, image=None, highlight=[]):
         """
+        TODO
         image: (optional) image
         highlight: [(x0, y0, x1, y1, "")]
+
+        :param image: TODO
+        :type image: TODO
+        :param highlight: TODO
+        :type highlight: TODO
+        :raises TypeError: TODO
+        :return: TODO
+        :rtype: TODO
         """
 
         if not image:
@@ -334,9 +434,40 @@ class Page(object):
         sort_reverse: bool = True,
         add_textblock: bool = False,
         regex: bool = False,
-    ) -> list:
+    ) -> list[tuple, int, int, int, int, str, int]:
         """
-        This method runs match on each textblock for the Page.
+        This method runs :func:`~defoe.fmp.textblock.TextBlock.match` for each
+        ``TextBlock`` on the ``defoe.fmp.page.Page``. See the documentation of
+        :func:`TextBlock's match <defoe.fmp.textblock.TextBlock.match>`
+        for information about the possible parameters.
+
+        :param token: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type token: Union[str, list]
+        :param normalise: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type normalise: bool, optional
+        :param include_numbers: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type include_numbers: bool, optional
+        :param lemmatise: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type lemmatise: bool, optional
+        :param stem: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type stem: bool, optional
+        :param fuzz_method: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type fuzz_method: str, optional
+        :param min_ratio: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type min_ratio: float, optional
+        :param all_results: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type all_results: bool, optional
+        :param sort_results: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type sort_results: bool, optional
+        :param sort_reverse: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type sort_reverse: bool, optional
+        :param add_textblock: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type add_textblock: bool, optional
+        :param regex: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :type regex: bool, optional
+
+        :return: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :rtype: list[tuple]
         """
         return [
             match
@@ -358,6 +489,14 @@ class Page(object):
         ]
 
     def get_cropped_areas(self, include_areas=[]):
+        """
+        TODO
+
+        :param include_areas: TODO
+        :type include_areas: TODO
+        :return: TODO
+        :rtype: TODO
+        """
         areas = self.areas
         if include_areas:
             areas = [x for x in areas if x.id in include_areas]

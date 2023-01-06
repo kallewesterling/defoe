@@ -84,3 +84,5 @@ error.yml
 #Geoparser
 geoparser-v1.1/
 georesolve/
+
+test.ipynb

@@ -1,3 +1,13 @@
+import mimetypes
+
+# Image types
+mimetypes.init()
+IMAGE_TYPES = [
+    type
+    for type, desc in mimetypes.types_map.items()
+    if desc.split("/")[0] == "image"
+]
+
 # For matching
 FUZZ_METHOD = "token_set_ratio"
 MIN_RATIO = 85

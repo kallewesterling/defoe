@@ -2,10 +2,27 @@
 Query-related utility functions and types.
 """
 
-import spacy
-from spacy.tokens import Doc
-from spacy.vocab import Vocab
-from nltk.stem import PorterStemmer, WordNetLemmatizer
+try:
+    import spacy
+    from spacy.tokens import Doc
+    from spacy.vocab import Vocab
+except ImportError:
+    raise ImportError(
+        "SpaCy cannot be loaded. Make sure you have installed it."
+    )
+
+try:
+    from nltk.stem import PorterStemmer, WordNetLemmatizer
+except ImportError:
+    raise ImportError(
+        "NLTK stemmers and lemmatizers cannot be loaded. Make sure you have installed them."  # noqa
+    )
+
+try:
+    from elasticsearch import Elasticsearch
+except ImportError:
+    # print("Warning: Could not import ElasticSearch. Functions related to ES won't work.") # noqa
+    pass
 
 from lxml import etree
 import enum
@@ -31,28 +48,27 @@ class PreprocessWordType(enum.Enum):
     NORMALIZE_NUM = 5  # Normalize word including numbers
 
 
-def parse_preprocess_word_type(type_str):
+PREPROCESS_WORD_TYPES = [
+    k.lower() for k in list(PreprocessWordType.__members__.keys())
+]
+
+
+def parse_preprocess_word_type(type_str: str) -> PreprocessWordType:
     """
-    Parse a string into a PreprocessWordType.
+    Parse a string into a ``defoe.query_utils.PreprocessWordType``.
 
     :param type_str: One of none|normalize|stem|lemmatize
-    :type type_str: str or unicode
+    :type type_str: str
     :return: word preprocessing type
-    :rtype: PreprocessingWordType
-    :raises: ValueError if "preprocess" is not one of the expected values
+    :rtype: defoe.query_utils.PreprocessWordType
+    :raises ValueError: If "preprocess" is not one of the expected values
     """
 
     try:
         preprocess_type = PreprocessWordType[type_str.upper()]
     except KeyError:
         raise KeyError(
-            "preprocess must be one of {} but is '{}'".format(
-                [
-                    k.lower()
-                    for k in list(PreprocessWordType.__members__.keys())
-                ],
-                type_str,
-            )
+            f"preprocess must be one of {PREPROCESS_WORD_TYPES} but is '{type_str}'"  # noqa
         )
 
     return preprocess_type
@@ -60,17 +76,17 @@ def parse_preprocess_word_type(type_str):
 
 def extract_preprocess_word_type(
     config: dict, default: PreprocessWordType = PreprocessWordType.LEMMATIZE
-):
+) -> PreprocessWordType:
     """
     Extract PreprocessWordType from "preprocess" dictionary value in query
     configuration.
 
-    :param config: config
+    :param config: Configuration dictionary
     :type config: dict
     :param default: default value if "preprocess" is not found
-    :type default: PreprocessingWordType
+    :type default: defoe.query_utils.PreprocessWordType
     :return: word preprocessing type
-    :rtype: PreprocessingWordType
+    :rtype: defoe.query_utils.PreprocessWordType
     :raises: ValueError if "preprocess" is not one of
     none|normalize|stem|lemmatize
     """
@@ -82,18 +98,18 @@ def extract_preprocess_word_type(
     return preprocess_type
 
 
-def extract_data_file(config: dict, default_path: str):
+def extract_data_file(config: dict, default_path: str) -> str:
     """
     Extract data file path from "data" dictionary value in query configuration.
 
-    :param config: config
+    :param config: Configuration dictionary
     :type config: dict
-    :param default_path: default path to prepend to data file path if data
-    file path is a relative path
-    :type default_path: str or unicode
-    :return: file path
-    :rtype: str or unicode
-    :raises: KeyError if "data" is not in config
+    :param default_path: Default path to prepend to data file path if data
+        file path is a relative path
+    :type default_path: str
+    :return: File path
+    :rtype: str
+    :raises KeyError: If "data" is not in config
     """
 
     if "data" not in config:
@@ -113,7 +129,7 @@ def extract_window_size(config: dict, default=10):
     """
     Extract window size from "window" dictionary value in query configuration.
 
-    :param config: config
+    :param config: Configuration dictionary
     :type config: dict
     :param default: default value if "window" is not found
     :type default: int
@@ -141,7 +157,7 @@ def extract_years_filter(config: dict):
 
     years_filter: 1780-1918
 
-    :param config: config
+    :param config: Configuration dictionary
     :type config: dict
     :return: min_year, max_year
     :rtype: int, int
@@ -157,17 +173,17 @@ def extract_years_filter(config: dict):
     return year_min, year_max
 
 
-def extract_output_path(config: dict):
+def extract_output_path(config: dict) -> str:
     """
     Extract output path from "output_path" dictionary value the query
     configuration.
 
     output_path: /home/users/rfilguei2/LwM/defoe/OUTPUT/
 
-    :param config: config
+    :param config: Configuration dictionary
     :type config: dict
-    :return: out_file
-    :rtype: string
+    :return: A path to an output directory, defaults to ``.``
+    :rtype: str
     """
 
     if "output_path" not in config:
@@ -178,7 +194,7 @@ def extract_output_path(config: dict):
     return output_path
 
 
-def extract_fuzzy(config: dict, kind="target"):
+def extract_fuzzy(config: dict, kind: str = "target") -> bool:
     """
     Extract boolean for fuzzy search dictionary value from the query
     configuration file.
@@ -186,11 +202,11 @@ def extract_fuzzy(config: dict, kind="target"):
     fuzzy_target: False
     fuzzy_keyword: True
 
-    :param config: config
+    :param config: Configuration dictionary
     :type config: dict
-    :param kind: kind
+    :param kind: Kind, defaults to ``target``
     :type kind: str
-    :return: fuzzy_search
+    :return: Boolean for fuzzy search, defaults to False
     :rtype: bool
     """
 
@@ -209,91 +225,94 @@ def extract_fuzzy(config: dict, kind="target"):
     return False
 
 
-def normalize(word):
+def normalize(word: str) -> str:
     """
-    Normalize a word by converting it to lower-case and removing all
-    characters that are not 'a',...,'z'.
+    Normalize a word by converting it to lowercase and removing all
+    characters that are not ``a-z`` or ``A-Z``.
 
     :param word: Word to normalize
-    :type word: str or unicode
-    :return: normalized word
-    :rtype word: str or unicode
+    :type word: str
+    :return: Normalized word
+    :rtype word: str
     """
 
     return re.sub(NON_AZ_REGEXP, "", word.lower())
 
 
-def normalize_including_numbers(word):
+def normalize_including_numbers(word: str) -> str:
     """
-    Normalize a word by converting it to lower-case and removing all
-    characters that are not 'a',...,'z' or '1' to '9'.
+    Normalize a word by converting it to lowercase and removing all
+    characters that are not ``a-z``, ``A-Z`` or ``0-9``.
 
     :param word: Word to normalize
-    :type word: str or unicode
-    :return: normalized word
-    :rtype word: str or unicode
+    :type word: str
+    :return: Normalized word
+    :rtype word: str
     """
 
     return re.sub(NON_AZ_19_REGEXP, "", word.lower())
 
 
-def stem(word):
+def stem(word: str) -> str:
     """
-    Reducing word to its word stem, base or root form (for example,
-    books - book, looked - look). The main two algorithms are:
+    Reducing word to its word stem, base or root form (for example, books -
+    book, looked - look). The main two algorithms are:
 
-    Porter stemming algorithm: removes common morphological and
-        inflexional endings from words, used here
-        (nltk.stem.PorterStemmer).
-    Lancaster stemming algorithm: a more aggressive stemming
-        algorithm.
+    - Porter stemming algorithm: removes common morphological and inflexional
+    endings from words, used here (nltk.stem.PorterStemmer).
+    - Lancaster stemming algorithm: a more aggressive stemming algorithm.
 
-    Like lemmatization, stemming reduces inflectional forms to a
-    common base form. As opposed to lemmatization, stemming simply
-    chops off inflections.
+    Like lemmatization, stemming reduces inflectional forms to a common base
+    form. As opposed to lemmatization, stemming simply chops off inflections.
 
     :param word: Word to stemm
-    :type word: str or unicode
-    :return: normalized word
-    :rtype word: str or unicode
+    :type word: str
+    :return: Normalized word
+    :rtype word: str
     """
 
+    # TODO: If we set this on module level instead, does that save memory, i.e. speed?
     stemmer = PorterStemmer()
 
     return stemmer.stem(word)
 
 
-def lemmatize(word):
+def lemmatize(word: str) -> str:
     """
-    Lemmatize a word, using a lexical knowledge bases to get the
-    correct base forms of a word.
+    Lemmatize a word, using a lexical knowledge bases to get the correct base
+    forms of a word.
 
-    Like stemming, lemmatization reduces inflectional forms to a
-    common base form. As opposed to stemming, lemmatization does not
-    simply chop off inflections. Instead it uses lexical knowledge
-    bases to get the correct base forms of words.
+    Like stemming, lemmatization reduces inflectional forms to a common base
+    form. As opposed to stemming, lemmatization does not simply chop off
+    inflections. Instead it uses lexical knowledge bases to get the correct
+    base forms of words.
 
     :param word: Word to normalize
-    :type word: str or unicode
-    :return: normalized word
-    :rtype word: str or unicode
+    :type word: str
+    :return: Normalized word
+    :rtype word: str
     """
+
+    # TODO: If we set this on module level instead, does that save memory, i.e. speed?
     lemmatizer = WordNetLemmatizer()
+
     return lemmatizer.lemmatize(word)
 
 
-def preprocess_word(word, preprocess_type=PreprocessWordType.NONE):
+def preprocess_word(
+    word: str, preprocess_type: PreprocessWordType = PreprocessWordType.NONE
+) -> str:
     """
     Preprocess a word by applying different treatments
     e.g. normalization, stemming, lemmatization.
 
-    :param word: word
-    :type word: string or unicode
+    :param word: Word
+    :type word: str
     :param preprocess_type: normalize, normalize and stem, normalize
-    and lemmatize, none (default)
+        and lemmatize, none (default)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: preprocessed word
-    :rtype: string or unicode
+    :return: Preprocessed word
+    :rtype: str
     """
 
     if preprocess_type == PreprocessWordType.NORMALIZE:
@@ -318,7 +337,13 @@ def preprocess_word(word, preprocess_type=PreprocessWordType.NONE):
     return preprocessed_word
 
 
-def longsfix_sentence(sentence, defoe_path, os_type):
+def longsfix_sentence(sentence: str, defoe_path: str, os_type: str):
+    """
+    Unsure of what this function does; leaving it private for docs for now.
+
+    :meta private:
+    """
+
     if "'" in sentence:
         sentence = sentence.replace("'", "'\\''")
 
@@ -353,7 +378,7 @@ def longsfix_sentence(sentence, defoe_path, os_type):
             stdout_value = stdout
 
         fix_s = stdout_value.decode("utf-8").split("\n")[0]
-    except:
+    except:  # TODO: Refactor bare except to explicit
         fix_s = sentence
     if re.search("[aeiou]fs", fix_s):
         fix_final = re.sub("fs", "ss", fix_s)
@@ -362,26 +387,88 @@ def longsfix_sentence(sentence, defoe_path, os_type):
     return fix_final
 
 
-def spacy_nlp(text, lang_model):
-    nlp = spacy.load(lang_model)
+def spacy_nlp(
+    text: str, lang_model: str = "en_core_web_sm"
+) -> spacy.tokens.doc.Doc:
+    """
+    Loads SpaCy with a given language model and runs its ``nlp`` function on
+    the given text.
+
+    :param text: The text for which you want to create a
+        ``spacy.tokens.doc.Doc``.
+    :type text: str
+    :param lang_model: Language model to apply, defaults to ``en_core_web_sm``
+    :type lang_model: str
+    :return: A SpaCy container for accessing linguistic annotations
+    :rtype: spacy.tokens.doc.Doc
+    """
+
+    try:
+        nlp = spacy.load(lang_model)
+    except OSError:
+        raise OSError("Language model cannot be found.")
+
     doc = nlp(text)
+
     return doc
 
 
-def serialize_doc(doc):
-    nlp = spacy.load("en")
+def serialize_doc(
+    doc: spacy.tokens.doc.Doc, lang_model: str = "en"
+) -> tuple[bytes, bytes]:
+    """
+    Serializes a given SpaCy container for accessing linguistic annotations.
+
+    :param doc: A SpaCy container for accessing linguistic annotations
+    :type doc: spacy.tokens.doc.Doc
+    :param lang_model: Language model to apply, defaults to ``en``
+    :type lang_model: str
+    :return: A tuple consisting of two bytes values: one for the SpaCy
+        container for accessing linguistic annotations, the other for the
+        storage class for SpaCy's vocabulary
+    :rtype: spacy.tokens.doc.Doc
+    """
+
+    nlp = spacy.load(lang_model)
     vocab_bytes = nlp.vocab.to_bytes()
     doc_bytes = doc.to_bytes()
     return doc_bytes, vocab_bytes
 
 
-def serialize_spacy(text):
-    doc = spacy_nlp(text)
-    doc_bytes, vocab_bytes = serialize_doc(doc)
+def serialize_spacy(
+    text: str, lang_model: str = "en_core_web_sm"
+) -> list[bytes, bytes]:
+    """
+    Serializes a given SpaCy container for accessing linguistic annotations
+    and a storage class for SpaCy's vocabulary, based on a given text.
+
+    :param text: The text for which you want to create a
+        ``spacy.tokens.doc.Doc`` which will be serialized through the function
+    :type text: str
+    Language model to apply, defaults to ``en_core_web_sm``
+    :type lang_model: str
+    :return: A list consisting of two bytes values: one for the SpaCy
+        container for accessing linguistic annotations, the other for the
+        storage class for SpaCy's vocabulary
+    :rtype: list[bytes, bytes]
+    """
+
+    doc = spacy_nlp(text=text, lang_model=lang_model)
+    doc_bytes, vocab_bytes = serialize_doc(doc, lang_model=lang_model)
     return [doc_bytes, vocab_bytes]
 
 
-def deserialize_doc(serialized_bytes):
+def deserialize_doc(serialized_bytes: tuple[bytes, bytes]):
+    """
+    Deserializes a given SpaCy container for accessing linguistic annotations.
+
+    :param serialized_bytes: A tuple of two serialized bytes lengths
+        representing a SpaCy container for accessing linguistic annotations
+        and a storage class for SpaCy's vocabulary
+    :type serialized_bytes: tuple[bytes, bytes]
+    :return: SpaCy container for accessing linguistic annotations
+    :rtype: spacy.tokens.doc.Doc
+    """
     vocab = Vocab()
     doc_bytes = serialized_bytes[0]
     vocab_bytes = serialized_bytes[1]
@@ -390,19 +477,50 @@ def deserialize_doc(serialized_bytes):
     return doc
 
 
-def display_spacy(doc):
-    disp_ent = ""
+def display_spacy(doc: spacy.tokens.doc.Doc):
+    """
+    For a given SpaCy container for accessing linguistic annotations, this
+    function will display its entities, if the container has any.
+
+    :param doc: SpaCy container for accessing linguistic annotations
+    :type doc: spacy.tokens.doc.Doc
+    :return: True
+    :rtype: bool
+    """
     if doc.ents:
-        disp_ent = spacy.displacy.render(doc, style="ent")
-    return disp_ent
+        spacy.displacy.render(doc, style="ent")
+    return True
 
 
-def spacy_entities(doc):
-    entities = [(i, i.label_, i.label) for i in doc.ents]
-    return entities
+def spacy_entities(
+    doc: spacy.tokens.doc.Doc,
+) -> list[tuple[spacy.tokens.span.Span, str, int]]:
+    """
+    Returns a list of the SpaCy recognised entities in a given SpaCy container
+    for accessing linguistic annotations.
+
+    :param doc: SpaCy container for accessing linguistic annotations
+    :type doc: spacy.tokens.doc.Doc
+    :return: A list of tuples consisting of a SpaCy span (see
+        spacy.tokens.span.Span, a string representation of the label and an
+        integer representing the label)
+    :rtype: list[tuple[spacy.tokens.span.Span, str, int]]
+    """
+    return [(i, i.label_, i.label) for i in doc.ents]
 
 
-def xml_geo_entities(doc):
+def xml_geo_entities(doc: spacy.tokens.doc.Doc) -> tuple[int, str]:
+    """
+    Returns XML for placenames for toponyms in a given SpaCy container for
+    accessing linguistic annotations, and a flag for whether placenames have
+    been detected in the container by SpaCy.
+
+    :param doc: SpaCy container for accessing linguistic annotations
+    :type doc: spacy.tokens.doc.Doc
+    :return: A tuple consisting of a flag indicating whether placenames have
+        been detected and a string with XML of placenames.
+    :rtype: tuple[int, str]
+    """
     id = 0
     xml_doc = "<placenames> "
     flag = 0
@@ -417,7 +535,18 @@ def xml_geo_entities(doc):
     return flag, xml_doc
 
 
-def xml_geo_entities_snippet(doc):
+def xml_geo_entities_snippet(
+    doc: spacy.tokens.doc.Doc,
+) -> tuple[int, str, dict]:
+    """
+    :param doc: SpaCy container for accessing linguistic annotations
+    :type doc: spacy.tokens.doc.Doc
+    :return: A tuple consisting of a flag indicating whether placenames have
+        been detected and a string with XML of placenames and a dictionary
+        with a key identifier and a snippet of -5/+5 words around the
+        identified placename.
+    :rtype: tuple[int, str, dict]
+    """
     snippet = {}
     id = 0
     xml_doc = "<placenames> "
@@ -454,7 +583,13 @@ def xml_geo_entities_snippet(doc):
     return flag, xml_doc, snippet
 
 
-def georesolve_cmd(in_xml, defoe_path, gazetteer, bounding_box):
+def georesolve_cmd(in_xml, defoe_path, gazetteer, bounding_box) -> str:
+    """
+    Function where Rosa used ``geoground`` script for georesolving placenames
+    in XML.
+
+    :meta private:
+    """
     georesolve_xml = ""
     attempt = 0
     flag = 1
@@ -494,13 +629,20 @@ def georesolve_cmd(in_xml, defoe_path, gazetteer, bounding_box):
     return georesolve_xml
 
 
-def coord_xml(geo_xml):
+def coord_xml(geo_xml: str) -> dict:
+    """
+    Function connected to georesolve_cmd above, which generates a dictionary
+    with a toponym name and ID as key and its values are tuples consisting of,
+    among other things, latitude and longitude values.
+
+    :meta private:
+    """
     dResolvedLocs = {}
     if len(geo_xml) > 5:
         root = etree.fromstring(geo_xml)
         for child in root:
-            toponymName = child.attrib["name"]
-            toponymId = child.attrib["id"]
+            toponym_name = child.attrib["name"]
+            toponym_id = child.attrib["id"]
             latitude = ""
             longitude = ""
             pop = ""
@@ -518,14 +660,14 @@ def coord_xml(geo_xml):
                         in_cc = subchild.attrib["in-cc"]
                     if "type" in subchild.attrib:
                         type = subchild.attrib["type"]
-                    dResolvedLocs[toponymName + "-" + toponymId] = (
+                    dResolvedLocs[toponym_name + "-" + toponym_id] = (
                         latitude,
                         longitude,
                         pop,
                         in_cc,
                         type,
                     )
-        dResolvedLocs[toponymName + "-" + toponymId] = (
+        dResolvedLocs[toponym_name + "-" + toponym_id] = (
             latitude,
             longitude,
             pop,
@@ -537,7 +679,14 @@ def coord_xml(geo_xml):
     return dResolvedLocs
 
 
-def coord_xml_snippet(geo_xml, snippet):
+def coord_xml_snippet(geo_xml: str, snippet: dict):
+    """
+    Same as ``coord_xml`` above but here joined with snippet (generated
+    by ``xml_geo_entities_snippet`` above) which generates a dictionary,
+    which values includes the snippet around the coordinates.
+
+    :meta private:
+    """
     dResolvedLocs = {}
     if len(geo_xml) > 5:
         root = etree.fromstring(geo_xml)
@@ -588,6 +737,11 @@ def coord_xml_snippet(geo_xml, snippet):
 
 
 def geomap_cmd(in_xml, defoe_path, os_type, gazetteer, bounding_box):
+    """
+    Another georesolving function that uses ``geoground``.
+
+    :meta private:
+    """
     geomap_html = ""
     attempt = 0
     if "'" in in_xml:
@@ -624,6 +778,12 @@ def geomap_cmd(in_xml, defoe_path, os_type, gazetteer, bounding_box):
 
 
 def geoparser_cmd(text, defoe_path, os_type, gazetteer, bounding_box):
+    """
+    Another georesolving function that uses ``geoparser-v1.1`` and
+    ``georesolve``.
+
+    :meta private:
+    """
     attempt = 0
     flag = 1
     geoparser_xml = ""
@@ -671,6 +831,9 @@ def geoparser_cmd(text, defoe_path, os_type, gazetteer, bounding_box):
 
 
 def geoparser_coord_xml(geo_xml):
+    """
+    :meta private:
+    """
     dResolvedLocs = dict()
     try:
         root = etree.fromstring(geo_xml)
@@ -718,6 +881,9 @@ def geoparser_coord_xml(geo_xml):
 
 
 def geoparser_text_xml(geo_xml):
+    """
+    :meta private:
+    """
     text_ER = []
     try:
         root = etree.fromstring(geo_xml)
@@ -751,72 +917,77 @@ def geoparser_text_xml(geo_xml):
 
 def create_es_index(es_index, force_creation):
     """
-    Create specified index if it doesn't already exist
+    Create specified ElasticSearch index if it doesn't already exist.
+
     :param es_index: the name of the ES index
-    :param force_creation: delete the original index and create a brand new index
-    :return: bool created
+    :type es_index: TODO
+    :param force_creation: delete the original index and create a brand new
+        index
+    :type force_creation: bool
+    :return: Boolean representing whether the index was created or not
+    :rtype: bool
     """
     created = False
     es_index_settings = {
         "settings": {"number_of_shards": 1, "number_of_replicas": 0},
         "mappings": {
             "properties": {
-                settings.TITLE: {
+                "settings.TITLE": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.AUTHOR: {
+                "settings.AUTHOR": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.EDITION: {
+                "settings.EDITION": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.YEAR: {
+                "settings.YEAR": {
                     "type": "text",
                     "fields": {"date": {"type": "date", "format": "yyyy"}},
                 },
-                settings.PLACE: {
+                "settings.PLACE": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.ARCHIVE_FILENAME: {
+                "settings.ARCHIVE_FILENAME": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.SOURCE_TEXT_FILENAME: {
+                "settings.SOURCE_TEXT_FILENAME": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.TEXT_UNIT: {
+                "settings.TEXT_UNIT": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.TEXT_UNIT_ID: {
+                "settings.TEXT_UNIT_ID": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.NUM_TEXT_UNIT: {
+                "settings.NUM_TEXT_UNIT": {
                     "type": "long",
                 },
-                settings.TYPE_ARCHIVE: {
+                "settings.TYPE_ARCHIVE": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.MODEL: {
+                "settings.MODEL": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.SOURCE_TEXT_CLEAN: {
+                "settings.SOURCE_TEXT_CLEAN": {
                     "type": "text",
                     "fields": {"keyword": {"type": "keyword"}},
                 },
-                settings.NUM_WORDS: {
+                "settings.NUM_WORDS": {
                     "type": "text",
                     "fields": {"integer": {"type": "integer"}},
                 },
-                settings.BOOK_ID: {
+                "settings.BOOK_ID": {
                     "type": "text",
                     "fields": {"integer": {"type": "integer"}},
                 },
@@ -851,7 +1022,29 @@ def create_es_index(es_index, force_creation):
         return created
 
 
-def get_config(config_file, optional=False):
+def get_config(config_file: str, optional=False):
+    """
+    This function attempts to open a configuration file. If ``optional`` is
+    set to ``True`` and no (valid) configuration file can be found, it will
+    return an empty dictionary rather than crashing.
+
+    :param config_file: Path to a configuration file
+    :type config_file: str
+    :param optional: Whether a file is required or optional, defaults to
+        ``False``
+    :type optional: bool
+    :raises FileNotFoundError: If the configuration file cannot be found and
+        ``optional`` is set to ``False``
+    :raises SyntaxError: If the configuration file path was not provided as
+        string
+    :return: A configuration dictionary
+    :rtype: dict
+    """
+    if not isinstance(config_file, str):
+        raise SyntaxError(
+            f"The name of the configuration file must be provided as a string. (Current value: {config_file}.)"  # noqa
+        )
+
     try:
         with open(config_file, "r") as f:
             return yaml.safe_load(f)
@@ -860,15 +1053,22 @@ def get_config(config_file, optional=False):
             return {}
 
         raise FileNotFoundError(e)
-    except TypeError as e:
-        raise RuntimeError(
-            f"The name of the configuration file must be provided as a string. (Current value: {config_file}.)"
-        )
 
 
 def get_normalized_keywords(
-    config_file, preprocess_type=PreprocessWordType.NONE
-):
+    config_file: str,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NONE,
+) -> list[str]:
+    """
+    Extracts the keywords from a configuration file and normalizes them
+    according to a provided preprocessing type parameter.
+
+    :param config_file: Path to a configuration file
+    :type config_file: str
+    :return: A list of processed keywords
+    :rtype: list[str]
+    """
+
     with open(config_file, "r") as f:
         if preprocess_type:
             return [preprocess_word(word, preprocess_type) for word in list(f)]
