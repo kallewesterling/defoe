@@ -3,7 +3,14 @@ Object model representation of a page represented as an XML file in
 METS/MODS format.
 """
 
+from __future__ import annotations
+
 from lxml import etree
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .document import Document
+    from typing import BinaryIO, Optional
 
 # FIXME: This needs docstring and typing fixing
 
@@ -17,7 +24,7 @@ class Page(object):
         which this page belongs
     :type document: defoe.alto.document.Document
     :param code: Identifier for this page within an archive
-    :type code: str or unicode
+    :type code: str
     :param source: Stream. If None then an attempt is made to
         open the file holding the page via the given "document"
     :type source: zipfile.ZipExt or another file-like object
@@ -30,7 +37,9 @@ class Page(object):
     WC_XPATH = etree.XPath("//String/@WC")
     CC_XPATH = etree.XPath("//String/@CC")
 
-    def __init__(self, document, code, source=None):
+    def __init__(
+        self, document: Document, code: str, source: Optional[BinaryIO] = None
+    ):
         """
         Constructor method.
         """
@@ -49,26 +58,26 @@ class Page(object):
         self.page_wc = None
         self.page_cc = None
 
-    def query(self, xpath_query):
+    def query(self, xpath_query: etree.XPath) -> list:
         """
         Run XPath query.
 
         :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: list of query results or None if none
+        :return: List of query results or None if none
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return xpath_query(self.tree)
 
-    def single_query(self, xpath_query):
+    def single_query(self, xpath_query: etree.XPath):
         """
         Run XPath query and return first result.
 
         :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: query result or None if none
+        :return: Query result or None if none
         :rtype: lxml.etree.<MODULE> (depends on query)
         """
         result = self.query(xpath_query)
@@ -77,13 +86,13 @@ class Page(object):
         return result[0]
 
     @property
-    def words(self):
+    def words(self) -> list[str]:
         """
-        Gets all words in page. These are then saved in an attribute,
-        so the words are only retrieved once.
+        Gets all words in page. These are then saved in an attribute, so the
+        words are only retrieved once.
 
-        :return: words
-        :rtype: list(str or unicode)
+        :return: Words
+        :rtype: list[str]
         """
         if not self.page_words:
             self.page_words = list(map(str, self.query(Page.WORDS_XPATH)))
@@ -92,10 +101,10 @@ class Page(object):
     @property
     def wc(self):
         """
-        Gets all word confidences (wc)  in page. These are then saved in an attribute,
-        so the wc are only retrieved once.
+        Gets all word confidences (wc)  in page. These are then saved in an
+        attribute, so the wc are only retrieved once.
 
-        :return: wc
+        :return: Wc
         :rtype: list(str)
         """
         if not self.page_wc:
@@ -109,7 +118,7 @@ class Page(object):
         Gets all character confidences (cc)  in page. These are then saved in an attribute,
         so the cc are only retrieved once.
 
-        :return: cc
+        :return: Cc
         :rtype: list(str)
         """
         if not self.page_cc:
@@ -123,7 +132,7 @@ class Page(object):
         Gets all strings in page. These are then saved in an attribute,
         so the strings are only retrieved once.
 
-        :return: strings
+        :return: Strings
         :rtype: list(lxml.etree._ElementStringResult)
         """
         if not self.page_strings:
@@ -136,7 +145,7 @@ class Page(object):
         Gets all images in page. These are then saved in an attribute,
         so the images are only retrieved once.
 
-        :return: images
+        :return: Images
         :rtype: list(lxml.etree._Element)
         """
         if not self.page_images:
@@ -149,7 +158,7 @@ class Page(object):
         Gets all words in page and contatenates together using ' ' as
         delimiter.
 
-        :return: content
-        :rtype: str or unicode
+        :return: Content
+        :rtype: str
         """
         return " ".join(self.words)

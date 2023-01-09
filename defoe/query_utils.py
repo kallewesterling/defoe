@@ -59,7 +59,7 @@ def parse_preprocess_word_type(type_str: str) -> PreprocessWordType:
 
     :param type_str: One of none|normalize|stem|lemmatize
     :type type_str: str
-    :return: word preprocessing type
+    :return: Word preprocessing type
     :rtype: defoe.query_utils.PreprocessWordType
     :raises ValueError: If "preprocess" is not one of the expected values
     """
@@ -85,7 +85,7 @@ def extract_preprocess_word_type(
     :type config: dict
     :param default: default value if "preprocess" is not found
     :type default: defoe.query_utils.PreprocessWordType
-    :return: word preprocessing type
+    :return: Word preprocessing type
     :rtype: defoe.query_utils.PreprocessWordType
     :raises: ValueError if "preprocess" is not one of
         none|normalize|stem|lemmatize
@@ -133,7 +133,7 @@ def extract_window_size(config: dict, default=10):
     :type config: dict
     :param default: default value if "window" is not found
     :type default: int
-    :return: window size
+    :return: Window size
     :rtype: int
     :raises: ValueError if "window" is >= 1
     """
@@ -159,7 +159,7 @@ def extract_years_filter(config: dict):
 
     :param config: Configuration dictionary
     :type config: dict
-    :return: min_year, max_year
+    :return: Min_year, max_year
     :rtype: int, int
     """
 

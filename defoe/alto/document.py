@@ -153,7 +153,7 @@ class Document(object):
 
         :param code: Page code
         :type code: str
-        :return: defoe.alto.page.Page
+        :return: Defoe.alto.page.Page
         :rtype: defoe.alto.page.Page
         """
         return Page(self, code)
@@ -186,7 +186,7 @@ class Document(object):
 
         :param index: Page index
         :type index: int
-        :return: defoe.alto.page.Page
+        :return: Defoe.alto.page.Page
         :rtype: defoe.alto.page.Page
         """
         return self.page(self.page_codes[index])
@@ -264,7 +264,7 @@ class Document(object):
         """
         Iterate over the ``defoe.alto.document.Document``'s strings.
 
-        :return: string
+        :return: String
         :rtype: str
         """
         for _, string in self.scan_strings():
@@ -274,7 +274,7 @@ class Document(object):
         """
         Iterate over the ``defoe.alto.document.Document``'s words.
 
-        :return: word
+        :return: Word
         :rtype: str
         """
         for _, word in self.scan_words():
@@ -294,7 +294,7 @@ class Document(object):
         """
         Iterate over the ``defoe.alto.document.Document``'s word qualities.
 
-        :return: wc
+        :return: Wc
         :rtype: str
         """
         for _, wc in self.scan_wc():
@@ -305,7 +305,7 @@ class Document(object):
         Iterate over the ``defoe.alto.document.Document``'s character
             qualities.
 
-        :return: wc
+        :return: Wc
         :rtype: str
         """
         for _, cc in self.scan_cc():

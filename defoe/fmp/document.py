@@ -475,7 +475,7 @@ class Document(object):
         """
         Parse the structMap Physical information.
 
-        :return: dictionary with the ID of each part as a keyword. For each
+        :return: Dictionary with the ID of each part as a keyword. For each
             part, it returns the shape and coord.
         :rtype: dictionary
         """
@@ -918,7 +918,7 @@ class Document(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: list of query results or None if none
+        :return: List of query results or None if none
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return self.tree.xpath(query, namespaces=NAMESPACES)
@@ -929,7 +929,7 @@ class Document(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: query result or None if none
+        :return: Query result or None if none
         :rtype: str
         """
         result = self._query(query)
