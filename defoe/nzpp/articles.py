@@ -40,8 +40,8 @@ class Articles(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: List of query results or an empty list if the object
-            represents an empty document or any errors arose
+        :return: List of query results or an empty list if query returns no
+            results or an AssertionError occurred
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         if not self.xml_tree:

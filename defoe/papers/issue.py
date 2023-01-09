@@ -102,8 +102,8 @@ class Issue(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: List of query results or an empty list if the object
-            represents an empty document
+        :return: List of query results or an empty list if query returns no
+            results or an AssertionError occurred
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         if not self.issue_tree:

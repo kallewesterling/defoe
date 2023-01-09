@@ -127,8 +127,8 @@ class Document(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: List of query results or an empty list if no results are
-            returned
+        :return: List of query results or an empty list if query returns no
+            results
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return self.metadata_tree.xpath(query, namespaces=self.namespaces)

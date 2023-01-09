@@ -918,7 +918,8 @@ class Document(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: List of query results or None if none
+        :return: List of query results or an empty list if query returns no
+            results
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return self.tree.xpath(query, namespaces=NAMESPACES)

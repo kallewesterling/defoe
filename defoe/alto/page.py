@@ -58,19 +58,20 @@ class Page(object):
         self.page_wc = None
         self.page_cc = None
 
-    def query(self, xpath_query: etree.XPath) -> list:
+    def query(self, xpath_query: etree.XPath) -> Optional[list]:
         """
         Run XPath query.
 
         :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: List of query results or None if none
+        :return: List of query results or an empty list if query returns no
+            results
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return xpath_query(self.tree)
 
-    def single_query(self, xpath_query: etree.XPath):
+    def single_query(self, xpath_query: etree.XPath) -> Optional[str]:
         """
         Run XPath query and return first result.
 
