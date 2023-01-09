@@ -384,7 +384,7 @@ def longsfix_sentence(sentence: str, defoe_path: str, os_type: str):
             stdout_value = stdout
 
         fix_s = stdout_value.decode("utf-8").split("\n")[0]
-    except:  # TODO: Refactor bare except to explicit
+    except:  # TODO: Change bare excepts to explicit
         fix_s = sentence
     if re.search("[aeiou]fs", fix_s):
         fix_final = re.sub("fs", "ss", fix_s)
@@ -881,7 +881,7 @@ def geoparser_coord_xml(geo_xml):
                                     "type": type,
                                     "snippet": snippet_er,
                                 }
-    except:
+    except:  # TODO: Change bare excepts to explicit
         pass
     return dResolvedLocs
 
@@ -916,7 +916,7 @@ def geoparser_text_xml(geo_xml):
                                         ]
                                     text_ER.append((subsubsubchild.text, inf))
 
-    except:
+    except:  # TODO: Change bare excepts to explicit
         pass
     return text_ER
 

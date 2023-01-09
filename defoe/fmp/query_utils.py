@@ -68,7 +68,7 @@ def convert_coords(x, y, w, h):
 def get_page_matches(
     document: Document,
     keywords: list,
-    preprocess_type=PreprocessWordType.NORMALIZE,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ):
     """
     Get pages within a document that include one or more keywords.
@@ -300,17 +300,17 @@ def segment_image(
     Segments textblock articles given coordinates and page path
 
     :param coords: Coordinates of an image
-    :type coords: string
+    :type coords: str
     :param page_name: Name of the page XML which the textblock has been extracted from.
-    :type page_name: string
+    :type page_name: str
     :param issue_path: Path of the ZIPPED archive or the issue
-    :type issue_path: string
+    :type issue_path: str
     :param year: Year of the publication
     :type year: integer
     :param keyword: Word for which the textblock has been selected/filtered
-    :type keyword: string
+    :type keyword: str
     :param output_path: Path to store the cropped image
-    :type output_path: string
+    :type output_path: str
     :param target: # TODO #3
     :type target: # TODO #3
     :param highlight: # TODO #3
@@ -441,7 +441,7 @@ def segment_image(
 def get_document_keywords(
     document: Document,
     keywords: list,
-    preprocess_type=PreprocessWordType.NORMALIZE,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ):
     """
     Gets list of keywords occuring within an document.
@@ -472,7 +472,7 @@ def get_document_keywords(
 def document_contains_word(
     document: Document,
     keyword: str,
-    preprocess_type=PreprocessWordType.NORMALIZE,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ):
     """
     Checks if a keyword occurs within an document.
@@ -499,7 +499,8 @@ def document_contains_word(
 
 
 def calculate_words_within_dictionary(
-    page: Page, preprocess_type=PreprocessWordType.NORMALIZE
+    page: Page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ):
     """
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
@@ -529,7 +530,7 @@ def calculate_words_within_dictionary(
 
     try:
         calculate_pc = str(counter * 100 / total_words)
-    except:
+    except:  # TODO: Change bare excepts to explicit
         calculate_pc = "0"
 
     return calculate_pc
@@ -554,7 +555,7 @@ def calculate_words_confidence_average(page: Page):
 
     try:
         calculate_wc = str(total_wc / len(page.wc))
-    except:
+    except:  # TODO: Change bare excepts to explicit
         calculate_wc = "0"
 
     return calculate_wc

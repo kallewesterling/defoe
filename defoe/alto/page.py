@@ -78,7 +78,7 @@ class Page(object):
         :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: Query result or None if none
+        :return: Query result or None if no result is returned from query
         :rtype: lxml.etree.<MODULE> (depends on query)
         """
         result = self.query(xpath_query)
@@ -89,10 +89,10 @@ class Page(object):
     @property
     def words(self) -> list[str]:
         """
-        Gets all words in page. These are then saved in an attribute, so the
-        words are only retrieved once.
+        Returns all the words in the ``defoe.alto.page.Page``. These are then
+        saved in an attribute, so the words are only retrieved once.
 
-        :return: Words
+        :return: List of words on ``defoe.alto.page.Page``
         :rtype: list[str]
         """
         if not self.page_words:
@@ -100,13 +100,14 @@ class Page(object):
         return self.page_words
 
     @property
-    def wc(self):
+    def wc(self) -> list[str]:
         """
-        Gets all word confidences (wc)  in page. These are then saved in an
-        attribute, so the wc are only retrieved once.
+        Returns all the word confidences in the ``defoe.alto.page.Page``. These
+        are then saved in an attribute, so the word confidences are only
+        retrieved once.
 
-        :return: Wc
-        :rtype: list(str)
+        :return: List of word confidences on ``defoe.alto.page.Page``
+        :rtype: list[str]
         """
         if not self.page_wc:
             self.page_wc = list(self.query(Page.WC_XPATH))
@@ -114,13 +115,14 @@ class Page(object):
         return self.page_wc
 
     @property
-    def cc(self):
+    def cc(self) -> list[str]:
         """
-        Gets all character confidences (cc)  in page. These are then saved in an attribute,
-        so the cc are only retrieved once.
+        Returns all the character confidences in the ``defoe.alto.page.Page``.
+        These are then saved in an attribute, so the character confidences are
+        only retrieved once.
 
-        :return: Cc
-        :rtype: list(str)
+        :return: List of character confidences on ``defoe.alto.page.Page``
+        :rtype: list[str]
         """
         if not self.page_cc:
             self.page_cc = list(self.query(Page.CC_XPATH))
@@ -128,38 +130,39 @@ class Page(object):
         return self.page_cc
 
     @property
-    def strings(self):
+    def strings(self) -> list:
         """
-        Gets all strings in page. These are then saved in an attribute,
-        so the strings are only retrieved once.
+        Returns all strings in the ``defoe.alto.page.Page``. These are then
+        saved in an attribute, so the strings are only retrieved once.
 
-        :return: Strings
-        :rtype: list(lxml.etree._ElementStringResult)
+        :return: List of strings on ``defoe.alto.page.Page``
+        :rtype: list[lxml.etree._ElementStringResult]
         """
         if not self.page_strings:
             self.page_strings = self.query(Page.STRINGS_XPATH)
         return self.page_strings
 
     @property
-    def images(self):
+    def images(self) -> list:
         """
-        Gets all images in page. These are then saved in an attribute,
-        so the images are only retrieved once.
+        Returns all graphical elements in the ``defoe.alto.page.Page``. These
+        are then saved in an attribute, so the graphical elements are only
+        retrieved once.
 
-        :return: Images
-        :rtype: list(lxml.etree._Element)
+        :return: List of graphical elements on ``defoe.alto.page.Page``
+        :rtype: list[lxml.etree._Element]
         """
         if not self.page_images:
             self.page_images = self.query(Page.IMAGES_XPATH)
         return self.page_images
 
     @property
-    def content(self):
+    def content(self) -> str:
         """
-        Gets all words in page and contatenates together using ' ' as
-        delimiter.
+        Returns all the words in the ``defoe.alto.page.Page``, concatenated
+        together using ' ' as delimiter.
 
-        :return: Content
+        :return: The content of ``defoe.alto.page.Page``
         :rtype: str
         """
         return " ".join(self.words)

@@ -1,6 +1,7 @@
 """
 Query-related utility functions.
 """
+from __future__ import annotations
 
 from defoe import query_utils
 from defoe.query_utils import (
@@ -14,18 +15,27 @@ from defoe.query_utils import (
     geoparser_coord_xml,
 )
 from nltk.corpus import words
+from typing import TYPE_CHECKING
+
 import re
 import spacy
-from spacy.tokens import Doc
-from spacy.vocab import Vocab
+
+if TYPE_CHECKING:
+    from .archive import Archive
+    from .document import Document
+    from .page import Page
 
 NON_AZ_REGEXP = re.compile("[^a-z]")
-from nltk.corpus import words
 
 
 def get_pages_matches_no_prep(
-    title, edition, archive, filename, text, keysentences
-):
+    title: str,
+    edition: str,
+    archive: Archive,
+    filename: str,
+    text: str,
+    keysentences: list[str],
+) -> list[tuple[str, str, Archive, str, str, str]]:
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
@@ -40,6 +50,8 @@ def get_pages_matches_no_prep(
 
     :return: List of tuples
     """
+    # FIXME: This function won't work because of undefined names below
+
     matches = []
     for keysentence in keysentences:
         # sentence_match = get_sentences_list_matches(text, keysentence)
@@ -51,8 +63,10 @@ def get_pages_matches_no_prep(
 
 
 def get_page_matches(
-    document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
-):
+    document: Document,
+    keywords: list[str],
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
+) -> list[tuple[int, Document, Page, str]]:
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
@@ -68,12 +82,12 @@ def get_page_matches(
     :param document: Document
     :type document: defoe.nls.document.Document
     :param keywords: Keywords
-    :type keywords: list(str or unicode:
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: List of tuples
-    :rtype: list(tuple)
+    :rtype: list[tuple[int, Document, Page, str]]
     """
     matches = []
     for keyword in keywords:
@@ -93,20 +107,22 @@ def get_page_matches(
 
 
 def get_document_keywords(
-    document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
-):
+    document: Document,
+    keywords: list[str],
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
+) -> list[str]:
     """
     Gets list of keywords occuring within an document.
 
     :param article: Article
     :type article: defoe.papers.article.Article
     :param keywords: Keywords
-    :type keywords: list(str or unicode)
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: Sorted list of keywords that occur within article
-    :rtype: list(str or unicode)
+    :rtype: list[str]
     """
     matches = set()
     for page in document:
@@ -120,8 +136,10 @@ def get_document_keywords(
 
 
 def document_contains_word(
-    document, keyword, preprocess_type=PreprocessWordType.NORMALIZE
-):
+    document: Document,
+    keyword: str,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
+) -> bool:
     """
     Checks if a keyword occurs within an article.
 
@@ -130,9 +148,9 @@ def document_contains_word(
     :param keywords: Keyword
     :type keywords: str or unicode
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: True if the article contains the word, false otherwise
+    :return: ``True`` if the article contains the word, ``False`` otherwise
     :rtype: bool
     """
     for page in document:
@@ -146,8 +164,9 @@ def document_contains_word(
 
 
 def calculate_words_within_dictionary(
-    page, preprocess_type=PreprocessWordType.NORMALIZE
-):
+    page: Page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
+) -> list[str]:
     """
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
     Page words are normalized.
@@ -156,7 +175,7 @@ def calculate_words_within_dictionary(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: Matches
-    :rtype: list(str or unicode)
+    :rtype: list[str]
     """
     dictionary = words.words()
     counter = 0
@@ -169,12 +188,12 @@ def calculate_words_within_dictionary(
                 counter += 1
     try:
         calculate_pc = str(counter * 100 / total_words)
-    except:
+    except:  # TODO: Change bare excepts to explicit
         calculate_pc = "0"
     return calculate_pc
 
 
-def calculate_words_confidence_average(page):
+def calculate_words_confidence_average(page: Page) -> list[str]:
     """
     Calculates the average of "words confidence (wc)" within a page.
     Page words are normalized.
@@ -183,7 +202,7 @@ def calculate_words_confidence_average(page):
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: Matches
-    :rtype: list(str or unicode)
+    :rtype: list[str]
     """
     dictionary = words.words()
     counter = 0
@@ -192,12 +211,14 @@ def calculate_words_confidence_average(page):
         total_wc += float(wc)
     try:
         calculate_wc = str(total_wc / len(page.wc))
-    except:
+    except:  # TODO: Change bare excepts to explicit
         calculate_wc = "0"
     return calculate_wc
 
 
-def get_page_as_string(page, preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_page_as_string(
+    page, preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE
+):
     """
     Return a page as a single string.
 
@@ -263,9 +284,9 @@ def clean_page_as_string(page, defoe_path, os_type):
 
 
 def preprocess_clean_page(
-    clean_page, preprocess_type=PreprocessWordType.LEMMATIZE
+    clean_page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
-
     clean_list = clean_page.split(" ")
     page_string = ""
     for word in clean_list:
@@ -277,16 +298,17 @@ def preprocess_clean_page(
     return page_string
 
 
-def get_sentences_list_matches(text, keysentence):
+def get_sentences_list_matches(text: str, keysentence: list[str]) -> list[str]:
     """
-    Check which key-sentences from occurs within a string
-    and return the list of matches.
+    Check which key-sentences from occurs within a string and return the list
+    of matches.
 
+    # FIXME: Wrong parameter list
     :param text: Text
-    :type text: str or unicode
+    :type text: str
     :type: list(str or uniocde)
-    :return: Set of sentences
-    :rtype: set(str or unicode)
+    :return: Sorted list of matching sentences
+    :rtype: set(str)
     """
 
     matches = []
@@ -304,17 +326,18 @@ def get_sentences_list_matches(text, keysentence):
     return sorted(matches)
 
 
-def get_sentences_list_matches_per_page(text, keysentences):
+def get_sentences_list_matches_per_page(
+    text: str, keysentences: list[str]
+) -> list[str]:
     """
-    Gets a list the total list of keywords within an
-    article.
+    Gets a list the total list of keywords within an article.
 
     :param text: Text
-    :type article: string
-    :param keywords: Keywords
-    :type keywords: list(str or unicode)
-    :return: Sorted list of keywords and their indices
-    :rtype: list(tuple(str or unicode, int))
+    :type article: str
+    :param keysentences: Sentences to match? TODO: Verify
+    :type keysentences: list[str]
+    :return: List of matching sentences
+    :rtype: list[str]
     """
     matches = []
     text_list = text.split()
@@ -335,9 +358,10 @@ def get_sentences_list_matches_per_page(text, keysentences):
 
 
 def preprocess_clean_page_spacy(
-    clean_page, preprocess_type=PreprocessWordType.LEMMATIZE
+    clean_page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
-
+    # FIXME: Function does not work (overwritten by function with same name below)
     clean_list = clean_page.split(" ")
     page_string = ""
     for word in clean_list:
@@ -349,7 +373,7 @@ def preprocess_clean_page_spacy(
     return page_string
 
 
-def preprocess_clean_page_spacy(clean_page):
+def preprocess_clean_page_spacy(clean_page: str):
     nlp = spacy.load("en")
     doc = nlp(clean_page)
     page_nlp_spacy = []
@@ -386,6 +410,8 @@ def georesolve_page_2(text, lang_model, defoe_path, gazetteer, bounding_box):
 
 
 def georesolve_page(doc):
+    # FIXME: Function does not work (xml_geo_entities is not defined)
+
     if doc.ents:
         flag, in_xml = xml_geo_entities(doc)
         if flag == 1:
@@ -405,6 +431,8 @@ def geoparser_page(text, defoe_path, os_type, gazetteer, bounding_box):
 
 
 def geomap_page(doc):
+    # FIXME: Function does not work (xml_geo_entities is not defined)
+
     geomap_html = ""
 
     if doc.ents:
@@ -416,17 +444,19 @@ def geomap_page(doc):
     return geomap_html
 
 
-def get_text_keyword_idx(text, keywords):
+def get_text_keyword_idx(
+    text: str, keywords: list[str]
+) -> list[tuple[str, int]]:
     """
     Gets a list of keywords (and their position indices) within an
     article.
 
     :param text: Text
-    :type article: string
+    :type article: str
     :param keywords: Keywords
-    :type keywords: list(str or unicode)
+    :type keywords: list[str]
     :return: Sorted list of keywords and their indices
-    :rtype: list(tuple(str or unicode, int))
+    :rtype: list[tuple[str, int]]
     """
     text_list = text.split()
     matches = set()
@@ -437,17 +467,18 @@ def get_text_keyword_idx(text, keywords):
     return sorted(list(matches))
 
 
-def get_text_keysentence_idx(text, keysentences):
+def get_text_keysentence_idx(
+    text: str, keysentences: list[str]
+) -> list[tuple[str, int]]:
     """
-    Gets a list of keywords (and their position indices) within an
-    article.
+    Gets a list of keywords (and their position indices) within an article.
 
     :param text: Text
-    :type article: string
-    :param keywords: Keywords
-    :type keywords: list(str or unicode)
+    :type article: str
+    :param keysentences: Keywords
+    :type keysentences: list[str]
     :return: Sorted list of keywords and their indices
-    :rtype: list(tuple(str or unicode, int))
+    :rtype: list[tuple[str, int]]
     """
     matches = []
     text_list = text.split()
@@ -470,22 +501,27 @@ def get_text_keysentence_idx(text, keysentences):
     return sorted(matches)
 
 
-def get_concordance(text, keyword, idx, window):
+def get_concordance(
+    text: str, keyword: str, idx: int, window: int
+) -> list[str]:
     """
-    For a given keyword (and its position in an article), return
-    the concordance of words (before and after) using a window.
+    For a given keyword (and its position in an article), return the
+    concordance of words (before and after) using a window.
 
     :param text: Text
-    :type text: string
+    :type text: str
     :param keyword: Keyword
-    :type keyword: str or unicode
+    :type keyword: str
     :param idx: Keyword index (position) in list of article's words
     :type idx: int
-    :window: number of words to the right and left
-    :type: int
+    :param window: number of words to the right and left
+    :type window: int
     :return: Concordance
-    :rtype: list(str or unicode)
+    :rtype: list[str]
     """
+
+    # FIXME: This function does not do what it says (keyword is not used)
+
     text_list = text.split()
     text_size = len(text_list)
 
@@ -505,22 +541,27 @@ def get_concordance(text, keyword, idx, window):
     return concordance_words
 
 
-def get_concordance_string(text, keyword, idx, window):
+def get_concordance_string(
+    text: str, keyword: str, idx: int, window: int
+) -> str:
     """
     For a given keyword (and its position in an article), return
     the concordance of words (before and after) using a window.
 
     :param text: Text
-    :type text: string
+    :type text: str
     :param keyword: Keyword
-    :type keyword: str or unicode
+    :type keyword: str
     :param idx: Keyword index (position) in list of article's words
     :type idx: int
-    :window: number of words to the right and left
-    :type: int
+    :param window: number of words to the right and left
+    :type window: int
     :return: Concordance
-    :rtype: list(str or unicode)
+    :rtype: str
     """
+
+    # FIXME: This function does not do what it says (keyword is not used)
+
     text_list = text.split()
     text_size = len(text_list)
 

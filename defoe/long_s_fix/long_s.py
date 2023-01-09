@@ -56,7 +56,7 @@ def longsfix_sentence(sentence):
             stdout_value = stdout
 
         fix_s = stdout_value.decode("utf-8").split("\n")[0]
-    except:
+    except:  # TODO: Change bare excepts to explicit
         fix_s = sentence
     if re.search("[aeiou]fs", fix_s):
         fix_final = re.sub("fs", "ss", fix_s)

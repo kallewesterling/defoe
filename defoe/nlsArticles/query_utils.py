@@ -23,7 +23,9 @@ NON_AZ_REGEXP = re.compile("[^a-z]")
 from nltk.corpus import words
 
 
-def get_pages_matches_no_prep(title, edition, archive, filename, text, keysentences):
+def get_pages_matches_no_prep(
+    title, edition, archive, filename, text, keysentences
+):
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
@@ -50,7 +52,11 @@ def get_pages_matches_no_prep(title, edition, archive, filename, text, keysenten
     return matches
 
 
-def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORMALIZE):
+def get_page_matches(
+    document,
+    keywords,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
+):
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
@@ -80,7 +86,9 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
             match = None
 
             for word in page.words:
-                preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+                preprocessed_word = query_utils.preprocess_word(
+                    word, preprocess_type
+                )
 
                 if preprocessed_word == keyword:
                     match = (document.year, document, page, keyword)
@@ -94,7 +102,9 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
 
 
 def get_document_keywords(
-    document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
+    document,
+    keywords,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ):
     """
     Gets list of keywords occuring within an document.
@@ -113,7 +123,9 @@ def get_document_keywords(
     matches = set()
     for page in document:
         for word in page.words:
-            preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+            preprocessed_word = query_utils.preprocess_word(
+                word, preprocess_type
+            )
 
             if preprocessed_word in keywords:
                 matches.add(preprocessed_word)
@@ -122,7 +134,9 @@ def get_document_keywords(
 
 
 def document_contains_word(
-    document, keyword, preprocess_type=PreprocessWordType.NORMALIZE
+    document,
+    keyword,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ):
     """
     Checks if a keyword occurs within an article.
@@ -139,7 +153,9 @@ def document_contains_word(
     """
     for page in document:
         for word in page.words:
-            preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+            preprocessed_word = query_utils.preprocess_word(
+                word, preprocess_type
+            )
 
             if keyword == preprocessed_word:
                 return True
@@ -148,7 +164,7 @@ def document_contains_word(
 
 
 def calculate_words_within_dictionary(
-    page, preprocess_type=PreprocessWordType.NORMALIZE
+    page, preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE
 ):
     """
     Calculates the % of page words within a dictionary and also returns the page quality (pc)
@@ -177,7 +193,7 @@ def calculate_words_within_dictionary(
 
     try:
         calculate_pc = str(counter * 100 / total_words)
-    except:
+    except:  # TODO: Change bare excepts to explicit
         calculate_pc = "0"
 
     return calculate_pc
@@ -201,13 +217,15 @@ def calculate_words_confidence_average(page):
 
     try:
         calculate_wc = str(total_wc / len(page.wc))
-    except:
+    except:  # TODO: Change bare excepts to explicit
         calculate_wc = "0"
 
     return calculate_wc
 
 
-def get_page_as_string(page, preprocess_type=PreprocessWordType.LEMMATIZE):
+def get_page_as_string(
+    page, preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE
+):
     """
     Return a page as a single string.
 
@@ -305,7 +323,9 @@ def clean_headers_page_as_string(page):
 
     page_words = page.words
 
-    page_string_final = clean_text_as_string(page_words, 0, defoe_path, os_type)
+    page_string_final = clean_text_as_string(
+        page_words, 0, defoe_path, os_type
+    )
 
     header_left_words = page.header_left_words
     header_left_string_final = clean_text_as_string(
@@ -322,7 +342,11 @@ def clean_headers_page_as_string(page):
         header_right_string_final = ""
 
     # print("Header_left_string_final %s - header_right_string_final %s" %(header_left_string_final, header_right_string_final))
-    return header_left_string_final, header_right_string_final, page_string_final
+    return (
+        header_left_string_final,
+        header_right_string_final,
+        page_string_final,
+    )
 
 
 def filter_terms_page(page, defoe_path, os_type):
@@ -337,10 +361,14 @@ def filter_terms_page(page, defoe_path, os_type):
     page_words = page.words
 
     header_left_words = page.header_left_words
-    header_left = clean_text_as_string(header_left_words, 1, defoe_path, os_type)
+    header_left = clean_text_as_string(
+        header_left_words, 1, defoe_path, os_type
+    )
 
     header_right_words = page.header_right_words
-    header_right = clean_text_as_string(header_right_words, 1, defoe_path, os_type)
+    header_right = clean_text_as_string(
+        header_right_words, 1, defoe_path, os_type
+    )
 
     # in case the right header is part of the text E.G. (LELAND,John,aneminentEnglishantiquarian,was)
     if len(header_right) > 12:
@@ -410,8 +438,12 @@ def filter_terms_page(page, defoe_path, os_type):
                         ):
                             if (
                                 (first_line == 1)
-                                and not (page_hpos_vpos_font[i][0][3].isupper())
-                                and not (page_hpos_vpos_font[i][0][2] == "font7")
+                                and not (
+                                    page_hpos_vpos_font[i][0][3].isupper()
+                                )
+                                and not (
+                                    page_hpos_vpos_font[i][0][2] == "font7"
+                                )
                             ):
                                 term = "previous_page"
 
@@ -423,10 +455,16 @@ def filter_terms_page(page, defoe_path, os_type):
                                     or ("'" in page_hpos_vpos_font[i][0][3])
                                     or (
                                         ";" in page_hpos_vpos_font[i][0][3]
-                                        or (":" in page_hpos_vpos_font[i][0][3])
+                                        or (
+                                            ":" in page_hpos_vpos_font[i][0][3]
+                                        )
                                     )
                                     or ("-" in page_hpos_vpos_font[i][0][3])
-                                    or (romanNumeral(page_hpos_vpos_font[i][0][3]))
+                                    or (
+                                        romanNumeral(
+                                            page_hpos_vpos_font[i][0][3]
+                                        )
+                                    )
                                     or len(page_hpos_vpos_font[i][0][3]) == 1
                                 ):
                                     if first_line == 1:
@@ -458,10 +496,14 @@ def filter_terms_page(page, defoe_path, os_type):
                                 page_term_dict[new_term] = ""
                                 num_terms += 1
                                 for j in range(1, len(page_hpos_vpos_font[i])):
-                                    definition.append(page_hpos_vpos_font[i][j][3])
+                                    definition.append(
+                                        page_hpos_vpos_font[i][j][3]
+                                    )
                             else:
                                 for j in range(0, len(page_hpos_vpos_font[i])):
-                                    definition.append(page_hpos_vpos_font[i][j][3])
+                                    definition.append(
+                                        page_hpos_vpos_font[i][j][3]
+                                    )
 
                         else:
                             for j in range(0, len(page_hpos_vpos_font[i])):
@@ -493,7 +535,10 @@ def filter_terms_page(page, defoe_path, os_type):
     return type_page, header, page_clean_term_dict, len(page_clean_term_dict)
 
 
-def preprocess_clean_page(clean_page, preprocess_type=PreprocessWordType.LEMMATIZE):
+def preprocess_clean_page(
+    clean_page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
+):
 
     clean_list = clean_page.split(" ")
     page_string = ""
@@ -534,7 +579,8 @@ def get_sentences_list_matches(text, keysentence):
 
 
 def preprocess_clean_page_spacy(
-    clean_page, preprocess_type=PreprocessWordType.LEMMATIZE
+    clean_page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
 
     clean_list = clean_page.split(" ")
@@ -619,7 +665,7 @@ def get_text_keyword_idx(text, keywords):
     article.
 
     :param text: Text
-    :type article: string
+    :type article: str
     :param keywords: Keywords
     :type keywords: list(str or unicode)
     :return: Sorted list of keywords and their indices
@@ -640,7 +686,7 @@ def get_concordance(text, keyword, idx, window):
     the concordance of words (before and after) using a window.
 
     :param text: Text
-    :type text: string 
+    :type text: str
     :param keyword: Keyword
     :type keyword: str or unicode
     :param idx: Keyword index (position) in list of article's words
@@ -848,7 +894,9 @@ def get_articles_page(text, text_list, terms_view, num_words):
                         # checking that the next one is lowe case - e.g. pleggis
                         # print("Importante: Palabra: %s, Capital de la siguiente %s, Latin de la siguiente %s" %(text_list[i], terms_view[i+1], latin_view[i+1]))
                         if not terms_view[i + 1]:
-                            if (not latin_view[i + 1]) or (text_list[i + 1] == "de"):
+                            if (not latin_view[i + 1]) or (
+                                text_list[i + 1] == "de"
+                            ):
                                 latin_key = latin_key + text_list[i]
                                 # print("Actualizando latin key %s" %(latin_key))
                             else:
@@ -870,7 +918,9 @@ def get_articles_page(text, text_list, terms_view, num_words):
                         # ignoring Charles VIII.
                         if romanNumeral(text_list[i]):
                             articles_page[key][list_key[key]] = (
-                                articles_page[key][list_key[key]] + " " + text_list[i]
+                                articles_page[key][list_key[key]]
+                                + " "
+                                + text_list[i]
                             )
                         # checking that the next one is See
                         elif "See" == text_list[i + 1]:
@@ -889,10 +939,13 @@ def get_articles_page(text, text_list, terms_view, num_words):
                             or ("E." == text_list[i])
                             or ("O." == text_list[i])
                         ) and (
-                            ("lat" in text_list[i + 1]) or ("long" in text_list[i + 1])
+                            ("lat" in text_list[i + 1])
+                            or ("long" in text_list[i + 1])
                         ):
                             articles_page[key][list_key[key]] = (
-                                articles_page[key][list_key[key]] + " " + text_list[i]
+                                articles_page[key][list_key[key]]
+                                + " "
+                                + text_list[i]
                             )
                         # ignoring the header of the first page - second half
                         elif half_key == "DCOMPLETEONARYFCIENCE":
@@ -930,11 +983,15 @@ def get_articles_page(text, text_list, terms_view, num_words):
                         half_key = ""
                     else:
                         articles_page[key][list_key[key]] = (
-                            articles_page[key][list_key[key]] + " " + text_list[i]
+                            articles_page[key][list_key[key]]
+                            + " "
+                            + text_list[i]
                         )
                         # print("!Entro en - or UPPERCASE,- : key %s - text %s:" %(key, articles_page[key]))
                     # See ASTRONOMY, - managing ASTRONOMY,
-                elif ("See" == text_list[i - 1]) or (romanNumeral(text_list[i])):
+                elif ("See" == text_list[i - 1]) or (
+                    romanNumeral(text_list[i])
+                ):
                     articles_page[key][list_key[key]] = (
                         articles_page[key][list_key[key]] + " " + text_list[i]
                     )
@@ -951,7 +1008,9 @@ def get_articles_page(text, text_list, terms_view, num_words):
                             half_key = ""
                         else:
                             articles_page[key][list_key[key]] = (
-                                articles_page[key][list_key[key]] + " " + text_list[i]
+                                articles_page[key][list_key[key]]
+                                + " "
+                                + text_list[i]
                             )
                     else:
                         # AB ACO, - recording ACO, (of AB ACO,)
@@ -1119,7 +1178,9 @@ def get_articles_eb(header_left, header_right, text, leftmost_terms):
 
         else:
             type = "Exception_Articles"
-            articles_page = get_articles_page(text, text_list, terms_view, num_words)
+            articles_page = get_articles_page(
+                text, text_list, terms_view, num_words
+            )
         return type, header, articles_page, len(articles_page)
 
     elif (type == "Articles") or (type == "Mix"):
@@ -1134,7 +1195,9 @@ def get_articles_eb(header_left, header_right, text, leftmost_terms):
                 )
 
         elif num_words >= 20:
-            articles_page = get_articles_page(text, text_list, terms_view, num_words)
+            articles_page = get_articles_page(
+                text, text_list, terms_view, num_words
+            )
         else:
             type = "Exception_FullPage"
             articles_page["FullPage"] = [text]
@@ -1144,4 +1207,3 @@ def get_articles_eb(header_left, header_right, text, leftmost_terms):
         type = "Exception"
         articles_page["FullPage"] = [text]
         return type, header, articles_page, len(articles_page)
-

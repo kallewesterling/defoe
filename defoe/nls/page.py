@@ -56,37 +56,37 @@ class Page(object):
     def alto_page(self) -> int:
         try:
             return self.tree.find("//{%s}Page" % self.namespaces)
-        except:  # TODO: Make except clause explicit
+        except:  # TODO: Change bare excepts to explicit
             return 0
 
     def alto_page_width(self) -> int:
         try:
             return int(self.page_tree.attrib.get("WIDTH"))
-        except:  # TODO: Make except clause explicit
+        except:  # TODO: Change bare excepts to explicit
             return 0
 
     def alto_page_id(self) -> str:
         try:
             return self.page_tree.attrib.get("ID")
-        except:  # TODO: Make except clause explicit
+        except:  # TODO: Change bare excepts to explicit
             return "0"
 
     def alto_image_nr(self) -> str:
         try:
             return self.page_tree.attrib.get("PHYSICAL_IMG_NR")
-        except:  # TODO: Make except clause explicit
+        except:  # TODO: Change bare excepts to explicit
             return "0"
 
     def alto_page_height(self) -> int:
         try:
             return int(self.page_tree.attrib.get("HEIGHT"))
-        except:  # TODO: Make except clause explicit
+        except:  # TODO: Change bare excepts to explicit
             return 0
 
     def alto_page_pc(self) -> str:
         try:
             return self.page_tree.attrib.get("PC")
-        except:  # TODO: Make except clause explicit
+        except:  # TODO: Change bare excepts to explicit
             return "0"
 
     @property
@@ -113,7 +113,7 @@ class Page(object):
                     for line in lines.findall("{%s}String" % self.namespaces):
                         text = line.attrib.get("WC")
                         self.page_wc.append(text)
-            except:  # TODO: Make except clause explicit
+            except:  # TODO: Change bare excepts to explicit
                 pass
         return self.page_wc
 
@@ -128,7 +128,7 @@ class Page(object):
                     for line in lines.findall("{%s}String" % self.namespaces):
                         text = line.attrib.get("CC")
                         self.page_cc.append(text)
-            except:  # TODO: Make except clause explicit
+            except:  # TODO: Change bare excepts to explicit
                 pass
         return self.page_cc
 
@@ -142,7 +142,7 @@ class Page(object):
                 ):
                     for line in lines.findall("{%s}String" % self.namespaces):
                         self.page_strings.append(line)
-            except:  # TODO: Make except clause explicit
+            except:  # TODO: Change bare excepts to explicit
                 pass
         return self.page_strings
 
@@ -165,7 +165,7 @@ class Page(object):
                     )
                     graphical_elements = graphical_id + "=" + graphical_coords
                     self.page_images.append(graphical_elements)
-            except:  # TODO: Make except clause explicit
+            except:  # TODO: Change bare excepts to explicit
                 pass
         return self.page_images
 

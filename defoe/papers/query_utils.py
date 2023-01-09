@@ -15,7 +15,7 @@ def get_article_matches(
     keysentences,
     defoe_path,
     os_type,
-    preprocess_type=PreprocessWordType.LEMMATIZE,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
     """
     Get articles within an issue that include one or more keywords.
@@ -66,7 +66,9 @@ def get_article_matches(
 
 
 def get_article_keywords(
-    article, keywords, preprocess_type=PreprocessWordType.LEMMATIZE
+    article,
+    keywords,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
     """
     Get list of keywords occuring within an article.
@@ -90,7 +92,9 @@ def get_article_keywords(
 
 
 def article_contains_word(
-    article, keyword, preprocess_type=PreprocessWordType.LEMMATIZE
+    article,
+    keyword,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
     """
     Check if a keyword occurs within an article.
@@ -113,7 +117,7 @@ def article_contains_word(
 
 
 def article_stop_words_removal(
-    article, preprocess_type=PreprocessWordType.LEMMATIZE
+    article, preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE
 ):
     """
     Remove the stop words of an article.
@@ -136,7 +140,7 @@ def article_stop_words_removal(
 
 
 def get_article_as_string(
-    article, preprocess_type=PreprocessWordType.LEMMATIZE
+    article, preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE
 ):
     """
     Return an article as a single string.
@@ -179,7 +183,9 @@ def get_sentences_list_matches_2(text, keysentence):
 
 
 def get_article_keyword_idx(
-    article, keywords, preprocess_type=PreprocessWordType.LEMMATIZE
+    article,
+    keywords,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
     """
     Gets a list of keywords (and their position indices) within an
@@ -205,7 +211,11 @@ def get_article_keyword_idx(
 
 
 def get_concordance(
-    article, keyword, idx, window, preprocess_type=PreprocessWordType.LEMMATIZE
+    article,
+    keyword,
+    idx,
+    window,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
     """
     For a given keyword (and its position in an article), return
@@ -275,7 +285,8 @@ def clean_article_as_string(article, defoe_path, os_type):
 
 
 def preprocess_clean_article(
-    clean_article, preprocess_type=PreprocessWordType.LEMMATIZE
+    clean_article,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
 ):
 
     clean_list = clean_article.split(" ")
