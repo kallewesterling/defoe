@@ -33,7 +33,7 @@ class Archive(AltoArchive):
     British Library Books-compliant ALTO format.
 
     :param filename: Archive filename
-    :type: filename: str
+    :type filename: str
     """
 
     def __init__(self, filename: str):

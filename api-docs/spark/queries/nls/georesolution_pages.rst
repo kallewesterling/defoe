@@ -1,4 +1,6 @@
-# Identify the locations (using spaCy) per page and geo-resolve them (using the Edinburgh georesolver)
+Identify the locations (using spaCy) per page and geo-resolve them (using the Edinburgh georesolver)
+==========================================================
+
 
 * It uses spaCy for identifying all posible locations within a page.
 * It uses the Edinburgh georesolve for getting the latituted and longitude of each location.

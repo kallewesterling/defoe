@@ -1,4 +1,6 @@
-# Get concordance (also called details) occurrences of keywords or keysentences (by page) and group by year - Returns Full Page for each match
+Get concordance (also called details) occurrences of keywords or keysentences (by page) and group by year - Returns Full Page for each match
+==========================================================
+
 
 * Both keywords/keysentences and words in documents are cleaned (long-S and hyphen fixes) and preprocessed according to the configuration file
 * Query module: `defoe.nls.queries.keysentence_by_year_details`

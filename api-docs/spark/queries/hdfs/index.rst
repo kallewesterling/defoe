@@ -1,4 +1,6 @@
-# HDFS document queries
+HDFS document queries
+==========================================================
+
 
 General:
 

@@ -1,4 +1,6 @@
-# Papers Past New Zealand and Pacific ewspapers dataset queries
+Papers Past New Zealand and Pacific ewspapers dataset queries
+==========================================================
+
 
 General:
 

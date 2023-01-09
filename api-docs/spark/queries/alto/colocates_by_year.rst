@@ -1,4 +1,5 @@
-# Get colocates and group by year
+Get colocates and group by year
+===============================
 
 * Both colocated words and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.alto.queries.colocates_by_year`
@@ -17,23 +18,24 @@
     - `queries/stranger_danger.yml`
 * Result format:
 
-```
-<YEAR>:
-- document_id: <DOCUMENT_ID>
-  place: <PLACE>
-  publisher: <PUBLISHER>
-  filename: <FILENAME>
-  matches:
-  - start_page: <PAGE_ID>
-    end_page: <PAGE_ID>
-    span: [<WORD>, ..., <WORD>]
-  - ...
+  <YEAR>:
+  - document_id: <DOCUMENT_ID>
+    place: <PLACE>
+    publisher: <PUBLISHER>
+    filename: <FILENAME>
+    matches:
+    - start_page: <PAGE_ID>
+      end_page: <PAGE_ID>
+      span: [<WORD>, ..., <WORD>]
+    - ...
+    ...
+  <YEAR>:
   ...
-<YEAR>:
-...
-```
 
-## Sample results
+
+Sample results
+----------------------------------------------------------
+
 
 Query over British Library Books `1510_1699/*.zip` with `queries/stranger_danger.yml`:
 

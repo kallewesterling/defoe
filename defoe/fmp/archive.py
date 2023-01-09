@@ -34,9 +34,9 @@ class Archive(AltoArchive):
         from defoe.fmp.archive import Archive
         archive = Archive("path/to/xml-files/")
 
-    :param path: path to a ZIP filename or directory containing the
-        necessary files
-    :type: path: str
+    :param path: path to a ZIP filename or directory containing the necessary
+        files
+    :type path: str
     """
 
     def __init__(self, path: str):
@@ -141,10 +141,10 @@ class Archive(AltoArchive):
         :type document_code: str
         :param page_code: File code
         :type page_code: str
-        :raises RuntimeError: In case multiple image paths are found for the
-            same page, a RuntimeError will be raised.
         :return: Image path
         :rtype: Optional[str]
+        :raises RuntimeError: if multiple image paths are found for the
+            same page
         """
 
         stem = f"{self.filename}{document_code}_{page_code}"

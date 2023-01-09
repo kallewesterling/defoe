@@ -1,6 +1,7 @@
 """
 Query-related utility functions.
 """
+from __future__ import annotations
 
 from defoe import query_utils
 from defoe.query_utils import (
@@ -14,24 +15,35 @@ from defoe.query_utils import (
     geoparser_coord_xml,
 )
 from nltk.corpus import words
+from typing import TYPE_CHECKING
+
 import re
 import spacy
-from spacy.tokens import Doc
-from spacy.vocab import Vocab
+
+if TYPE_CHECKING:
+    from .archive import Archive
+    from .document import Document
+    from .page import Page
+    from spacy.tokens import Doc, Token
+    from typing import Union
+
 
 NON_AZ_REGEXP = re.compile("[^a-z]")
-from nltk.corpus import words
 
 
 def get_pages_matches_no_prep(
-    title, edition, archive, filename, text, keysentences
-):
+    title: str,
+    edition: str,
+    archive: Archive,
+    filename: str,
+    text: str,
+    keysentences: list[str],
+) -> list[tuple[str, str, Archive, str, str, str]]:
     """
     Get pages within a document that include one or more keywords.
-    For each page that includes a specific keyword, add a tuple of
-    form:
 
-        (<TITLE>, <EDITION>, <ARCHIVE>, <FILENAME>, <TEXT>, <KEYWORD>)
+    For each page that includes a specific keyword, add a tuple of form:
+    ``(<TITLE>, <EDITION>, <ARCHIVE>, <FILENAME>, <TEXT>, <KEYWORD>)``
 
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
@@ -53,31 +65,30 @@ def get_pages_matches_no_prep(
 
 
 def get_page_matches(
-    document,
-    keywords,
+    document: Document,
+    keywords: list[str],
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> tuple[int, Document, Page, str]:
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
-    form:
-
-        (<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)
+    form ``(<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)``.
 
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
+
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
 
     :param document: Document
-    :type document: defoe.nls.document.Document
+    :type document: defoe.nlsArticles.document.Document
     :param keywords: Keywords
-    :type keywords: list(str or unicode:
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: List of tuples
-    :rtype: list(tuple)
+    :rtype: list[tuple[int, Document, Page, str]]
     """
 
     matches = []
@@ -102,22 +113,22 @@ def get_page_matches(
 
 
 def get_document_keywords(
-    document,
-    keywords,
+    document: Document,
+    keywords: list[str],
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> list[str]:
     """
     Gets list of keywords occuring within an document.
 
-    :param article: Article
-    :type article: defoe.papers.article.Article
+    :param article: Document
+    :type article: defoe.nlsArticles.document.Document
     :param keywords: Keywords
-    :type keywords: list(str or unicode)
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: Sorted list of keywords that occur within article
-    :rtype: list(str or unicode)
+    :return: Sorted list of keywords that occur within document
+    :rtype: list[str]
     """
 
     matches = set()
@@ -134,21 +145,21 @@ def get_document_keywords(
 
 
 def document_contains_word(
-    document,
-    keyword,
+    document: Document,
+    keyword: str,
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> bool:
     """
-    Checks if a keyword occurs within an article.
+    Checks if a keyword occurs within a document.
 
-    :param article: Article
-    :type article: defoe.papers.article.Article
-    :param keywords: Keyword
-    :type keywords: str or unicode
+    :param article: Document
+    :type article: defoe.nlsArticles.document.Document
+    :param keyword: Keyword
+    :type keyword: str
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: True if the article contains the word, false otherwise
+    :return: ``True`` if the article contains the word, ``False`` otherwise
     :rtype: bool
     """
     for page in document:
@@ -164,18 +175,19 @@ def document_contains_word(
 
 
 def calculate_words_within_dictionary(
-    page, preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE
-):
+    page: Page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
+) -> str:
     """
-    Calculates the % of page words within a dictionary and also returns the page quality (pc)
-    Page words are normalized.
+    Calculates the % of a given page's words within a dictionary (see
+    ``nltk.corpus.words``). Page words are normalized.
 
     :param page: Page
-    :type page: defoe.nls.page.Page
+    :type page: defoe.nlsArticles.page.Page
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: Matches
-    :rtype: list(str or unicode)
+        (normalize, normalize and stem, normalize and lemmatize, none)
+    :return: Percent of a given page's words that appear within a dictionary
+    :rtype: str
     """
 
     dictionary = words.words()
@@ -199,16 +211,15 @@ def calculate_words_within_dictionary(
     return calculate_pc
 
 
-def calculate_words_confidence_average(page):
+def calculate_words_confidence_average(page: Page) -> str:
     """
     Calculates the average of "words confidence (wc)" within a page.
     Page words are normalized.
+
     :param page: Page
     :type page: defoe.nls.page.Page
-    :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: Matches
-    :rtype: list(str or unicode)
+    :return: Word confidence average
+    :rtype: str
     """
 
     total_wc = 0
@@ -216,26 +227,27 @@ def calculate_words_confidence_average(page):
         total_wc += float(wc)
 
     try:
-        calculate_wc = str(total_wc / len(page.wc))
+        wc_avg = str(total_wc / len(page.wc))
     except:  # TODO: Change bare excepts to explicit
-        calculate_wc = "0"
+        wc_avg = "0"
 
-    return calculate_wc
+    return wc_avg
 
 
 def get_page_as_string(
-    page, preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE
-):
+    page: Page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
+) -> str:
     """
     Return a page as a single string.
 
     :param page: Page
-    :type page: defoe.nls.Page
+    :type page: defoe.nlsArticles.Page
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: Page words as a string
-    :rtype: string or unicode
+    :rtype: str
     """
 
     page_string = ""
@@ -250,11 +262,23 @@ def get_page_as_string(
     return page_string
 
 
-def clean_text_as_string(text, flag, defoe_path, os_type):
+def clean_text_as_string(
+    text: Union[str, list], flag: int, defoe_path: str, os_type: str
+) -> str:
     """
     Clean a text as a single string,
     Handling hyphenated words: combine and split and also fixing the long-s
 
+    :param text: Text to clean provided as string or as list
+    :type text: Union[str, list]
+    :param flag: TODO
+    :type flag: int
+    :param defoe_path: TODO
+    :type defoe_path: str
+    :param os_type: TODO
+    :type defoe_path: str
+    :return: Clean text as a string
+    :rtype: str
     """
 
     if flag == 2:
@@ -308,18 +332,19 @@ def clean_text_as_string(text, flag, defoe_path, os_type):
     return text_string_final
 
 
-# TODO: This function will fail as defoe_path and os_type are not defined
-# -- but the function is not currently used in any scripts
-def clean_headers_page_as_string(page):
+def clean_headers_page_as_string(page: Page) -> str:
     """
-    Clean a page as a single string,
-    Handling hyphenated words: combine and split and also fixing the long-s
+    Clean a page as a single string.
+
+    Handling hyphenated words: combine and split and also fixing the long-s.
 
     :param page: Page
     :type page: defoe.nls.Page
     :return: Clean page words as a string
-    :rtype: string or unicode
+    :rtype: str
     """
+
+    # FIXME: This function will fail as defoe_path and os_type are not defined
 
     page_words = page.words
 
@@ -337,11 +362,11 @@ def clean_headers_page_as_string(page):
         header_right_words, 1, defoe_path, os_type
     )
 
-    # in case the right header is part of the text E.G. (LELAND,John,aneminentEnglishantiquarian,was)
+    # in case the right header is part of the text
+    # E.G. (LELAND,John,aneminentEnglishantiquarian,was)
     if len(header_right_string_final) > 12:
         header_right_string_final = ""
 
-    # print("Header_left_string_final %s - header_right_string_final %s" %(header_left_string_final, header_right_string_final))
     return (
         header_left_string_final,
         header_right_string_final,
@@ -349,13 +374,14 @@ def clean_headers_page_as_string(page):
     )
 
 
-def filter_terms_page(page, defoe_path, os_type):
+def filter_terms_page(page: Page, defoe_path: str, os_type: str) -> str:
     """
     Discovering the TERMS in the leftmost side of each colum.
+
     :param page: Page
     :type page: defoe.nls.Page
     :return: Clean page words as a string
-    :rtype: string or unicode
+    :rtype: str
     """
 
     page_words = page.words
@@ -370,7 +396,8 @@ def filter_terms_page(page, defoe_path, os_type):
         header_right_words, 1, defoe_path, os_type
     )
 
-    # in case the right header is part of the text E.G. (LELAND,John,aneminentEnglishantiquarian,was)
+    # in case the right header is part of the text
+    # E.G. (LELAND,John,aneminentEnglishantiquarian,was)
     if len(header_right) > 12:
         header_right = ""
 
@@ -536,10 +563,20 @@ def filter_terms_page(page, defoe_path, os_type):
 
 
 def preprocess_clean_page(
-    clean_page,
+    clean_page: str,
     preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
-):
+) -> str:
+    """
+    TODO
 
+    :param clean_page: TODO
+    :type clean_page: str
+    :param preprocess_type: How words should be preprocessed
+        (normalize, normalize and stem, normalize and lemmatize, none)
+    :type preprocess_type: defoe.query_utils.PreprocessWordType
+    :return: TODO
+    :rtype: str
+    """
     clean_list = clean_page.split(" ")
     page_string = ""
     for word in clean_list:
@@ -551,16 +588,17 @@ def preprocess_clean_page(
     return page_string
 
 
-def get_sentences_list_matches(text, keysentence):
+def get_sentences_list_matches(text: str, keysentence: list[str]) -> list[str]:
     """
-    Check which key-sentences from occurs within a string
-    and return the list of matches.
+    Check which key-sentences from occurs within a string and return the list
+    of matches.
 
     :param text: Text
-    :type text: str or unicode
-    :type: list(str or uniocde)
-    :return: Set of sentences
-    :rtype: set(str or unicode)
+    :type text: str
+    :param keysentence: Key sentence
+    :type keysentence: list[str]
+    :return: List of matching sentences
+    :rtype: list[str]
     """
     matches = []
     text_list = text.split()
@@ -579,10 +617,20 @@ def get_sentences_list_matches(text, keysentence):
 
 
 def preprocess_clean_page_spacy(
-    clean_page,
+    clean_page: str,
     preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
-):
+) -> str:
+    """
+    TODO
 
+    :param clean_page: TODO
+    :type clean_page: str
+    :param preprocess_type: How words should be preprocessed
+        (normalize, normalize and stem, normalize and lemmatize, none)
+    :type preprocess_type: defoe.query_utils.PreprocessWordType
+    :return: TODO
+    :rtype: str
+    """
     clean_list = clean_page.split(" ")
     page_string = ""
     for word in clean_list:
@@ -594,7 +642,17 @@ def preprocess_clean_page_spacy(
     return page_string
 
 
-def preprocess_clean_page_spacy(clean_page):
+def preprocess_clean_page_spacy(
+    clean_page: str,
+) -> list[tuple[int, Token, str, str, str, str]]:
+    """
+    TODO
+
+    :param clean_page: TODO
+    :type clean_page: str
+    :return: TODO
+    :rtype: list[tuple[int, Token, str, str, str, str]]
+    """
     nlp = spacy.load("en")
     doc = nlp(clean_page)
     page_nlp_spacy = []
@@ -613,7 +671,7 @@ def preprocess_clean_page_spacy(clean_page):
     return page_nlp_spacy
 
 
-def georesolve_page_2(text, lang_model):
+def georesolve_page_2(text, lang_model) -> dict:
     nlp = spacy.load(lang_model)
     doc = nlp(text)
     if doc.ents:
@@ -628,7 +686,7 @@ def georesolve_page_2(text, lang_model):
         return {}
 
 
-def georesolve_page(doc):
+def georesolve_page(doc: Doc) -> dict:
     if doc.ents:
         flag, in_xml = xml_geo_entities(doc)
         if flag == 1:
@@ -642,13 +700,13 @@ def georesolve_page(doc):
         return {}
 
 
-def geoparser_page(text):
+def geoparser_page(text: str) -> dict:
     geo_xml = geoparser_cmd(text)
     dResolved_loc = geoparser_coord_xml(geo_xml)
     return dResolved_loc
 
 
-def geomap_page(doc):
+def geomap_page(doc: Doc):
     geomap_html = ""
 
     if doc.ents:
@@ -659,7 +717,9 @@ def geomap_page(doc):
     return geomap_html
 
 
-def get_text_keyword_idx(text, keywords):
+def get_text_keyword_idx(
+    text: str, keywords: list[str]
+) -> list[tuple[str, int]]:
     """
     Gets a list of keywords (and their position indices) within an
     article.
@@ -667,9 +727,9 @@ def get_text_keyword_idx(text, keywords):
     :param text: Text
     :type article: str
     :param keywords: Keywords
-    :type keywords: list(str or unicode)
+    :type keywords: list[str]
     :return: Sorted list of keywords and their indices
-    :rtype: list(tuple(str or unicode, int))
+    :rtype: list[tuple[str, int]]
     """
     text_list = text.split()
     matches = set()
@@ -680,22 +740,25 @@ def get_text_keyword_idx(text, keywords):
     return sorted(list(matches))
 
 
-def get_concordance(text, keyword, idx, window):
+def get_concordance(text: str, keyword: str, idx: int, window: int) -> list[str]:
     """
-    For a given keyword (and its position in an article), return
-    the concordance of words (before and after) using a window.
+    For a given keyword (and its position in an article), return the
+    concordance of words (before and after) using a window.
 
     :param text: Text
     :type text: str
     :param keyword: Keyword
-    :type keyword: str or unicode
+    :type keyword: str
     :param idx: Keyword index (position) in list of article's words
     :type idx: int
-    :window: number of words to the right and left
-    :type: int
+    :param window: number of words to the right and left
+    :type window: int
     :return: Concordance
-    :rtype: list(str or unicode)
+    :rtype: list[str]
     """
+
+    # FIXME: keyword not used
+
     text_list = text.split()
     text_size = len(text_list)
 
@@ -715,35 +778,55 @@ def get_concordance(text, keyword, idx, window):
     return concordance_words
 
 
-def hasNumbers(inputString):
+def hasNumbers(inputString: str) -> bool:
+    """
+    TODO
+    """
     return any(char.isdigit() for char in inputString)
 
 
-def removeNumbers(inputString):
-    result = "".join(i for i in inputString if not i.isdigit())
-    return result
+def removeNumbers(inputString: str) -> str:
+    """
+    TODO
+    """
+    return "".join(i for i in inputString if not i.isdigit())
 
 
-def removeSpecialcharacters(inputString):
+def removeSpecialcharacters(inputString: str) -> str:
+    """
+    TODO
+    """
     return re.sub("[^A-Za-z0-9]+", "", inputString)
 
 
-def splitGroups(inputString):
+def splitGroups(inputString: str) -> list:
+    """
+    TODO
+    """
     match = re.match(r"([0-9]+)([A-Z]+)", inputString, re.I)
+
     if match:
-        items = match.groups()
-    else:
-        items = []
-    return items
+        return match.groups()
+
+    return []
 
 
-def split(word):
+def split(word: str) -> list:
+    """
+    TODO
+    """
     return [char for char in word]
 
 
-def specialCharacters(inputString):
-    regex = re.compile("■@_!#$%^&*?/\|~")
+def specialCharacters(inputString: str) -> int:
+    """
+    TODO
+    """
+
+    # regex = re.compile("■@_!#$%^&*?/\|~")
+
     inputString_list = split(inputString)
+
     spc_cont = 0
     for i in inputString_list:
         if re.match(r"^[_\W]+$", i):
@@ -751,24 +834,33 @@ def specialCharacters(inputString):
     return spc_cont
 
 
-def hasDot(inputString):
-    if "." in inputString:
-        return True
-    else:
-        return False
+def hasDot(inputString) -> bool:
+    """
+    TODO
+    """
+    return "." in inputString
 
 
-def romanNumeral(inputString):
-    if "." in inputString:
+def romanNumeral(inputString: str):
+    """
+    TODO
+    """
+
+    if hasDot(inputString):
         word = inputString.split(".")[0]
     else:
         word = inputString
+
     return not set(word).difference("MDCLXVI()")
 
 
-def get_header_eb(header_left, header_right):
-    header = ""
-    page_type = ""
+def get_header_eb(header_left: str, header_right: str) -> tuple[str, str]:
+    """
+    TODO
+    """
+
+    header, page_type = "", ""
+
     if (header_left == "") and (header_right == ""):
         header = "Empty"
         page_type = "Empty"
@@ -856,14 +948,21 @@ def get_header_eb(header_left, header_right):
         else:
             page_type = "FullPage"
 
-    tmp_header = removeSpecialcharacters(header)
-    f_header = removeNumbers(tmp_header)
+    f_header = removeNumbers(removeSpecialcharacters(header))
+
     if f_header == "":
         f_header = header
+
     return page_type, f_header
 
 
-def get_articles_page(text, text_list, terms_view, num_words):
+def get_articles_page(
+    text: str, text_list: list[str], terms_view: dict, num_words: int
+) -> dict:
+    """
+    TODO
+    """
+
     articles_page = {}
     latin_view = [s in words.words() for s in text_list]
     key = "previous_page"
@@ -1141,11 +1240,19 @@ def get_articles_page(text, text_list, terms_view, num_words):
     return articles_page
 
 
-def get_articles_eb(header_left, header_right, text, leftmost_terms):
+def get_articles_eb(
+    header_left: str, header_right: str, text: str, leftmost_terms
+) -> tuple[str, str, dict, int]:
+    """
+    TODO
+    """
+
     type, header = get_header_eb(header_left, header_right)
+
     text_list = text.split()
     terms_view = [s.isupper() for s in text_list]
     num_words = len(terms_view)
+
     articles_page = {}
 
     if type == "Empty" and num_words < 10:
@@ -1203,6 +1310,7 @@ def get_articles_eb(header_left, header_right, text, leftmost_terms):
             articles_page["FullPage"] = [text]
 
         return type, header, articles_page, len(articles_page)
+
     else:
         type = "Exception"
         articles_page["FullPage"] = [text]

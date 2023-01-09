@@ -1,4 +1,5 @@
-# Count number of occurrences of keywords and group by year
+Count number of occurrences of keywords and group by year
+==========================================================
 
 * Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.alto.queries.keyword_by_year`
@@ -17,7 +18,9 @@
 ...
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over British Library Books `1510_1699/000001143_0_1-20pgs__560409_dat.zip` and `1510_1699/000000874_0_1-22pgs__570785_dat.zip` with `queries/hearts.txt`:
 

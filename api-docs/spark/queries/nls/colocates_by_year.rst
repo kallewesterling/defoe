@@ -1,4 +1,6 @@
-# Get colocates and group by year
+Get colocates and group by year
+==========================================================
+
 
 * Both colocated words and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.alto.queries.colocates_by_year`

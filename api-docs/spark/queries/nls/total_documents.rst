@@ -1,4 +1,6 @@
-# Count total number of documents
+Count total number of documents
+==========================================================
+
 
 * Query module: `defoe.alto.queries.total_documents`
 * Configuration file: None

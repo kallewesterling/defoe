@@ -3,13 +3,9 @@ This query filters articles' textblocks by selecting the ones that have one of
 the target word(s) AND any the keywords. Later it produces the segmentation/
 crop or the filtered textblocks.
 """
-
-from pyspark.rdd import PipelinedRDD
+from __future__ import annotations
 
 from defoe import query_utils
-from defoe.fmp import Document
-from defoe.fmp.textblock import TextBlock
-
 from defoe.fmp.query_utils import (
     segment_image,
     preprocess_word,
@@ -17,9 +13,17 @@ from defoe.fmp.query_utils import (
     MatchedWords,
     WordLocation,
 )
-
-# from collections import defaultdict
 from itertools import product
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..document import Document
+    from ..textblock import TextBlock
+    from typing import Optional
+    from pyspark.rdd import RDD
+    from pyspark import SparkContext
+    from py4j.java_gateway import JavaObject
+
 import os
 
 
@@ -36,7 +40,7 @@ def get_highlight_coords(
     ]
 
 
-def check_word(word, lst, fuzzy=False) -> bool:
+def check_word(word: str, lst: list[str], fuzzy: bool = False) -> bool:
     """
     Fuzzy/non-fuzzy check of word against a list.
 
@@ -50,6 +54,10 @@ def check_word(word, lst, fuzzy=False) -> bool:
     if not fuzzy:
         return word in lst
 
+    raise NotImplementedError(
+        "Fuzzy searching is not yet implemented into the FMP API."
+    )
+
     # TODO: Consider DeezyMatch?
     for target_or_keyword in lst:
         if target_or_keyword in word:
@@ -57,14 +65,24 @@ def check_word(word, lst, fuzzy=False) -> bool:
 
 
 def get_word_data(
-    loc: TextBlock.locations,
+    loc: list[Optional[tuple[int, int, int, int, str]]],
     document: Document,
     article_id: str,
     textblock: TextBlock,
 ) -> WordLocation:
     """
-    Combines data from a tb.location object, a Document, its article, and TextBlock.
+    Combines data from a tb.location object, a Document, its article, and
+    TextBlock.
 
+    :param loc: The tokens property from a given TextBlock, see
+        :func:`~defoe.fmp.textblock.TextBlock.tokens`
+    :type loc: list[Optional[tuple[int, int, int, int, str]]]
+    :param document: A Document to get data from
+    :type document: defoe.fmp.document.Document
+    :param article_id: The article ID
+    :type article_id: str
+    :param textblock: A given TextBlock
+    :type textblock: defoe.fmp.textblock.TextBlock
     :return: A WordLocation object that describes the word's data in-depth.
     :rtype: defoe.fmp.query_utils.WordLocation
     """
@@ -88,17 +106,33 @@ def get_word_data(
 
 def find_closest(
     document: Document,
-    target_words: list,
-    keywords: list,
+    target_words: list[str],
+    keywords: list[str],
     preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
     fuzzy_target: bool = False,
     fuzzy_keyword: bool = False,
-) -> list:
+) -> list[MatchedWords]:
     """
-    Updated query structure (replaces the earlier one, above). This structure allows for
-    fuzzy searching, and is faster (?).
+    Searches a document for matches and provides back a list which includes
+    the distance between the keyword and the target word.
 
-    TODO: More docstring needed.
+    :param document: Document to search
+    :type document: defoe.fmp.document.Document
+    :param target_words: List of target words
+    :type target_words: list[str]
+    :param keywords: List of keywords
+    :type keywords: list[str]
+    :param preprocess_type: How words should be preprocessed
+        (normalize, normalize and stem, normalize and lemmatize, none)
+    :type preprocess_type: defoe.query_utils.PreprocessWordType
+    :param fuzzy_target: Whether to fuzzy search the target word (Note: Not
+        yet implemented.), defaults to False
+    :type fuzzy_target: bool
+    :param fuzzy_keyword: Whether to fuzzy search the keyword (Note: Not yet
+        implemented.), defaults to False
+    :type fuzzy_keyword: bool
+    :return: List of matched words
+    :rtype: list[MatchedWords]
     """
 
     matches = []
@@ -137,7 +171,8 @@ def find_closest(
                 if check_word(x[4], keywords, fuzzy_keyword)
             ]
 
-            # Pair targets and keywords and add a final count of their difference in position
+            # Pair targets and keywords and add a final count of their
+            # difference in position
             found = [
                 (x[0], x[1], abs(x[0].position - x[1].position))
                 for x in list(product(found_targets, found_keywords))
@@ -171,7 +206,10 @@ def find_closest(
 
 
 def do_query(
-    archives: PipelinedRDD, config_file: str = None, logger=None, context=None
+    archives: RDD,
+    config_file: Optional[str] = None,
+    logger: Optional[JavaObject] = None,
+    context: Optional[SparkContext] = None,
 ):
     """
     Crops articles' images for keywords and groups by word.
@@ -213,14 +251,18 @@ def do_query(
         }
 
     :param archives: RDD of defoe.fmp.archive.Archive
-    :type archives: pyspark.rdd.PipelinedRDD
+    :type archives: pyspark.rdd.RDD
     :param config_file: Query configuration file
-    :type config_file: str
-    :param logger: Logger
-    :type logger: py4j.java_gateway.JavaObject
+    :type config_file: str, optional
+    :param logger: PySpark's Logger
+    :type logger: py4j.java_gateway.JavaObject, optional
+    :param context: PySpark's context
+    :type context: pyspark.SparkContext
     :return: Information on documents in which keywords occur grouped
-    by word
+        by word
     :rtype: dict
+    :raises RuntimeError: if data file does not contain two valid YAML lists
+        with targets and keywords
     """
 
     '''

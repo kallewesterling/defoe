@@ -1,4 +1,6 @@
-# Normalize
+Normalize
+==========================================================
+
 
 Count total number of articles and words per year. This can be useful if wanting to see how the average number of articles and words change over time.
 
@@ -11,7 +13,9 @@ Count total number of articles and words per year. This can be useful if wanting
 ...
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over `1.xml` and `2.xml`:
 

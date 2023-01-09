@@ -1,4 +1,6 @@
-# Get concordance for keywords and group by date
+Get concordance for keywords and group by date
+==========================================================
+
 
 * Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.nzpp.queries.keyword_concordance_by_date`
@@ -25,7 +27,9 @@
 
 **Caution:** as this query returns each article's content, for every match, there is a risk that the query will fail due to lack of memory. This query should only be run with interesting words that are not expected to occur often.
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over `1.xml` and `2.xml` with `queries/hearts.txt`:
 

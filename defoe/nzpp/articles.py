@@ -7,7 +7,7 @@ from lxml import etree
 
 from .article import Article
 from defoe.spark_utils import open_stream
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Union
 
 
 class Articles(object):
@@ -16,7 +16,7 @@ class Articles(object):
     Papers Past represented as an XML document.
 
     :param filename: XML filename
-    :type: filename: str
+    :type filename: str
     """
 
     def __init__(self, filename: str):
@@ -34,7 +34,9 @@ class Articles(object):
         self.document_type = "newspaper"
         self.model = "nzpp"
 
-    def query(self, query: etree.XPath) -> list:
+    def query(
+        self, query: etree.XPath
+    ) -> list[Optional[Union[etree._ElementUnicodeResult, etree._Element]]]:
         """
         Run XPath query.
 
@@ -42,7 +44,8 @@ class Articles(object):
         :type query: lxml.etree.XPath
         :return: List of query results or an empty list if query returns no
             results or an AssertionError occurred
-        :rtype: list(lxml.etree.<MODULE>) (depends on query)
+        :rtype: list[Optional[Union[etree._ElementUnicodeResult,
+            etree._Element]]], depending on the query
         """
         if not self.xml_tree:
             return []
@@ -51,15 +54,16 @@ class Articles(object):
         except AssertionError:
             return []
 
-    def single_query(self, query: etree.XPath) -> Optional[str]:
+    def single_query(
+        self, query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: Query results or None if the object represents an
-            empty document
-        :rtype: str
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self.query(query)
         if not result:

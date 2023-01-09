@@ -7,13 +7,14 @@ from __future__ import annotations
 from .page import Page
 
 from lxml import etree
-from typing import Iterator, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import re
 import zipfile
 
 if TYPE_CHECKING:
     from .archive import Archive
+    from typing import Iterator, Optional, Union
 
 
 class Document(object):
@@ -120,7 +121,9 @@ class Document(object):
         """
         return list(map(int, page_code.split("/")[1].split(".")[0]))
 
-    def query(self, query: etree.XPath) -> list:
+    def query(
+        self, query: etree.XPath
+    ) -> list[Optional[Union[etree._ElementUnicodeResult, etree._Element]]]:
         """
         Run XPath query.
 
@@ -128,18 +131,21 @@ class Document(object):
         :type query: lxml.etree.XPath
         :return: List of query results or an empty list if query returns no
             results
-        :rtype: list(lxml.etree.<MODULE>) (depends on query)
+        :rtype: list[Optional[Union[etree._ElementUnicodeResult,
+            etree._Element]]], depending on the query
         """
         return self.metadata_tree.xpath(query, namespaces=self.namespaces)
 
-    def single_query(self, query: etree.XPath) -> Optional[str]:
+    def single_query(
+        self, query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: Query result or None if query returned no results
-        :rtype: Optional[str]
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self.query(query)
         if not result:
@@ -172,7 +178,7 @@ class Document(object):
         Gets information from ZIP file about a page file within this document.
 
         :param page_code: Page file code
-        :type page_code: str or unicode
+        :type page_code: str
         :return: File information
         :rtype: zipfile.ZipInfo
         """

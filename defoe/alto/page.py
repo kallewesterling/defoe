@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .document import Document
-    from typing import BinaryIO, Optional
+    from typing import BinaryIO, Optional, Union
 
 # FIXME: This needs docstring and typing fixing
 
@@ -58,7 +58,9 @@ class Page(object):
         self.page_wc = None
         self.page_cc = None
 
-    def query(self, xpath_query: etree.XPath) -> Optional[list]:
+    def query(
+        self, xpath_query: etree.XPath
+    ) -> list[Optional[Union[etree._ElementUnicodeResult, etree._Element]]]:
         """
         Run XPath query.
 
@@ -71,15 +73,17 @@ class Page(object):
         """
         return xpath_query(self.tree)
 
-    def single_query(self, xpath_query: etree.XPath) -> Optional[str]:
+    def single_query(
+        self, xpath_query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: Query result or None if no result is returned from query
-        :rtype: lxml.etree.<MODULE> (depends on query)
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self.query(xpath_query)
         if not result:

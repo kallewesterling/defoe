@@ -1,4 +1,6 @@
-# Newspapers dataset queries
+Newspapers dataset queries
+==========================================================
+
 
 British Library Newspapers dataset and Times Digital Archive dataset.
 

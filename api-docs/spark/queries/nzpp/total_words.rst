@@ -1,4 +1,6 @@
-# Count total number of words
+Count total number of words
+==========================================================
+
 
 * Query module: `defoe.nzpp.queries.total_words`
 * Configuration file: None
@@ -18,7 +20,9 @@ grep \<result\> ~/data/nzpp/*xml | wc -l
 40
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over `1.xml` and `2.xml`:
 

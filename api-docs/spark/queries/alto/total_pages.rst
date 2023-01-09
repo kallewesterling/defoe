@@ -1,4 +1,5 @@
-# Count total number of pages
+Count total number of pages
+===========================
 
 * Query module: `defoe.alto.queries.total_pages`
 * Configuration file: None
@@ -27,7 +28,9 @@ grep \<Page ALTO/*xml | wc -l
 42
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over British Library Books `1510_1699/000001143_0_1-20pgs__560409_dat.zip` and `1510_1699/000000874_0_1-22pgs__570785_dat.zip`: 
 

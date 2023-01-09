@@ -1,4 +1,6 @@
-# Read data from ES, and count number of occurrences of keywords or keysentences (by page) and group by year
+Read data from ES, and count number of occurrences of keywords or keysentences (by page) and group by year
+==========================================================
+
 
 * Read data previously stored in HDFS  
 * Query module: `defoe.es.queries.keysearch_by_year`

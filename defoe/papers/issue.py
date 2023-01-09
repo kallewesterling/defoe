@@ -24,7 +24,7 @@ from defoe.spark_utils import open_stream
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Iterator, Optional
+    from typing import Iterator, Optional, Union
 
 
 class Issue(object):
@@ -34,9 +34,8 @@ class Issue(object):
 
     :param filename: XML filename. If the filename cannot be parsed into valid
         XML an empty document is created.
-    :type: filename: str
-    :raises Exception: Raises an Exception if the XML does not have an
-        ``issue`` element.
+    :type filename: str
+    :raises Exception: if the XML does not have an ``issue`` element.
     """
 
     def __init__(self, filename):
@@ -96,7 +95,9 @@ class Issue(object):
         except Exception:
             pass
 
-    def query(self, query: etree.XPath) -> list:
+    def query(
+        self, query: etree.XPath
+    ) -> list[Optional[Union[etree._ElementUnicodeResult, etree._Element]]]:
         """
         Run XPath query.
 
@@ -104,7 +105,8 @@ class Issue(object):
         :type query: lxml.etree.XPath
         :return: List of query results or an empty list if query returns no
             results or an AssertionError occurred
-        :rtype: list(lxml.etree.<MODULE>) (depends on query)
+        :rtype: list[Optional[Union[etree._ElementUnicodeResult,
+            etree._Element]]], depending on the query
         """
         if not self.issue_tree:
             return []
@@ -113,15 +115,16 @@ class Issue(object):
         except AssertionError:
             return []
 
-    def single_query(self, query: etree.XPath) -> Optional[str]:
+    def single_query(
+        self, query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: Query results or None if the object represents an empty
-            document
-        :rtype: str
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self.query(query)
         if not result:

@@ -1,4 +1,6 @@
-# Count number of articles in which appear keywords or keysentences, filtering those by target words, and group by year
+Count number of articles in which appear keywords or keysentences, filtering those by target words, and group by year
+==========================================================
+
 
 * Both keywords/keysentences and words in documents are cleaned (long-S and hyphen fixes) and preprocessed according to the configuration file
 * Query module: `defoe.papers.queries.target_keysearch_by_year`

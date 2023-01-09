@@ -1,4 +1,6 @@
-# Count number of occurences of keywords or keysentences appear and group by book
+Count number of occurences of keywords or keysentences appear and group by book
+==========================================================
+
 
 * Both keywords/keysentences and words in documents are cleaned (long-S and hyphen fixes) and preprocessed according to the configuration file
 * Query module: `defoe.nls.queries.keysentence_by_book_term_count`

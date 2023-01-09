@@ -1,4 +1,6 @@
-# ES document queries
+ES document queries
+==========================================================
+
 
 General:
 

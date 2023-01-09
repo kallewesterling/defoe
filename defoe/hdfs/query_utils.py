@@ -7,16 +7,17 @@ from pyspark.sql.functions import col, when
 import re
 
 
-def get_sentences_list_matches(text, keysentence):
+def get_sentences_list_matches(text: str, keysentence: list[str]) -> list[str]:
     """
-    Check which key-sentences from occurs within a string
-    and return the list of matches.
+    Check which key-sentences from occurs within a string and return the list
+    of matches.
 
     :param text: Text
-    :type text: str or unicode
-    :type: list(str or uniocde)
-    :return: Set of sentences
-    :rtype: set(str or unicode)
+    :type text: str
+    :param text: Keysentence
+    :type text: list[str]
+    :return: Sorted list of matching sentences
+    :rtype: list[str]
     """
 
     text_list = text.split()
@@ -39,18 +40,24 @@ def get_sentences_list_matches(text, keysentence):
     return sorted(matches)
 
 
-def get_articles_list_matches(text, keysentence):
+def get_articles_list_matches(text: str, keysentence: list[str]) -> list[str]:
     """
-    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time.
+    Article count: The query counts as a "hint" every time that finds an
+    article with a particular term from our lexicon in the previously selected
+    articles (by the target words or/and time period).  So, if a term is
+    repeated several times in an article, it will be counted just as ONE. In
+    this way, we are basically calculating the “frequency of articles” over
+    time.
 
-    Check which key-sentences from occurs within a string
-    and return the list of matches.
+    Check which key-sentences from occurs within a string and return the list
+    of matches.
 
     :param text: Text
-    :type text: str or unicode
-    :type: list(str or uniocde)
-    :return: Set of sentences
-    :rtype: set(str or unicode)
+    :type text: str
+    :param text: Keysentence
+    :type text: list[str]
+    :return: Sorted list of matching sentences
+    :rtype: list[str]
     """
 
     text_list = text.split()
@@ -70,18 +77,24 @@ def get_articles_list_matches(text, keysentence):
     return sorted(matches)
 
 
-def get_articles_text_matches(text, keysentence):
+def get_articles_text_matches(text: str, keysentence: list[str]) -> dict:
     """
-    Article count: The query counts as a “hint” every time that finds an article with a particular term from our lexicon in the previously selected articles (by the target words or/and time period).  So, if a term is repeated several times in an article, it will be counted just as ONE. In this way, we are basically calculating the “frequency of articles” over time.
+    Article count: The query counts as a “hint” every time that finds an
+    article with a particular term from our lexicon in the previously selected
+    articles (by the target words or/and time period).  So, if a term is
+    repeated several times in an article, it will be counted just as ONE. In
+    this way, we are basically calculating the “frequency of articles” over
+    time.
 
-    Check which key-sentences from occurs within a string
-    and return the list of matches.
+    Check which key-sentences from occurs within a string and return the list
+    of matches.
 
     :param text: Text
-    :type text: str or unicode
-    :type: list(str or uniocde)
-    :return: Set of sentences
-    :rtype: set(str or unicode)
+    :type text: str
+    :param text: Keysentence
+    :type text: list[str]
+    :return: Dictionary of matching sentences as keys and the text as value
+    :rtype: dict
     """
 
     match_text = {}

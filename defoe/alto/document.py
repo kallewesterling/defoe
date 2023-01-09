@@ -14,7 +14,7 @@ import re
 
 if TYPE_CHECKING:
     from .archive import Archive
-    from typing import Iterator, Optional
+    from typing import Iterator, Optional, Union
     import zipfile
 
 
@@ -121,26 +121,30 @@ class Document(object):
         codes = list(map(int, page_code.split("_")))
         return codes
 
-    def query(self, query: etree.XPath) -> list:
+    def query(
+        self, query: etree.XPath
+    ) -> list[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query.
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: List of query results or an empty list if query returns no
-            results
+        :return: list[Union[etree._ElementUnicodeResult, etree._Element]],
+            depending on the query
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return self.metadata_tree.xpath(query, namespaces=self.namespaces)
 
-    def single_query(self, query: etree.XPath) -> Optional[str]:
+    def single_query(
+        self, query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: Query result or None if none
-        :rtype: Optional[str]
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self.query(query)
         if not result:

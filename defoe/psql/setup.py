@@ -1,44 +1,41 @@
 """
 Given a filename create a dataframe.
 """
+from __future__ import annotations
 
 from pyspark.sql import SQLContext
 from pyspark.sql import DataFrameReader
 
 
-def filename_to_object(filename, context):
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pyspark.context import SparkContext
+    from pyspark.sql.dataframe import DataFrame
+
+
+def filename_to_object(filename: str, context: SparkContext) -> DataFrame:
     """
     Given a filename create a defoe.books.archive.Archive.  If an error
     arises during its creation this is caught and returned as a
     string.
 
     :param filename: Filename
-    :type filename: str or unicode
-    :return: Tuple of form (Archive, None) or (filename, error message),
-    if there was an error creating Archive
-    :rtype: tuple(defoe.books.archive.Archive | str or unicode, str or unicode)
+    :type filename: str
+    :return: PySpark SQL DataFrame
+    :rtype: pyspark.sql.dataframe.DataFrame
     """
 
     lines = open(filename).readlines()
-
-    fields = lines[1].split(",")
-
-    # host,port,database,user,driver,table # TODO: better destructing available here
-    host = fields[0]
-    port = fields[1]
-    database = fields[2]
-    user = fields[3]
-    driver = fields[4]
-    table = fields[5]
+    host, port, database, user, driver, table = lines[1].split(",")
+    url = f"postgresql://{host}:{port}/{database}"
 
     sqlContext = SQLContext(context)
 
-    url = "postgresql://%s:%s/%s" % (host, port, database)
-
-    properties = {"user": user, "driver": driver}
-
     df = DataFrameReader(sqlContext).jdbc(
-        url="jdbc:%s" % url, table=table, properties=properties
+        url=f"jdbc:{url}",
+        table=table,
+        properties={"user": user, "driver": driver},
     )
 
     return df

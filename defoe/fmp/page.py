@@ -56,7 +56,6 @@ class Page(object):
     WORDS_XPATH = etree.XPath("//String/@CONTENT")  # String content
     STRINGS_XPATH = etree.XPath("//String")  # String elements
     GRAPHICS_XPATH = etree.XPath("//GraphicalElement")  # Graphical elements
-    # TODO: for doc, the above was renamed due to images being in the mix
     PAGE_XPATH = etree.XPath("//Page")  # Page
     WC_XPATH = etree.XPath("//String/@WC")  # Word confidence content
     CC_XPATH = etree.XPath("//String/@CC")  # Character confience content
@@ -148,11 +147,11 @@ class Page(object):
         :type width: int
         :param height: Height in pixels of crop rectangle
         :type height: int
-        :raises SyntaxError: If not the correct values (integers for ``x``,
-            ``y``, ``width`` and ``height``) where ``width`` and ``height`` is
-            over 0, a ``SyntaxError`` will be raised
-        :return: The ``defoe.fmp.page.Page``'s image, cropped
         :rtype: PIL.Image.Image
+        :return: The ``defoe.fmp.page.Page``'s image, cropped
+        :raises SyntaxError: if not the correct values (integers for ``x``,
+            ``y``, ``width`` and ``height``) are provided or ``width`` and
+            ``height`` is lower than or equal to 0 pixels
         """
 
         if not all(
@@ -174,7 +173,7 @@ class Page(object):
 
     def _query(
         self, xpath_query
-    ) -> list[Union[etree._ElementUnicodeResult, etree._Element]]:
+    ) -> list[Optional[Union[etree._ElementUnicodeResult, etree._Element]]]:
         """
         Run XPath query.
 
@@ -182,8 +181,8 @@ class Page(object):
         :type xpath_query: lxml.etree.XPath
         :return: A list of query results or an empty list if no result is
             returned from query
-        :rtype: list[Union[etree._ElementUnicodeResult, etree._Element]],
-            depending on the query
+        :rtype: list[Optional[Union[etree._ElementUnicodeResult,
+            etree._Element]]], depending on the query
         """
         return xpath_query(self.tree)
 
@@ -196,7 +195,7 @@ class Page(object):
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
         :return: The query's result or None if no result is returned
-        :rtype: Union[etree._ElementUnicodeResult, etree._Element] or None
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self._query(xpath_query)
         if not result:
@@ -295,7 +294,7 @@ class Page(object):
         return self._character_confidences
 
     @property
-    def strings(self) -> list:
+    def strings(self) -> list[etree._ElementStringResult]:
         """
         Returns all strings in the ``defoe.fmp.page.Page``. These are then
         saved in an attribute, so the strings are only retrieved once.
@@ -308,7 +307,7 @@ class Page(object):
         return self._strings
 
     @property
-    def textblock_ids(self) -> list:
+    def textblock_ids(self) -> list[etree._ElementStringResult]:
         """
         Returns all strings in the ``defoe.fmp.page.Page``. These are then
         saved in an attribute, so the strings are only retrieved once.
@@ -321,7 +320,7 @@ class Page(object):
         return self._textblock_ids
 
     @property
-    def graphics(self) -> list:
+    def graphics(self) -> list[etree._Element]:
         """
         Returns all graphical elements in the ``defoe.fmp.page.Page``. These
         are then saved in an attribute, so the graphical elements are only
@@ -372,7 +371,11 @@ class Page(object):
             self._image_path = self.get_image_path()
         return self._image_path
 
-    def get_image_path(self, document_code=None, page_code=None):
+    def get_image_path(
+        self,
+        document_code: Optional[str] = None,
+        page_code: Optional[str] = None,
+    ) -> str:
         """
         Returns the path to a given ``defoe.fmp.document.Document``'s
         ``defoe.fmp.page.Page``'s image.
@@ -392,19 +395,28 @@ class Page(object):
 
         return self.document.archive.get_image_path(document_code, page_code)
 
-    def highlight(self, image=None, highlight=[]):
+    def highlight(
+        self,
+        image: Optional[Image.Image] = None,
+        highlight: list[Optional[tuple[int, int, int, int, str, str]]] = [],
+    ) -> Image.Image:
         """
-        TODO
-        image: (optional) image
-        highlight: [(x0, y0, x1, y1, "")]
+        Takes an optional image (or defaults to the ``defoe.fmp.page.Page``'s
+        image) and annotates it with highlights.
 
-        :param image: TODO
-        :type image: TODO
-        :param highlight: TODO
-        :type highlight: TODO
-        :raises TypeError: TODO
-        :return: TODO
-        :rtype: TODO
+        :param image: The input image
+        :type image: Optional[PIL.Image.Image]
+        :param highlight: A list of all the rectangles in need of highlight.
+            The list should contain 4-, 5-, or 6-tuples with
+            ``[(x0, y0, x1, y1)]`` as the minimum required tuple information.
+            The remaining two positions can include an RGB value for the fill
+            colour, and a floating point value between 0 and 1 for opacity:
+            ``[(x0, y0, x1, y1, (255, 255, 255))]`` or
+            ``[(x0, y0, x1, y1, (255, 255, 255), 0.4)]``
+        :type highlight: list[Optional[tuple[int, int, int, int, str, str]]]
+        :return: A copy of the input image with highlights applied
+        :rtype: PIL.Image.Image
+        :raises TypeError: if the image provided is not of the correct format
         """
 
         if not image:
@@ -514,16 +526,27 @@ class Page(object):
             )
         ]
 
-    def get_cropped_areas(self, include_areas=[]):
+    def get_cropped_areas(self, include_areas: Optional[list[str]] = []):
         """
-        TODO
+        Returns a dictionary consisting of page area IDs as keys and a
+        dictionary as value with two keys: "area" and "image". "Area" provides
+        the ``defoe.fmp.area.Area`` object for the page area and "image"
+        provides a ``PIL.Image.Image`` with a cropped image of the given page
+        area.
 
-        :param include_areas: TODO
-        :type include_areas: TODO
-        :return: TODO
-        :rtype: TODO
+        The function can be limited to a restricted list of area IDs, provided
+        as an ``include_areas`` parameter.
+
+        :param include_areas: List of area IDs to include; if no list provided,
+            all page areas will be included
+        :type include_areas: list[str], optional
+        :return: Dictionary with page area IDs as keys and value consisting of
+            a dictionary providing access to the ``defoe.fmp.area.Area``
+            object and cropped ``PIL.Image.Image`` for the page area.
+        :rtype: dict
         """
         areas = self.areas
+
         if include_areas:
             areas = [x for x in areas if x.id in include_areas]
 

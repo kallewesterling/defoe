@@ -16,3 +16,4 @@ Contents
   query_utils
   spark_utils
   file_utils
+  queries/index

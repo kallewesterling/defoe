@@ -1,17 +1,23 @@
 """
 Query-related utility functions.
 """
+from __future__ import annotations
 
 from defoe.query_utils import PreprocessWordType, preprocess_word
-from defoe.fmp.document import Document
-from defoe.fmp import Page
 
-from nltk.corpus import words
-from PIL import Image, ImageDraw, ImageColor
-
-from pathlib import Path
-from math import floor
 from collections import namedtuple
+from math import floor
+from nltk.corpus import words
+from pathlib import Path
+from PIL import Image, ImageDraw, ImageColor
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .document import Document
+    from .page import Page
+    from logging import Logger
+    from typing import Optional
+
 import os
 
 
@@ -40,7 +46,9 @@ MatchedWords = namedtuple(
 )
 
 
-def convert_coords(x, y, w, h):
+def convert_coords(
+    x: int, y: int, w: int, h: int
+) -> list[tuple[int, int], tuple[int, int]]:
     """
     Takes starting x, y coordinates (upper-left corner) and a width and height,
     and returns the correct format for PIL to draw a rectangle.
@@ -54,8 +62,8 @@ def convert_coords(x, y, w, h):
     :param h: Rectangle's height in pixels
     :type h: int
     :return: List of two tuples with coordinates of the rectangle's two
-    opposite corners: (1) upper-left, (2) lower-right
-    :rtype: list(tuple)
+        opposite corners: (1) upper-left, (2) lower-right
+    :rtype: list[tuple[int, int], tuple[int, int]]
     """
     x0 = x
     y0 = y
@@ -67,13 +75,14 @@ def convert_coords(x, y, w, h):
 
 def get_page_matches(
     document: Document,
-    keywords: list,
+    keywords: list[str],
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> list[tuple[int, Document, Page, str]]:
     """
     Get pages within a document that include one or more keywords.
+
     For each page that includes a specific keyword, add a tuple of form:
-        (<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)
+    ``(<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)``
 
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
@@ -84,12 +93,12 @@ def get_page_matches(
     :param document: Document
     :type document: defoe.fmp.document.Document
     :param keywords: Keywords
-    :type keywords: list(str)
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: List of tuples
-    :rtype: list(tuple)
+    :rtype: list[tuple[int, Document, Page, str]]
     """
 
     matches = []
@@ -111,18 +120,46 @@ def get_page_matches(
     return matches
 
 
-def get_tb_matches(target_match, keywords):
+def get_tb_matches(
+    target_match: tuple[
+        int,
+        Document,
+        str,
+        str,
+        Optional[list[int, int, int, int]],
+        str,
+        list,
+        list,
+        str,
+        str,
+    ],
+    keywords: list[str],
+) -> list[
+    tuple[
+        int,
+        Document,
+        str,
+        str,
+        Optional[list[int, int, int, int]],
+        str,
+        list,
+        list,
+        str,
+        str,
+    ]
+]:
     """
-    TODO #3: Incomplete docstring
+    Takes a complex target_match and filters its preprocessed words according
+    to whether they appear in a provided list of keywords.
 
-    (target_match=><YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <TARGETWORD>)
-
-    :param document: Target_match
-    :type document: list
+    :param target_match: A given target match
+    :type target_match: tuple[int, Document, str, str, Optional[list[int, int,
+        int, int]], str, list, list, str, str]
     :param keywords: Keywords
-    :type keywords: list(str:
+    :type keywords: list[str]
     :return: List of tuples
-    :rtype: list(tuple)
+    :rtype: list[tuple[int, Document, str, str, Optional[list[int, int, int,
+        int]], str, list, list, str, str]]
     """
 
     (
@@ -169,53 +206,62 @@ def get_tb_matches(target_match, keywords):
 
 def get_article_matches(
     document: Document,
-    keywords: list,
+    keywords: list[str],
     preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
     fuzzy: bool = False,
-):
+) -> list[
+    tuple[
+        int,
+        Document,
+        str,
+        str,
+        Optional[list[int, int, int, int]],
+        str,
+        list,
+        list,
+        str,
+        str,
+        Optional[list[int, int, int, int, str]],
+    ]
+]:
     """
-    Takes a document and a list of keywords and a type of preprocessing,
-    loops through each keyword and looks in each textblock inside each
-    article for the first occurring match of the keyword in the textblock.
+    Takes a document and a list of keywords and a type of preprocessing, loops
+    through each keyword and looks in each textblock inside each article for
+    the first occurring match of the keyword in the textblock.
 
-    If a keyword occurs more than once on a page, there will be only
-    one tuple for the page for that keyword.
+    If a keyword occurs more than once on a page, there will be only one tuple
+    for the page for that keyword.
 
-    If more than one keyword occurs on a page, there will be one tuple
-    per keyword.
+    If more than one keyword occurs on a page, there will be one tuple per
+    keyword.
 
-    Returns a list of tuples of the following format:
-
-        (
-            <YEAR>,
-            <DOCUMENT>,
-            <ARTICLE>,
-            <BLOCK_ID>,
-            <COORDINATES>,
-            <PAGE_AREA>,
-            <ORIGINAL_WORDS>,
-            <PREPROCESSED_DATA>,
-            <PAGE_NAME>,
-            <MATCHED_KEYWORD>
-        )
+    Returns a list of tuples of the following format: (``<YEAR>``,
+    ``<DOCUMENT>``, ``<ARTICLE>``, ``<BLOCK_ID>``, ``<COORDINATES>``,
+    ``<PAGE_AREA>``, ``<ORIGINAL_WORDS>``, ``<PREPROCESSED_DATA>``,
+    ``<PAGE_NAME>``, ``<MATCHED_KEYWORD>``)
 
     :param document: Document
     :type document: defoe.fmp.document.Document
     :param keywords: Keywords
-    :type keywords: list(str)
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: List of tuples
-    :rtype: list(tuple)
+    :return: List of tuples of the following format: (``<YEAR>``,
+        ``<DOCUMENT>``, ``<ARTICLE>``, ``<BLOCK_ID>``, ``<COORDINATES>``,
+        ``<PAGE_AREA>``, ``<ORIGINAL_WORDS>``, ``<PREPROCESSED_DATA>``,
+        ``<PAGE_NAME>``, ``<MATCHED_KEYWORD>``)
+    :rtype: list[tuple[int, Document, str, str, Optional[list[int, int, int,
+        int]], str, list, list, str, str, Optional[list[int, int, int, int,
+        str]]]]
     """
 
     matches = []
     for keyword in keywords:
         processed_keyword = preprocess_word(keyword, preprocess_type)
 
-        for article_id, article in document.articles.items():
-            for tb in article:
+        for article_id, textblocks in document.articles.items():
+            for tb in textblocks:
                 preprocessed_data = [
                     (
                         x[0],
@@ -285,23 +331,24 @@ def segment_image(
     issue_path: str,
     keyword: str,
     output_path: str,
-    target: str = "",
-    highlight: list = [],
-    highlight_frame: str = "#C02F1D",  # highlight box frame's tint (hex)
-    highlight_frame_width: int = 2,  # highlight box frame's width (pixels)
-    highlight_tint: str = "#FFFF00",  # highlight box's tint (hex)
-    highlight_tint_transparency: float = 0.25,  # Degree of transparency, 0-1 (percent)
-    max_height: int = 0,  # max height of resulting image (pixels)
-    limit_size: int = 950000,  # File size limit (bytes)
+    target: Optional[str] = "",
+    highlight: Optional[list[Optional[tuple[int, int, int, int]]]] = [],
+    highlight_frame: str = "#C02F1D",
+    highlight_frame_width: int = 2,
+    highlight_tint: str = "#FFFF00",
+    highlight_tint_transparency: float = 0.25,
+    max_height: Optional[int] = 0,
+    limit_size: int = 950000,
     overwrite_existing: bool = False,
-    logger=None,  # optional logger
+    logger: Logger = None,
 ) -> str:
     """
     Segments textblock articles given coordinates and page path
 
     :param coords: Coordinates of an image
     :type coords: str
-    :param page_name: Name of the page XML which the textblock has been extracted from.
+    :param page_name: Name of the page XML which the textblock has been
+        extracted from.
     :type page_name: str
     :param issue_path: Path of the ZIPPED archive or the issue
     :type issue_path: str
@@ -311,23 +358,32 @@ def segment_image(
     :type keyword: str
     :param output_path: Path to store the cropped image
     :type output_path: str
-    :param target: # TODO #3
-    :type target: # TODO #3
-    :param highlight: # TODO #3
-    :type highlight: # TODO #3
-    :param highlight_frame: # TODO #3
-    :type highlight_frame: # TODO #3
-    :param highlight_frame_width: # TODO #3
-    :type highlight_frame_width: # TODO #3
-    :param highlight_tint: # TODO #3
-    :type highlight_tint: # TODO #3
-    :param highlight_tint_transparency: # TODO #3
-    :type highlight_tint_transparency: # TODO #3
-    :param max_height: # TODO #3
-    :type max_height: # TODO #3
-    :param limit_size: # TODO #3
-    :type limit_size: # TODO #3
+    :param target: Target keyword, will be added to final result file
+    :type target: str, optional
+    :param highlight: List of tuples, consisting of x-axis pixel value, y-axis
+        pixel value, width in pixels, height in pixels, i.e. ``(x, y, w, h)``,
+        optional
+    :type highlight: Optional[list[Optional[tuple[int, int, int, int]]]]
+    :param highlight_frame: Highlight box frame's tint (hex), defaults to
+        ``"#C02F1D"``
+    :type highlight_frame: str
+    :param highlight_frame_width: Highlight box frame's width (pixels),
+        defaults to ``2``
+    :type highlight_frame_width: int
+    :param highlight_tint: Highlight box's tint (hex), defaults to
+        ``"#FFFF00"``
+    :type highlight_tint: str
+    :param highlight_tint_transparency: Degree of transparency, percent as
+        floating point value between 0.0 and 1.0, defaults to ``0.25``
+    :type highlight_tint_transparency: float
+    :param max_height: Max height of resulting image (pixels)
+    :type max_height: int, optional
+    :param limit_size: File size limit (bytes), defaults to ``950000``
+    :type limit_size: int
+    :param logger: Optional logger
+    :type: logging.Logger
     :return: The path of the cropped/segmented image
+    :rtype: str
     """
 
     def get_image_name(issue_path, page_name):
@@ -353,6 +409,10 @@ def segment_image(
         filename += f"_{coords_name}.jpg"
 
         return os.path.join(output_path, filename)
+
+    def check_size(path):
+        """Return the size of a file in a given path"""
+        return os.stat(path).st_size
 
     image_in = get_image_name(issue_path, page_name)
     image_out = get_image_out(image_in, coords, target, keyword)
@@ -405,8 +465,6 @@ def segment_image(
     crop.save(image_out, quality=80, optimize=True)
 
     # Limit file size to 1MB
-    check_size = lambda path: os.stat(path).st_size
-
     if check_size(image_out) > limit_size:
         crop.save(image_out, quality=50, optimize=True)
 
@@ -440,21 +498,21 @@ def segment_image(
 
 def get_document_keywords(
     document: Document,
-    keywords: list,
+    keywords: list[str],
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> list[str]:
     """
     Gets list of keywords occuring within an document.
 
     :param document: Document
     :type document: defoe.fmp.document.Document
     :param keywords: Keywords
-    :type keywords: list(str)
+    :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: Sorted list of keywords that occur within document
-    :rtype: list(str)
+    :rtype: list[str]
     """
 
     matches = set()
@@ -473,7 +531,7 @@ def document_contains_word(
     document: Document,
     keyword: str,
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> bool:
     """
     Checks if a keyword occurs within an document.
 
@@ -501,17 +559,17 @@ def document_contains_word(
 def calculate_words_within_dictionary(
     page: Page,
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-):
+) -> str:
     """
-    Calculates the % of page words within a dictionary and also returns the page quality (pc)
-    Page words are normalized.
+    Calculates the % of a given page's words within a dictionary (see
+    ``nltk.corpus.words``). Page words are normalized.
 
     :param page: Page
     :type page: defoe.fmp.page.Page
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: Matches
-    :rtype: list(str)
+        (normalize, normalize and stem, normalize and lemmatize, none)
+    :return: Percent of a given page's words that appear within a dictionary
+    :rtype: str
     """
 
     dictionary = words.words()
@@ -530,23 +588,22 @@ def calculate_words_within_dictionary(
 
     try:
         calculate_pc = str(counter * 100 / total_words)
-    except:  # TODO: Change bare excepts to explicit
+    except TypeError:
         calculate_pc = "0"
 
     return calculate_pc
 
 
-def calculate_words_confidence_average(page: Page):
+def calculate_words_confidence_average(page: Page) -> str:
     """
-    Calculates the average of "words confidence (wc)" within a page.
-    Page words are normalized.
+    Calculates the average of a given ``defoe.fmp.page.Page``'s word
+    confidence.
 
     :param page: Page
     :type page: defoe.fmp.page.Page
-    :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: Matches
-    :rtype: list(str)
+    :return: The word confidence average of a given ``defoe.fmp.page.Page`` as
+        string
+    :rtype: str
     """
 
     total_wc = 0
@@ -555,7 +612,7 @@ def calculate_words_confidence_average(page: Page):
 
     try:
         calculate_wc = str(total_wc / len(page.wc))
-    except:  # TODO: Change bare excepts to explicit
+    except TypeError:
         calculate_wc = "0"
 
     return calculate_wc

@@ -84,8 +84,14 @@ class Document(object):
         self._area_lookup = None
         self._article_id_to_area_lookup_obj = None
 
-        # TODO docs: `num_articles` only includes ID starting with "art"
         self.num_articles = len(self.articles_ids)
+        """
+        Returns the number of articles in the ``defoe.fmp.document.Document``.
+
+        *Note: Includes only articles with an ID starting with "art".*
+
+        :rtype: int
+        """
 
         # Adding backward compatibility
         self.metadata = self.source
@@ -522,7 +528,7 @@ class Document(object):
     def page_parts(self) -> dict:
         """
         Returns a different view of the structural links of the METS document
-        (see  :func:`~defoe.fmp.document.Document.struct_links`)) where
+        (see :func:`~defoe.fmp.document.Document.struct_links`)) where
         article IDs and page areas of the document are provided back as keys
         in a dictionary, and the type of area (for article IDs) and the area's
         designated string representation (for page areas) are provided as
@@ -542,7 +548,7 @@ class Document(object):
     def locators(self) -> dict:
         """
         Returns a different view of the structural links of the METS document
-        (see  :func:`~defoe.fmp.document.Document.struct_links`)) where the
+        (see :func:`~defoe.fmp.document.Document.struct_links`)) where the
         article IDs from the document are provided as keys and a list of their
         pertaining page areas are provided as string representations of their
         IDs as values.
@@ -669,13 +675,13 @@ class Document(object):
     def article_id_lookup(self) -> dict:
         """
         Returns a different view of the structural links of the METS document
-        (see  :func:`~defoe.fmp.document.Document.struct_links`)) where the
+        (see :func:`~defoe.fmp.document.Document.struct_links`)) where the
         links are reorganised into a dictionary with the page area identifier
         as key and the article ID to which the page area belongs as key. Can
         thus easily be used to look up the article ID by page area ID.
 
         :return: Dictionary with the page area identifier as key and the
-            article ID to which the page area belongs as key.
+            article ID to which the page area belongs as key
         :rtype: dict
         """
         if not self._article_id_lookup:
@@ -852,7 +858,10 @@ class Document(object):
         first_year = years[0] if len(years) else None
 
         if len(years) > 1:
-            pass  # TODO: issue warning here if > 0?
+            # TODO: Enable this warning?
+            # print("Warning: More than one year has been detected but only \
+            # the first will be saved in first_year property for Document.")
+            pass
 
         return first_year, years
 
@@ -924,14 +933,16 @@ class Document(object):
         """
         return self.tree.xpath(query, namespaces=NAMESPACES)
 
-    def _single_query(self, query: etree.XPath) -> Optional[str]:
+    def _single_query(
+        self, query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: Query result or None if none
-        :rtype: str
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self._query(query)
         if not result:

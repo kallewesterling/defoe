@@ -1,13 +1,24 @@
 """
 Gets colocated words and groups by year.
 """
+from __future__ import annotations
 
 from defoe import query_utils
+from typing import TYPE_CHECKING
 
-import os
+if TYPE_CHECKING:
+    from ..issue import Issue
+    from py4j.java_gateway import JavaObject
+    from pyspark import SparkContext
+    from pyspark.rdd import RDD
 
 
-def do_query(issues, config_file=None, logger=None, context=None):
+def do_query(
+    issues: RDD[Issue],
+    config_file: str = None,
+    logger: JavaObject = None,
+    context: SparkContext = None,
+):
     """
     Gets colocated words and groups by year.
 
@@ -56,6 +67,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :return: Information on articles in which keywords occur grouped
     by year
     :rtype: dict
+    :raises ValueError: if window is not larger than or equal to 0
     """
 
     config = query_utils.get_config(config_file)

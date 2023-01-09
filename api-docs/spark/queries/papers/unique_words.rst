@@ -1,4 +1,6 @@
-# Finds every unique word and its frequency
+Finds every unique word and its frequency
+==========================================================
+
 
 * Words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.papers.queries.unique_words`
@@ -23,7 +25,9 @@
 }
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with `queries/unique_words.yml`:
 

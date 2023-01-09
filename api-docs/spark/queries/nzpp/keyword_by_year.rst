@@ -1,4 +1,6 @@
-# Count number of occurrences of keywords and group by year
+Count number of occurrences of keywords and group by year
+==========================================================
+
 
 * Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.nzpp.queries.keyword_by_year`
@@ -18,7 +20,9 @@
 ...
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over `1.xml` and `2.xml` with `queries/hearts.txt`:
 

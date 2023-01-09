@@ -19,7 +19,7 @@ class Article(object):
     :param article_tree: Article XML
     :type article_tree: lxml.etree._Element
     :param filename: File from which the article XML was extracted
-    :type: filename: str
+    :type filename: str
     """
 
     def __init__(self, article_tree: etree._Element, filename: str):

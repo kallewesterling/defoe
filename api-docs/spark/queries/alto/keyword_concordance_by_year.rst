@@ -1,4 +1,5 @@
-# Get concordance for keywords and group by year
+Get concordance for keywords and group by year
+==============================================
 
 * Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
 * Query module: `defoe.alto.queries.keyword_concordance_by_year`
@@ -26,7 +27,9 @@
 
 **Caution:** as this query returns each page's content, for every match, there is a risk that the query will fail due to lack of memory. This query should only be run with interesting words that are not expected to occur often.
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over British Library Books `1510_1699/000001143_0_1-20pgs__560409_dat.zip` and `1510_1699/000000874_0_1-22pgs__570785_dat.zip` with `queries/hearts.txt`:
 

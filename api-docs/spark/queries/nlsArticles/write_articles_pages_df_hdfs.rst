@@ -1,4 +1,6 @@
-# Extract automatically the EB articles within a page as string to HDFS (as a CSV file) with some metadata associated with each document
+Extract automatically the EB articles within a page as string to HDFS (as a CSV file) with some metadata associated with each document
+==========================================================
+
 
 * Documents are cleaned (long-S and hyphen fixes) .
 * Articles are stored clean, one per row, along with some metadata.

@@ -78,10 +78,9 @@ def open_stream(filename: str) -> Union[StringIO, BytesIO, BinaryIO]:
 
     :param filename: File name, URL, or blob path
     :type filename: str
-    :raises SyntaxError: In case of an empty filename, the function will raise
-        a SyntaxError.
     :return: Stream
     :rtype: Union[StringIO, BytesIO, BinaryIO]
+    :raises SyntaxError: if an empty filename is provided
     """
 
     if filename == "":

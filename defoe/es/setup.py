@@ -1,32 +1,35 @@
 """
 Given a filename create a dataframe
 """
+from __future__ import annotations
 
 from pyspark.sql import SQLContext
+from typing import TYPE_CHECKING
 
 
-def filename_to_object(filename, context):
+if TYPE_CHECKING:
+    from pyspark.context import SparkContext
+
+
+def filename_to_object(filename: str, context: SparkContext):
     """
     Given a filename create a defoe.books.archive.Archive.  If an error
     arises during its creation this is caught and returned as a
     string.
 
     :param filename: Filename
-    :type filename: str or unicode
-    :return: Tuple of form (Archive, None) or (filename, error message),
-    if there was an error creating Archive
-    :rtype: tuple(defoe.books.archive.Archive | str or unicode, str or unicode)
+    :type filename: str
+    :param context: Spark Context
+    :type context: pyspark.context.SparkContext
+    :return: #TODO
+    :rtype: #TODO
     """
 
     lines = open(filename).readlines()
-    fields = lines[1].split(",")
+    es_index, es_host, es_port = lines[1].split(",")
+    es_port = es_port.rstrip("\n")
 
-    # index,host,port = TODO: This could be a better destructuring
-    es_index = fields[0]
-    es_host = fields[1]
-    es_port = fields[2].rstrip("\n")
-
-    print("es_index %s, es_host %s, es_port %s" % (es_index, es_host, es_port))
+    print(f"es_index {es_index}, es_host {es_host}, es_port {es_port}")
 
     sqlContext = SQLContext(context)
     reader = (

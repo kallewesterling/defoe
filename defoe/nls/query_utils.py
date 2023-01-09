@@ -70,12 +70,11 @@ def get_page_matches(
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
-    form:
-
-        (<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)
+    form: ``(<YEAR>, <DOCUMENT>, <PAGE>, <KEYWORD>)``.
 
     If a keyword occurs more than once on a page, there will be only
     one tuple for the page for that keyword.
+
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
 
@@ -114,14 +113,14 @@ def get_document_keywords(
     """
     Gets list of keywords occuring within an document.
 
-    :param article: Article
-    :type article: defoe.papers.article.Article
+    :param document: Document
+    :type document: defoe.nls.document.Document
     :param keywords: Keywords
     :type keywords: list[str]
     :param preprocess_type: How words should be preprocessed
         (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: Sorted list of keywords that occur within article
+    :return: Sorted list of keywords that occur within document
     :rtype: list[str]
     """
     matches = set()
@@ -141,12 +140,12 @@ def document_contains_word(
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
 ) -> bool:
     """
-    Checks if a keyword occurs within an article.
+    Checks if a keyword occurs within a document.
 
-    :param article: Article
-    :type article: defoe.papers.article.Article
-    :param keywords: Keyword
-    :type keywords: str or unicode
+    :param article: Document
+    :type article: defoe.nls.document.Document
+    :param keyword: Keyword
+    :type keyword: str
     :param preprocess_type: How words should be preprocessed
         (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
@@ -166,16 +165,17 @@ def document_contains_word(
 def calculate_words_within_dictionary(
     page: Page,
     preprocess_type: PreprocessWordType = PreprocessWordType.NORMALIZE,
-) -> list[str]:
+) -> str:
     """
-    Calculates the % of page words within a dictionary and also returns the page quality (pc)
-    Page words are normalized.
+    Calculates the % of a given page's words within a dictionary (see
+    ``nltk.corpus.words``). Page words are normalized.
+
     :param page: Page
     :type page: defoe.nls.page.Page
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: Matches
-    :rtype: list[str]
+        (normalize, normalize and stem, normalize and lemmatize, none)
+    :return: Percent of a given page's words that appear within a dictionary
+    :rtype: str
     """
     dictionary = words.words()
     counter = 0
@@ -193,62 +193,67 @@ def calculate_words_within_dictionary(
     return calculate_pc
 
 
-def calculate_words_confidence_average(page: Page) -> list[str]:
+def calculate_words_confidence_average(page: Page) -> str:
     """
     Calculates the average of "words confidence (wc)" within a page.
     Page words are normalized.
+
     :param page: Page
     :type page: defoe.nls.page.Page
-    :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: Matches
-    :rtype: list[str]
+    :return: Word confidence average
+    :rtype: str
     """
-    dictionary = words.words()
-    counter = 0
+
     total_wc = 0
     for wc in page.wc:
         total_wc += float(wc)
+
     try:
-        calculate_wc = str(total_wc / len(page.wc))
+        wc_avg = str(total_wc / len(page.wc))
     except:  # TODO: Change bare excepts to explicit
-        calculate_wc = "0"
-    return calculate_wc
+        wc_avg = "0"
+
+    return wc_avg
 
 
 def get_page_as_string(
-    page, preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE
-):
+    page: Page,
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
+) -> str:
     """
     Return a page as a single string.
 
     :param page: Page
     :type page: defoe.nls.Page
     :param preprocess_type: How words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: Page words as a string
-    :rtype: string or unicode
+    :rtype: str
     """
+
     page_string = ""
     for word in page.words:
         preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+
         if page_string == "":
             page_string = preprocessed_word
         else:
             page_string += " " + preprocessed_word
+
     return page_string
 
 
-def clean_page_as_string(page, defoe_path, os_type):
+def clean_page_as_string(page: Page, defoe_path: str, os_type: str) -> str:
     """
-    Clean a page as a single string,
-    Handling hyphenated words: combine and split and also fixing the long-s
+    Clean a page as a single string.
+
+    Handling hyphenated words: combine and split and also fixing the long-s.
 
     :param page: Page
     :type page: defoe.nls.Page
     :return: Clean page words as a string
-    :rtype: string or unicode
+    :rtype: str
     """
     page_string = ""
     for word in page.words:
@@ -303,12 +308,12 @@ def get_sentences_list_matches(text: str, keysentence: list[str]) -> list[str]:
     Check which key-sentences from occurs within a string and return the list
     of matches.
 
-    # FIXME: Wrong parameter list
     :param text: Text
     :type text: str
-    :type: list(str or uniocde)
+    :param text: Keysentence
+    :type text: list[str]
     :return: Sorted list of matching sentences
-    :rtype: set(str)
+    :rtype: list[str]
     """
 
     matches = []

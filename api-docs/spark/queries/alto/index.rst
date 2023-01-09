@@ -1,4 +1,5 @@
-# ALTO document queries
+ALTO document queries
+=========================
 
 British Library Books dataset and Find My Past dataset.
 
@@ -20,3 +21,21 @@ Keyword searches:
 Colocated word searches:
 
 * [Get colocated words and group by year](./colocates_by_year.md)
+
+
+Contents
+--------
+
+.. toctree::
+  :maxdepth: 2
+
+  total_documents
+  total_pages
+  total_words
+  ocr_quality_by_year
+  normalize
+  keyword_by_year
+  keyword_by_word
+  keyword_concordance_by_year
+  keyword_concordance_by_word
+  colocates_by_year

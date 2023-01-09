@@ -56,8 +56,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: Information on documents in which keywords occur grouped
-    by year
+        by year
     :rtype: dict
+    :raises ValueError: if configuration setting for window is less than 0
     """
 
     window = 0

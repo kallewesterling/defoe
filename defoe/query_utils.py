@@ -4,8 +4,6 @@ Query-related utility functions and types.
 
 try:
     import spacy
-    from spacy.tokens import Doc
-    from spacy.vocab import Vocab
 except ImportError:
     raise ImportError(
         "SpaCy cannot be loaded. Make sure you have installed it."
@@ -25,6 +23,10 @@ except ImportError:
     pass
 
 from lxml import etree
+from spacy.tokens import Doc
+from spacy.vocab import Vocab
+from typing import Literal
+
 import enum
 import os
 import re
@@ -53,15 +55,21 @@ PREPROCESS_WORD_TYPES = [
 ]
 
 
-def parse_preprocess_word_type(type_str: str) -> PreprocessWordType:
+def parse_preprocess_word_type(
+    type_str: Literal[
+        "none", "normalize", "stem", "lemmatize", "normalize_num"
+    ]
+) -> PreprocessWordType:
     """
     Parse a string into a ``defoe.query_utils.PreprocessWordType``.
 
-    :param type_str: One of none|normalize|stem|lemmatize
+    :param type_str: One of ``none``, ``normalize``, ``stem``, ``lemmatize``
+        or ``normalize_num``
     :type type_str: str
     :return: Word preprocessing type
     :rtype: defoe.query_utils.PreprocessWordType
-    :raises ValueError: If "preprocess" is not one of the expected values
+    :raises KeyError: if type_str provided is not one of the expected values (
+        ``none``, ``normalize``, ``stem``, ``lemmatize`` or ``normalize_num``)
     """
 
     try:
@@ -87,15 +95,11 @@ def extract_preprocess_word_type(
     :type default: defoe.query_utils.PreprocessWordType
     :return: Word preprocessing type
     :rtype: defoe.query_utils.PreprocessWordType
-    :raises: ValueError if "preprocess" is not one of
-        none|normalize|stem|lemmatize
     """
     if "preprocess" not in config:
-        preprocess_type = default
-    else:
-        preprocess_type = parse_preprocess_word_type(config["preprocess"])
+        return default
 
-    return preprocess_type
+    return parse_preprocess_word_type(config["preprocess"])
 
 
 def extract_data_file(config: dict, default_path: str) -> str:
@@ -125,7 +129,7 @@ def extract_data_file(config: dict, default_path: str) -> str:
     return data_file
 
 
-def extract_window_size(config: dict, default=10):
+def extract_window_size(config: dict, default: int = 10) -> int:
     """
     Extract window size from "window" dictionary value in query configuration.
 
@@ -135,7 +139,8 @@ def extract_window_size(config: dict, default=10):
     :type default: int
     :return: Window size
     :rtype: int
-    :raises: ValueError if "window" is >= 1
+    :raises ValueError: if "window" is not an integer-like value or smaller
+        than 1
     """
 
     if "window" not in config:
@@ -143,32 +148,62 @@ def extract_window_size(config: dict, default=10):
     else:
         window = config["window"]
 
+    try:
+        window = int(window)
+    except ValueError:
+        raise ValueError("window must be an integer-like value")
+
     if window < 1:
         raise ValueError("window must be at least 1")
 
     return window
 
 
-def extract_years_filter(config: dict):
+def extract_years_filter(config: dict) -> tuple[int, int]:
     """
     Extract min and max years to filter data from "years_filter" dictionary
-    value the query configuration. The years will be split using the "-"
+    value the query configuration. The years will be split using the ``-``
     character.
 
-    years_filter: 1780-1918
+    Example: ``years_filter: 1780-1918``
 
     :param config: Configuration dictionary
     :type config: dict
     :return: Min_year, max_year
-    :rtype: int, int
+    :rtype: tuple[int, int]
+    :raises SyntaxError: if config file does not contain years_filter
+    :raises IndexError: if config file's years_filter is not formatted
+        appropriately
+    :raises ValueError: if either value in the years_filter cannot be
+        converted to an integer
     """
 
     if "years_filter" not in config:
-        raise ValueError("years_filter value not found in the config file")
+        raise SyntaxError("years_filter value not found in the config file")
 
     years = config["years_filter"]
-    year_min = years.split("-")[0]
-    year_max = years.split("-")[1]
+    try:
+        year_min = years.split("-")[0]
+        year_max = years.split("-")[1]
+    except IndexError:
+        raise IndexError(
+            "years_filter must consist of two years: one minimum \
+            and one maximum, separated by a `-`"
+        )
+
+    try:
+        year_min = int(year_min)
+    except ValueError:
+        raise ValueError(
+            "the minimum year in years_filter must be an integer-like value"
+        )
+
+    try:
+        year_max = int(year_max)
+    except ValueError:
+        raise ValueError(
+            "the maximum year in years_filter must be an integer-like value"
+        )
 
     return year_min, year_max
 
@@ -178,20 +213,22 @@ def extract_output_path(config: dict) -> str:
     Extract output path from "output_path" dictionary value the query
     configuration.
 
-    output_path: /home/users/rfilguei2/LwM/defoe/OUTPUT/
+    Example: ``output_path: /home/users/rfilguei2/LwM/defoe/OUTPUT/``
 
     :param config: Configuration dictionary
     :type config: dict
     :return: A path to an output directory, defaults to ``.``
     :rtype: str
+    :raises ValueError: if output_path cannot be converted to str
     """
 
     if "output_path" not in config:
-        output_path = "."
-    else:
-        output_path = config["output_path"]
+        return "."
 
-    return output_path
+    try:
+        return str(config["output_path"])
+    except ValueError:
+        raise ValueError("output_path must be a string-like value")
 
 
 def extract_fuzzy(config: dict, kind: str = "target") -> bool:
@@ -199,8 +236,8 @@ def extract_fuzzy(config: dict, kind: str = "target") -> bool:
     Extract boolean for fuzzy search dictionary value from the query
     configuration file.
 
-    fuzzy_target: False
-    fuzzy_keyword: True
+    Example 1: ``fuzzy_target: False``
+    Example 2: ``fuzzy_keyword: True``
 
     :param config: Configuration dictionary
     :type config: dict
@@ -407,6 +444,7 @@ def spacy_nlp(
     :type lang_model: str
     :return: A SpaCy container for accessing linguistic annotations
     :rtype: spacy.tokens.doc.Doc
+    :raises OSError: if language model cannot be found
     """
 
     try:
@@ -1039,12 +1077,12 @@ def get_config(config_file: str, optional=False):
     :param optional: Whether a file is required or optional, defaults to
         ``False``
     :type optional: bool
-    :raises FileNotFoundError: If the configuration file cannot be found and
-        ``optional`` is set to ``False``
-    :raises SyntaxError: If the configuration file path was not provided as
-        string
     :return: A configuration dictionary
     :rtype: dict
+    :raises FileNotFoundError: if the configuration file cannot be found and
+        ``optional`` is set to ``False``
+    :raises SyntaxError: if the configuration file path was not provided as
+        string
     """
     if not isinstance(config_file, str):
         raise SyntaxError(

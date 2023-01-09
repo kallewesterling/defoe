@@ -1,4 +1,6 @@
-# Stores each Page as string to a PSQL database  with some metadata associated with each document
+Stores each Page as string to a PSQL database  with some metadata associated with each document
+==========================================================
+
 
 * Documents are cleaned (long-S and hyphen fixes) and also preprocessed using all the treatments that we have.
 * Pages are saved as cleaned, as well as the other preprocessed method, in different columns, along with some metadata

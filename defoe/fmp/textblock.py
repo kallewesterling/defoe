@@ -51,6 +51,8 @@ class TextBlock(object):
     :param page: The parent ``defoe.fmp.page.Page`` which contains the
         ``defoe.fmp.textblock.TextBlock``
     :type page: defoe.fmp.page.Page
+    :raises RuntimeError: if the TextBlock seems like it could belong to
+        multiple areas
     """
 
     # XPath Queries
@@ -328,7 +330,7 @@ class TextBlock(object):
         self, highlight=[], max_width=500, max_height=500
     ) -> Image.Image:
         """
-        Shortcut function to add highlight to a TextBlock
+        Shortcut function to add highlight to a TextBlock.
 
         :param highlight: A list of all the rectangles in need of highlight.
             The list should contain 4-, 5-, or 6-tuples with
@@ -389,10 +391,9 @@ class TextBlock(object):
         Returns the article ID from the ``defoe.fmp.textblock.TextBlock``'s
         parent ``defoe.fmp.document.Document``.
 
-        :raises RuntimeError: If the article ID cannot be reconstructed, a
-            RuntimeError will be raised.
         :return: The ``defoe.fmp.textblock.TextBlock``'s article ID
         :rtype: str
+        :raises RuntimeError: if the article ID cannot be reconstructed
         """
         test = [
             id
@@ -502,6 +503,8 @@ class TextBlock(object):
             and height values, the token itself, and the match ratio as a
             value between 0 and 100
         :rtype: list[tuple]
+
+        :raises SyntaxError: if token provided is not a string or a list
         """
 
         if isinstance(token, str):

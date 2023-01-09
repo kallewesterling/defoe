@@ -1,4 +1,6 @@
-# Count number of articles containing two or more keywords and group by year
+Count number of articles containing two or more keywords and group by year
+==========================================================
+
 
 * For each article:
   - Look for the keywords provided by the user and form a list of all the keywords that occur in the article.
@@ -24,7 +26,9 @@
 ...
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with `queries/gender.txt`:
 

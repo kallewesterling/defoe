@@ -1,4 +1,6 @@
-# Identify the locations per page and geo-resolve them using the Original Edinburgh Geoparser
+Identify the locations per page and geo-resolve them using the Original Edinburgh Geoparser
+===========================================================================================
+
 
 * It uses the Original Geoparser for identifying all posible locations within a page.
 * And it also ues Edinburgh georesolve for getting the latituted and longitude of each location.

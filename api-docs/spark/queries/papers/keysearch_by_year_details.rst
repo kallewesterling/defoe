@@ -1,4 +1,6 @@
-# Get concordance (also called details) of articles in which we have keywords or keysentences and group by year
+Get concordance (also called details) of articles in which we have keywords or keysentences and group by year
+==========================================================
+
 
 * Both keywords/keysentences and words in documents are cleaned (long-S and hyphen fixes) and preprocessed according to the configuration file
 * Query module: `defoe.papers.queries.keysentence_by_year_details`

@@ -3,17 +3,32 @@ Gets the Latent Dirochelet Allocation (LDA) topics for words within
 articles.
 """
 
-from pyspark.ml.feature import CountVectorizer, StopWordsRemover
-from pyspark.mllib.clustering import LDA
-from pyspark.mllib.linalg import Vectors
-from pyspark.sql import Row, SparkSession
+from __future__ import annotations
 
 from defoe import query_utils
 from defoe.papers.query_utils import article_contains_word
 from defoe.papers.query_utils import PreprocessWordType
 
+from pyspark.ml.feature import CountVectorizer, StopWordsRemover
+from pyspark.mllib.clustering import LDA
+from pyspark.mllib.linalg import Vectors
+from pyspark.sql import Row, SparkSession
 
-def do_query(issues, config_file=None, logger=None, context=None):
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..issue import Issue
+    from py4j.java_gateway import JavaObject
+    from pyspark import SparkContext
+    from pyspark.rdd import RDD
+
+
+def do_query(
+    issues: RDD[Issue],
+    config_file: str = None,
+    logger: JavaObject = None,
+    context: SparkContext = None,
+):
     """
     Gets the Latent Dirochelet Allocation (LDA) topics for words
     within articles.
@@ -30,7 +45,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     <N> must be >= 1 for each parameter.
 
     The keyword and words in documents are normalized, by removing all
-    non-'a-z|A-Z' characters.
+    non-``a-z|A-Z`` characters.
 
     Returns result of form:
 
@@ -45,12 +60,16 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     :param issues: RDD of defoe.papers.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
-    :param config_file: Query configuration file
-    :type config_file: str or unicode
+    :param config_file: Path to a configuration file
+    :type config_file: str
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: LDA topics
     :rtype: dict
+    :raises ValueError: if optimizer is not either "online" or "em"
+    :raises ValueError: if max_iterations is smaller than 1
+    :raises ValueError: if n_topics is smaller than 1
+    :raises ValueError: if topic_words is smaller than 1
     """
 
     config = query_utils.get_config(config_file)

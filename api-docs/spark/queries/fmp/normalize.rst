@@ -1,4 +1,6 @@
-# Normalize
+Normalize
+==========================================================
+
 
 Count total number of documents, pages and words per year. This can be useful if wanting to see how the average number of documents, pages and words change over time.
 
@@ -11,7 +13,9 @@ Count total number of documents, pages and words per year. This can be useful if
 ...
 ```
 
-## Sample results
+Sample results
+----------------------------------------------------------
+
 
 Query over British Library Books `1510_1699/*.zip`:
 

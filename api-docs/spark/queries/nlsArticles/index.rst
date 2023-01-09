@@ -1,4 +1,6 @@
-# NLS Articles document queries
+NLS Articles document queries
+==========================================================
+
 
 For working **just** with Encyclopaedia Britannica (EB) dataset. **Do not** use this query for other NLS dataset.
 

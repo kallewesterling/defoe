@@ -18,7 +18,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
     files in ALTO format.
 
     :param filename: Archive filename
-    :type: filename: str
+    :type filename: str
     """
 
     def __init__(self, filename: str):

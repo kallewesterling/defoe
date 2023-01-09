@@ -1,4 +1,6 @@
-# Get concordance (also called details) occurrences of keywords or keysentences (by page) and group by year - Uses a Windonw 
+Get concordance (also called details) occurrences of keywords or keysentences (by page) and group by year - Uses a Windonw 
+==========================================================
+
 
 * Uses a window to return the number of words before and after each term found in a page. 
 * Query module: `defoe.es.queries.window_concordance_by_date`

@@ -31,13 +31,13 @@ Run Spark text query job.
         loaded. Given a "model_name" value of "<MODEL_NAME>" then a module
         "defoe.<MODEL_NAME>.setup" must exist and support a function:
 
-        tuple(Object | str or unicode, str or unicode)
-        filename_to_object(str or unicode: filename)
+        tuple(Object | str, str)
+        filename_to_object(str: filename)
 
         - tuple(Object, None) is returned where Object is an instance of the
         - object model representing the data, if the file was successfully
         - read and parsed into an object
-        - tuple(str or unicode, filename) is returned with the filename and
+        - tuple(str, filename) is returned with the filename and
         - an error message, if the file was not successfully read and parsed
         - into an object
     * query_name: name of Python module implementing the query to run
@@ -47,7 +47,7 @@ Run Spark text query job.
         must support a function
 
             list do_query(pyspark.rdd.PipelinedRDD rdd,
-                        str|unicode config_file,
+                        str config_file,
                         py4j.java_gateway.JavaObject logger)
 
     * "query_config_file": query-specific configuration file. This is
@@ -121,10 +121,9 @@ def _test_args(args) -> bool:
     formatted and adheres to the script's standards.
 
     :param args: Arguments passed from ``ArgumentParser.parse_args``
-    :raises SyntaxError: Raises SyntaxError if there are any problems with the
-        arguments passed.
     :return: True
     :rtype: bool
+    :raises SyntaxError: if there are any problems with the arguments passed
     """
     if args.model_name not in MODELS:
         raise SyntaxError(f"'model' must be one of {MODELS}")
@@ -132,9 +131,16 @@ def _test_args(args) -> bool:
     return True
 
 
-def main():
+def main() -> True:
     """
     Run Spark text analysis job.
+
+    :return: True if job is successful.
+    :rtype: True
+    :raises SyntaxError: if "errors_file" argument does not end with ".yaml"
+        or ".json"
+    :raises SyntaxError: if "results_file" argument does not end with ".yaml"
+        or ".json"
     """
 
     args = get_args()
@@ -230,6 +236,8 @@ def main():
             f.write(json.dumps(dict(results)))
         elif json_results_file:
             f.write(yaml.safe_dump(dict(results)))
+
+    return True
 
 
 if __name__ == "__main__":

@@ -1,4 +1,6 @@
-# Count total number of words
+Count total number of words
+==========================================================
+
 
 * Query module: `defoe.nls.queries.total_words`
 * Configuration file: None

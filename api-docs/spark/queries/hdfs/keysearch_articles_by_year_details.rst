@@ -1,4 +1,6 @@
-# Read EB articles from HDFS, and count number of occurrences of keywords or keysentences (by page) and group by year
+Read EB articles from HDFS, and count number of occurrences of keywords or keysentences (by page) and group by year
+==========================================================
+
 
 * Read data previously stored in HDFS  
 * Query module: `defoe.hdfs.queries.keysearch_articles_by_year_details`
