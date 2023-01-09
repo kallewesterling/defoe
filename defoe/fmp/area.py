@@ -20,6 +20,25 @@ class Area:
     Object model representation of a page area represented as an XML file in
     METS/MODS format.
 
+    Usage:
+
+    .. code-block:: python
+
+        from defoe.fmp.archive import Archive
+
+        archive = Archive("path/to/xml-files/")
+
+        # See documentation for defoe.fmp.document.Document here:
+        document = archive[0]
+
+        # See documentation for defoe.fmp.page.Page here:
+        page = document[0]
+
+        # Iterate through an archive's document's page's areas
+        for area in page.areas:
+            # Access the properties and methods from the TextBlock
+            print(area.tokens)
+
     :param document: ``defoe.fmp.document.Document`` object corresponding to
         document to which this page belongs.
     :type document: defoe.fmp.document.Document
@@ -171,3 +190,27 @@ class Area:
                 self._content = ""
 
         return self._content
+
+    @property
+    def tokens(self) -> list[Optional[tuple[int, int, int, int, str]]]:
+        """
+        Returns all tokens in the Area and returns them as a list of
+        tuples: ``[(x, y, width, height, content)]``.
+
+        :return: The ``defoe.fmp.area.Area``'s tokens as list of tuples
+        :rtype: list[Optional[tuple[int, int, int, int, str]]]
+        """
+        if not self.textblock:
+            return []
+
+        attribs = [string.attrib for string in self.textblock.strings]
+        return [
+            (
+                int(x["HPOS"]),
+                int(x["VPOS"]),
+                int(x["WIDTH"]),
+                int(x["HEIGHT"]),
+                x["CONTENT"],
+            )
+            for x in attribs
+        ]

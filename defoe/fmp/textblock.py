@@ -303,14 +303,14 @@ class TextBlock(object):
         return " ".join(words)
 
     @property
-    def tokens(self) -> list[tuple[int, int, int, int, str]]:
+    def tokens(self) -> list[Optional[tuple[int, int, int, int, str]]]:
         """
         Returns all tokens in the TextBlock and returns them as a list of
         tuples: ``[(x, y, width, height, content)]``.
 
         :return: The ``defoe.fmp.textblock.TextBlock``'s tokens as list of
             tuples
-        :rtype: list[tuple[int, int, int, int, str]]
+        :rtype: list[Optional[tuple[int, int, int, int, str]]]
         """
         attribs = [string.attrib for string in self.strings]
         return [
