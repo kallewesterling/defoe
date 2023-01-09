@@ -240,7 +240,7 @@ class Page(object):
     @property
     def words(self) -> list[str]:
         """
-        Gets all the words in the ``defoe.fmp.page.Page``. These are then
+        Returns all the words in the ``defoe.fmp.page.Page``. These are then
         saved in an attribute, so the words are only retrieved once.
 
         :return: List of words on ``defoe.fmp.page.Page``
