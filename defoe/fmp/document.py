@@ -25,6 +25,21 @@ class Document(object):
     Object model representation of a document represented as a collection of
     XML files in METS/MODS format.
 
+    Usage:
+
+    .. code-block:: python
+
+        from defoe.fmp.archive import Archive
+
+        archive = Archive("path/to/xml-files/")
+
+        # Get document by indexing
+        document = archive[0]
+
+        # Iterate through an archive's document
+        for document in archive:
+            print(document.code)
+
     :param code: identifier for this document within an archive
     :type code: str
     :param archive: archive to which this document belongs
@@ -542,23 +557,24 @@ class Document(object):
                     locators[current].append(locator)
         return locators
 
-    def _get_struct_link(self) -> tuple:
+    def _get_struct_link(self) -> tuple[dict, dict]:
         """
         Shortcut that returns the dictionary from `Document.locators` and
         `Document.page_parts`.
-        :return: Two dictionaries. First one with parts/textblocks IDs as
-        keys and page and area as values. Second one with articles IDs as
-        keys. And per article ID, we have a list of parts/textblocks IDs
-        that conform each article.
-        :rtype: tuple
+
+        :return: Two dictionaries. First one with parts/textblocks IDs as keys
+            and page and area as values. Second one with articles IDs as keys.
+            And per article ID, we have a list of parts/textblocks IDs that
+            conform each article.
+        :rtype: tuple[dict, dict]
         """
         return (self.locators, self.page_parts)
 
     def _articles_info(self) -> dict:
         """
-        :return: A dictionary with articles IDs as keys. Each entry
-        has has a dictionary of parts/textblocks as values, with all the parts
-        information (shape, coords and page_area).
+        :return: A dictionary with articles IDs as keys. Each entry has a
+            dictionary of parts/textblocks as values, with all the parts
+            information (shape, coords and page_area).
         :rtype: dictionary
         """
         return {
@@ -573,7 +589,7 @@ class Document(object):
             for art_id, areas in self._article_id_to_area_lookup.items()
         }
 
-    def _get_years(self):
+    def _get_years(self) -> tuple[Optional[int], list]:
         years = Document._parse_year(self.date)
 
         # place may often have a year in.
@@ -589,27 +605,27 @@ class Document(object):
         return first_year, years
 
     @staticmethod
-    def _parse_year(text: str) -> list:
+    def _parse_year(text: str) -> list[Optional[int]]:
         """
         Parse text to extract years of form 16xx to 19xx.
 
-        Any date of form NN following a year of form CCYY to CCYY
-        is used to derive a date CCNN.
+        Any date of form ``NN`` following a year of form ``CCYY`` to ``CCYY``
+        is used to derive a date ``CCNN``.
 
-        As an exception to this rule, single years are parsed
-        from dates precisely matching the format YYYY-MM-DD.
+        As an exception to this rule, single years are parsed from dates
+        precisely matching the format ``YYYY-MM-DD``.
 
         For example:
 
-        * "1862, [1861]" returns [1861, 1862]
-        * "1847 [1846, 47]" returns [1846, 1847]
-        * "1873-80" returns [1873, 1880]
-        * "1870-09-01" returns [1870]
+        * ``1862, [1861]`` returns ``[1861, 1862]``
+        * ``1847 [1846, 47]`` returns ``[1846, 1847]``
+        * ``1873-80`` returns ``[1873, 1880]``
+        * ``1870-09-01`` returns ``[1870]``
 
-        :param text: text to parse
+        :param text: Text to parse
         :type text: str
-        :return: years
-        :rtype: set(int)
+        :return: Years
+        :rtype: list[Optional[int]]
         """
         try:
             if DATE_PATTERNS.standard.match(text):
@@ -631,37 +647,36 @@ class Document(object):
             return []
 
     @staticmethod
-    def _sorter(page_code: str) -> list:
+    def _sorter(page_code: str) -> list[int]:
         """
-        Given a page code of form [0-9]*(_[0-9]*), split this
-        into the sub-codes. For example, given 123_456, return
-        [123, 456]
+        Given a page code of form ``[0-9]*(_[0-9]*)``, split it into its
+        sub-codes. For example, given ``123_456``, return ``[123, 456]``.
 
-        :param page_code: page code
+        :param page_code: Page code
         :type page_code: str
-        :return: list of page codes
-        :rtype: list(int)
+        :return: List of page codes
+        :rtype: list[int]
         """
         codes = list(map(int, page_code.split("_")))
         return codes
 
-    def _query(self, query: str) -> Union[list, None]:
+    def _query(self, query: etree.XPath) -> Optional[list]:
         """
         Run XPath query.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: list of query results or None if none
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return self.tree.xpath(query, namespaces=NAMESPACES)
 
-    def _single_query(self, query: str) -> Union[str, None]:
+    def _single_query(self, query: etree.XPath) -> Optional[str]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: query result or None if none
         :rtype: str
         """

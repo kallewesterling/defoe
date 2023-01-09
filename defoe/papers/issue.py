@@ -24,7 +24,7 @@ from defoe.spark_utils import open_stream
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from typing import Iterator, Optional
 
 
 class Issue(object):
@@ -96,12 +96,12 @@ class Issue(object):
         except Exception:
             pass
 
-    def query(self, query: str) -> list:
+    def query(self, query: etree.XPath) -> list:
         """
         Run XPath query.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: list of query results or an empty list if the object
             represents an empty document
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
@@ -113,12 +113,12 @@ class Issue(object):
         except AssertionError:
             return []
 
-    def single_query(self, query: str) -> str:
+    def single_query(self, query: etree.XPath) -> Optional[str]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: Query results or None if the object represents an empty
             document
         :rtype: str

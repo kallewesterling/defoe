@@ -11,7 +11,7 @@ def get_path(module: ModuleType, *name: str) -> str:
     """
     Gets path to file in module, given module and relative path.
 
-    For example:
+    Usage:
 
     .. code-block:: python
 
@@ -33,7 +33,7 @@ def open_file(module: ModuleType, *name: str) -> TextIO:
     Gets path to file in module, given module and relative path,
     and returns open file.
 
-    For example:
+    Usage:
 
     .. code-block:: python
 
@@ -55,7 +55,7 @@ def load_content(module: ModuleType, *name: str) -> str:
     Gets path to file in module, given module and relative path, and returns
     the file contents.
 
-    For example:
+    Usage:
 
     .. code-block:: python
 

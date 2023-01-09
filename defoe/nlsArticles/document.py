@@ -120,23 +120,23 @@ class Document(object):
         """
         return list(map(int, page_code.split("/")[1].split(".")[0]))
 
-    def query(self, query: str) -> list:
+    def query(self, query: etree.XPath) -> list:
         """
         Run XPath query.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: List of query results or an empty list if query has no results
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return self.metadata_tree.xpath(query, namespaces=self.namespaces)
 
-    def single_query(self, query: str) -> Optional[str]:
+    def single_query(self, query: etree.XPath) -> Optional[str]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: Query result or None if query returned no results
         :rtype: Optional[str]
         """

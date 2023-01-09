@@ -27,6 +27,13 @@ class Archive(AltoArchive):
     Object model representation of archive of files in ALTO format compliant
     with Find My Past's newspapers.
 
+    Usage:
+
+    .. code-block:: python
+
+        from defoe.fmp.archive import Archive
+        archive = Archive("path/to/xml-files/")
+
     :param path: path to a ZIP filename or directory containing the
         necessary files
     :type: path: str

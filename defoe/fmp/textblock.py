@@ -26,6 +26,25 @@ class TextBlock(object):
     Object model representation of a textblock represented as an XML file in
     METS/MODS format.
 
+    Usage:
+
+    .. code-block:: python
+
+        from defoe.fmp.archive import Archive
+
+        archive = Archive("path/to/xml-files/")
+
+        # See documentation for defoe.fmp.document.Document here:
+        document = archive[0]
+
+        # See documentation for defoe.fmp.page.Page here:
+        page = document[0]
+
+        # Iterate through an archive's document's page's textblocks
+        for textblock in page.textblocks:
+            # Access the properties and methods from the TextBlock
+            print(textblock.tokens)
+
     :param textblock_tree: The XML element that contains the
         ``defoe.fmp.textblock.TextBlock``
     :type textblock_tree: lxml.etree._Element

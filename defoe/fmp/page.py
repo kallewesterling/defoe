@@ -23,6 +23,25 @@ class Page(object):
     Object model representation of a page represented as an XML file in
     METS/MODS format.
 
+    Usage:
+
+    .. code-block:: python
+
+        from defoe.fmp.archive import Archive
+
+        archive = Archive("path/to/xml-files/")
+
+        # See documentation for defoe.fmp.document.Document here:
+        document = archive[0]
+
+        # Get page by indexing
+        page = document[0]
+
+        # Iterate through an archive's document's pages
+        for page in document:
+            # Access the properties and methods from the Page
+            print(page.width)
+
     :param document: ``defoe.fmp.document.Document`` object corresponding to
         document to which this page belongs
     :type document: defoe.fmp.document.Document
@@ -57,7 +76,7 @@ class Page(object):
             self.source = document.archive.open_page(document.code, code)
 
         self.tree = etree.parse(self.source)
-        self.page_tree = self.single_query(Page.PAGE_XPATH)
+        self.page_tree = self._single_query(Page.PAGE_XPATH)
 
         self.width = int(self.page_tree.get("WIDTH"))
         """
@@ -98,6 +117,8 @@ class Page(object):
         self._areas = None
 
         # Adding backward compatibility
+        self.query = self._query
+        self.single_query = self._single_query
         self.page_words = self.words
         self.page_strings = self.strings
         self.cc = self.character_confidences
@@ -151,7 +172,7 @@ class Page(object):
 
         return self.image.crop([x, y, x + width, y + height])
 
-    def query(
+    def _query(
         self, xpath_query
     ) -> list[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
@@ -166,7 +187,7 @@ class Page(object):
         """
         return xpath_query(self.tree)
 
-    def single_query(
+    def _single_query(
         self, xpath_query
     ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
@@ -177,7 +198,7 @@ class Page(object):
         :return: The query's result or None if no result is returned
         :rtype: Union[etree._ElementUnicodeResult, etree._Element] or None
         """
-        result = self.query(xpath_query)
+        result = self._query(xpath_query)
         if not result:
             return None
         return result[0]
@@ -212,7 +233,7 @@ class Page(object):
         :return: The ``defoe.fmp.page.Page``'s Textblocks
         :rtype: Iterator[:class:`defoe.fmp.textblock.TextBlock`]
         """
-        for tb in self.query(Page.TB_XPATH):
+        for tb in self._query(Page.TB_XPATH):
             yield TextBlock(tb, self)
 
     @property
@@ -225,7 +246,7 @@ class Page(object):
         :rtype: list[str]
         """
         if not self._words:
-            self._words = list(map(str, self.query(Page.WORDS_XPATH)))
+            self._words = list(map(str, self._query(Page.WORDS_XPATH)))
         return self._words
 
     @property
@@ -238,7 +259,7 @@ class Page(object):
         :rtype: list[float]
         """
         if not self._word_confidences:
-            self._word_confidences = list(self.query(Page.WC_XPATH))
+            self._word_confidences = list(self._query(Page.WC_XPATH))
 
         # Attempt to set word confidence to floating point
         try:
@@ -259,7 +280,7 @@ class Page(object):
         :rtype: list[float]
         """
         if not self._character_confidences:
-            self._character_confidences = list(self.query(Page.CC_XPATH))
+            self._character_confidences = list(self._query(Page.CC_XPATH))
 
         # Attempt to set character confidence to floating point
         try:
@@ -281,7 +302,7 @@ class Page(object):
         :rtype: list[lxml.etree._ElementStringResult]
         """
         if not self._strings:
-            self._strings = self.query(Page.STRINGS_XPATH)
+            self._strings = self._query(Page.STRINGS_XPATH)
         return self._strings
 
     @property
@@ -294,7 +315,7 @@ class Page(object):
         :rtype: list[lxml.etree._ElementStringResult]
         """
         if not self._textblock_ids:
-            self._textblock_ids = list(self.query(Page.TB_XPATH_ID))
+            self._textblock_ids = list(self._query(Page.TB_XPATH_ID))
         return self._textblock_ids
 
     @property
@@ -307,7 +328,7 @@ class Page(object):
         :rtype: list[lxml.etree._Element]
         """
         if not self._graphics:
-            self._graphics = self.query(Page.GRAPHICS_XPATH)
+            self._graphics = self._query(Page.GRAPHICS_XPATH)
         return self._graphics
 
     @property

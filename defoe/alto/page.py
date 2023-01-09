@@ -57,6 +57,7 @@ class Page(object):
         """
         Run XPath query.
 
+        :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
         :return: list of query results or None if none
@@ -68,6 +69,7 @@ class Page(object):
         """
         Run XPath query and return first result.
 
+        :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
         :return: query result or None if none

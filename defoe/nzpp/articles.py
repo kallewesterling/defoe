@@ -34,12 +34,12 @@ class Articles(object):
         self.document_type = "newspaper"
         self.model = "nzpp"
 
-    def query(self, query: str) -> list:
+    def query(self, query: etree.XPath) -> list:
         """
         Run XPath query.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: List of query results or an empty list if the object
             represents an empty document or any errors arose
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
@@ -51,12 +51,12 @@ class Articles(object):
         except AssertionError:
             return []
 
-    def single_query(self, query: str) -> Optional[str]:
+    def single_query(self, query: etree.XPath) -> Optional[str]:
         """
         Run XPath query and return first result.
 
         :param query: XPath query
-        :type query: str
+        :type query: lxml.etree.XPath
         :return: Query results or None if the object represents an
             empty document
         :rtype: str
