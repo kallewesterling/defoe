@@ -19,7 +19,7 @@ class AltoArchive(object, metaclass=abc.ABCMeta):
     Abstract base class for object model representation of [ZIP] archive
     of files in ALTO format.
 
-    :param filename: archive filename
+    :param filename: Archive filename
     :type: filename: str
     """
 

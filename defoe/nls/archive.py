@@ -65,7 +65,7 @@ class Archive(AltoArchive):
         """
         Gets information from ZIP file about metadata file.
 
-        :param document_code: document file code
+        :param document_code: Document file code
         :type document_code: str
         :return: File information
         :rtype: zipfile.ZipInfo

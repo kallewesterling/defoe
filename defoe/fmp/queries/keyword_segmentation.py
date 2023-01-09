@@ -10,7 +10,9 @@ from defoe.fmp.query_utils import get_article_matches, segment_image
 import os
 
 
-def do_query(archives: PipelinedRDD, config_file=None, logger=None, context=None):
+def do_query(
+    archives: PipelinedRDD, config_file=None, logger=None, context=None
+):
     """
     Crops articles' images for keywords and groups by word.
 
@@ -52,9 +54,9 @@ def do_query(archives: PipelinedRDD, config_file=None, logger=None, context=None
 
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by word
@@ -66,7 +68,9 @@ def do_query(archives: PipelinedRDD, config_file=None, logger=None, context=None
 
     # Process configuration
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
     keywords = query_utils.get_normalized_keywords(data_file, preprocess_type)
@@ -90,7 +94,8 @@ def do_query(archives: PipelinedRDD, config_file=None, logger=None, context=None
         lambda archive: [
             document
             for document in list(archive)
-            if document.year >= int(year_min) and document.year <= int(year_max)
+            if document.year >= int(year_min)
+            and document.year <= int(year_max)
         ]
     )
 
@@ -100,7 +105,9 @@ def do_query(archives: PipelinedRDD, config_file=None, logger=None, context=None
     #       ...
     # ]
     article_matches = documents.flatMap(
-        lambda document: get_article_matches(document, keywords, preprocess_type)
+        lambda document: get_article_matches(
+            document, keywords, preprocess_type
+        )
     )
 
     # Spark: re-organize article_matches into matching_docs

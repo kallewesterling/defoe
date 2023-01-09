@@ -34,9 +34,9 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
@@ -46,11 +46,15 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     preprocess_config = config["preprocess"]
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
 
     # Filter out the pages that are null, which model is nls, and select only 2 columns: year and the page as string (either raw or preprocessed).
     if preprocess_config == "normalize":
-        fdf = df.withColumn("source_text_norm", blank_as_null("source_text_norm"))
+        fdf = df.withColumn(
+            "source_text_norm", blank_as_null("source_text_norm")
+        )
         newdf = (
             fdf.filter(fdf.source_text_norm.isNotNull())
             .filter(fdf["model"] == "nls")
@@ -66,14 +70,18 @@ def do_query(df, config_file=None, logger=None, context=None):
             .select(fdf.year, fdf.source_text_lemmatize)
         )
     elif preprocess_config == "stem":
-        fdf = df.withColumn("source_text_stem", blank_as_null("source_text_stem"))
+        fdf = df.withColumn(
+            "source_text_stem", blank_as_null("source_text_stem")
+        )
         newdf = (
             fdf.filter(fdf.source_text_stem.isNotNull())
             .filter(fdf["model"] == "nls")
             .select(fdf.year, fdf.source_text_stem)
         )
     else:
-        fdf = df.withColumn("source_text_clean", blank_as_null("source_text_clean"))
+        fdf = df.withColumn(
+            "source_text_clean", blank_as_null("source_text_clean")
+        )
         newdf = (
             fdf.filter(fdf.source_text_clean.isNotNull())
             .filter(fdf["model"] == "nls")
@@ -86,7 +94,8 @@ def do_query(df, config_file=None, logger=None, context=None):
         for keysentence in list(f):
             k_split = keysentence.split()
             sentence_word = [
-                query_utils.preprocess_word(word, preprocess_type) for word in k_split
+                query_utils.preprocess_word(word, preprocess_type)
+                for word in k_split
             ]
             sentence_norm = ""
             for word in sentence_word:

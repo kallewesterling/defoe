@@ -43,9 +43,9 @@ def files_to_rdd(
 
     :param context: Spark Context
     :type context: pyspark.context.SparkContext
-    :param num_cores: number of cores over which to parallelize Spark job
+    :param num_cores: Number of cores over which to parallelize Spark job
     :type num_cores: int
-    :param data_file: name of file with file names or URLs, one per line
+    :param data_file: Name of file with file names or URLs, one per line
     :type data_file: str
     :return: A Resilient Distributed Dataset
     :rtype: pyspark.rdd.RDD

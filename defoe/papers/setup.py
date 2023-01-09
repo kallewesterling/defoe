@@ -11,7 +11,7 @@ def filename_to_object(filename):
     arises during its creation this is caught and returned as a
     string.
 
-    :param filename: filename
+    :param filename: Filename
     :type filename: str or unicode
     :return: tuple of form (Issue, None) or (filename, error message),
     if there was an error creating Issue

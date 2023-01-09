@@ -11,7 +11,7 @@ def filename_to_object(filename):
     arises during its creation this is caught and returned as a
     string.
 
-    :param filename: filename
+    :param filename: Filename
     :type filename: str
     :return: tuple of form (Archive, None) or (filename, error message),
     if there was an error creating Archive

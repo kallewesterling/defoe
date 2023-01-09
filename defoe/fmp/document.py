@@ -38,11 +38,12 @@ class Document(object):
 
         # Iterate through an archive's document
         for document in archive:
+            # Access the properties and methods from the Document
             print(document.code)
 
-    :param code: identifier for this document within an archive
+    :param code: Identifier for this document within an archive
     :type code: str
-    :param archive: archive to which this document belongs
+    :param archive: Archive to which this document belongs
     :type archive: defoe.fmp.archive.Archive
     """
 
@@ -724,6 +725,7 @@ class Document(object):
         Usage, given that you already have a ``document`` assigned:
 
         .. code-block:: python
+
             for area in document.scan_areas(selected_page_code="0001"):
                 area.tokens
 
@@ -773,8 +775,8 @@ class Document(object):
     @property
     def areas(self) -> dict:
         """
-        Shortcut property for running the standard setup of
-        :func:`~defoe.fmp.document.Document.get_areas_by_page_code`
+        Shortcut property for storing and returning the output of
+        :func:`~defoe.fmp.document.Document.get_areas_by_page_code`.
 
         :return: Dictionary with page codes as keys and each
             ``defoe.fmp.page.Page``'s areas as a list as value for each key.

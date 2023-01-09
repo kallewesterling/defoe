@@ -7,8 +7,12 @@ from defoe.query_utils import PreprocessWordType
 
 from nltk.corpus import words
 
+# FIXME: This needs docstring and typing fixing
 
-def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORMALIZE):
+
+def get_page_matches(
+    document, keywords, preprocess_type=PreprocessWordType.NORMALIZE
+):
     """
     Get pages within a document that include one or more keywords.
     For each page that includes a specific keyword, add a tuple of
@@ -21,11 +25,11 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
 
-    :param document: document
+    :param document: Document
     :type document: defoe.alto.document.Document
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str or unicode:
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: list of tuples
@@ -36,7 +40,9 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
         for page in document:
             match = None
             for word in page.words:
-                preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+                preprocessed_word = query_utils.preprocess_word(
+                    word, preprocess_type
+                )
                 if preprocessed_word == keyword:
                     match = (document.year, document, page, keyword)
                     break
@@ -54,9 +60,9 @@ def get_document_keywords(
 
     :param article: Article
     :type article: defoe.papers.article.Article
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str or unicode)
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: sorted list of keywords that occur within article
@@ -67,7 +73,9 @@ def get_document_keywords(
 
     for page in document:
         for word in page.words:
-            preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+            preprocessed_word = query_utils.preprocess_word(
+                word, preprocess_type
+            )
             if preprocessed_word in keywords:
                 matches.add(preprocessed_word)
 
@@ -82,9 +90,9 @@ def document_contains_word(
 
     :param article: Article
     :type article: defoe.papers.article.Article
-    :param keywords: keyword
+    :param keywords: Keyword
     :type keywords: str or unicode
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: True if the article contains the word, false otherwise
@@ -93,7 +101,9 @@ def document_contains_word(
 
     for page in document:
         for word in page.words:
-            preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
+            preprocessed_word = query_utils.preprocess_word(
+                word, preprocess_type
+            )
 
             if keyword == preprocessed_word:
                 return True
@@ -109,7 +119,7 @@ def calculate_words_within_dictionary(
     Page words are normalized.
     :param page: Page
     :type page: defoe.alto.page.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
     :rtype: list(str or unicode)
@@ -142,7 +152,7 @@ def calculate_words_confidence_average(page):
     Page words are normalized.
     :param page: Page
     :type page: defoe.alto.page.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
     :rtype: list(str or unicode)

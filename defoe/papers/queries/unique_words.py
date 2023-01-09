@@ -34,9 +34,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     :param issues: RDD of defoe.papers.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file (optional)
+    :param config_file: Query configuration file (optional)
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: total number of issues and words
     :rtype: dict
@@ -47,11 +47,15 @@ def do_query(issues, config_file=None, logger=None, context=None):
     threshold = max(1, value)
 
     # [article, article, ...]
-    articles = issues.flatMap(lambda issue: [article for article in issue.articles])
+    articles = issues.flatMap(
+        lambda issue: [article for article in issue.articles]
+    )
 
     # [(word, 1), (word, 1), ...]
     words = articles.flatMap(
-        lambda article: [(query_utils.normalize(word), 1) for word in article.words]
+        lambda article: [
+            (query_utils.normalize(word), 1) for word in article.words
+        ]
     )
 
     # [(word, 1), (word, 1), ...]

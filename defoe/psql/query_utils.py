@@ -11,7 +11,7 @@ def get_sentences_list_matches(text, keysentence):
     Check which key-sentences from occurs within a string
     and return the list of matches.
 
-    :param text: text
+    :param text: Text
     :type text: str or unicode
     :type: list(str or uniocde)
     :return: Set of sentences

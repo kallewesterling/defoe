@@ -26,9 +26,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file (unused)
+    :param config_file: Query configuration file (unused)
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: total number of documents, pages and words per year
     :rtype: list
@@ -37,10 +37,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
     newdf = (
         df.filter(df.source_text_clean.isNotNull())
         .filter(df["model"] == "nls")
-        .select(df.year, df.archive_filename, df.num_text_unit, df.source_text_clean)
+        .select(
+            df.year,
+            df.archive_filename,
+            df.num_text_unit,
+            df.source_text_clean,
+        )
     )
 
-    archive_df = newdf.groupby("archive_filename", "year", "num_text_unit").count()
+    archive_df = newdf.groupby(
+        "archive_filename", "year", "num_text_unit"
+    ).count()
 
     # >>> archive_df.show()
     # +--------------------+----+---------------+-----+

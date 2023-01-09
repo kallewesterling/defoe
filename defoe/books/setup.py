@@ -9,7 +9,7 @@ def filename_to_object(
     Given a filename, creates a defoe.books.archive.Archive.  If an error
     arises during its creation this is caught and returned as a string.
 
-    :param filename: filename
+    :param filename: Filename
     :type filename: str
     :return: tuple of form (Archive, None) or (filename, error message),
         if there was an error creating Archive

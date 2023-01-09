@@ -36,9 +36,9 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
 
     :param all_articles: RDD of defoe.npzz.articles.Articles
     :type all_articles: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by date
@@ -66,7 +66,9 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
 
     # [(article, word), ...]
     article_words = filtered_words.flatMap(
-        lambda article_words: [(article_words[0], word) for word in article_words[1]]
+        lambda article_words: [
+            (article_words[0], word) for word in article_words[1]
+        ]
     )
 
     # [(article, word), ...]

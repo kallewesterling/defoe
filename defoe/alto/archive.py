@@ -24,7 +24,6 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
     def __init__(self, filename: str):
         """
         Constructor method.
-
         """
         self.filename = filename
         stream = open_stream(self.filename)

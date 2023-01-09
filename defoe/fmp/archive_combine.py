@@ -24,7 +24,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
     Abstract base class for object model representation of ZIP|UNZIP archive
     of files in ALTO format.
 
-    :param filename: archive filename
+    :param filename: Archive filename
     :type: filename: str
     """
 
@@ -66,7 +66,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Given a document index, return a new Document object.
 
-        :param index: document index
+        :param index: Document index
         :type index: int
         :return: Document object
         :rtype: defoe.alto.document.Document
@@ -118,7 +118,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Gets information from ZIP file about metadata file.
 
-        :param document_code: document file code
+        :param document_code: Document file code
         :type document_code: str
         :return: information
         :rtype: zipfile.ZipInfo
@@ -132,9 +132,9 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Gets information from ZIP file about a page file.
 
-        :param document_code: page file code
+        :param document_code: Page file code
         :type document_code: str
-        :param page_code: file code
+        :param page_code: File code
         :type page_code: str
         :return: information
         :rtype: zipfile.ZipInfo
@@ -146,7 +146,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Opens metadata file.
 
-        :param document_code: document file code
+        :param document_code: Document file code
         :type document_code: str
         :return: stream
         :rtype: zipfile.ZipExt
@@ -158,9 +158,9 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Opens page file.
 
-        :param document_code: page file code
+        :param document_code: Page file code
         :type document_code: str
-        :param page_code: file code
+        :param page_code: File code
         :type page_code: str
         :return: stream
         :rtype: zipfile.ZipExt

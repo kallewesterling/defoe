@@ -45,13 +45,13 @@ def convert_coords(x, y, w, h):
     Takes starting x, y coordinates (upper-left corner) and a width and height,
     and returns the correct format for PIL to draw a rectangle.
 
-    :param x: x value in pixels for left side of rectangle
+    :param x: X value in pixels for left side of rectangle
     :type x: int
-    :param y: y value in pixels for left side of rectangle
+    :param y: Y value in pixels for left side of rectangle
     :type y: int
-    :param w: rectangle's width in pixels
+    :param w: Rectangle's width in pixels
     :type w: int
-    :param h: rectangle's height in pixels
+    :param h: Rectangle's height in pixels
     :type h: int
     :return: list of two tuples with coordinates of the rectangle's two
     opposite corners: (1) upper-left, (2) lower-right
@@ -81,11 +81,11 @@ def get_page_matches(
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
 
-    :param document: document
+    :param document: Document
     :type document: defoe.fmp.document.Document
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str)
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: list of tuples
@@ -117,9 +117,9 @@ def get_tb_matches(target_match, keywords):
 
     (target_match=><YEAR>, <DOCUMENT>, <ARTICLE>, <BLOCK_ID>, <COORDINATES>, <PAGE_AREA>, <ORIGINAL_WORDS>,<PREPROCESSED_WORDS>, <PAGE_NAME>, <TARGETWORD>)
 
-    :param document: target_match
+    :param document: Target_match
     :type document: list
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str:
     :return: list of tuples
     :rtype: list(tuple)
@@ -199,11 +199,11 @@ def get_article_matches(
             <MATCHED_KEYWORD>
         )
 
-    :param document: document
+    :param document: Document
     :type document: defoe.fmp.document.Document
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str)
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: list of tuples
@@ -299,17 +299,17 @@ def segment_image(
     """
     Segments textblock articles given coordinates and page path
 
-    :param coords: coordinates of an image
+    :param coords: Coordinates of an image
     :type coords: string
-    :param page_name: name of the page XML which the textblock has been extracted from.
+    :param page_name: Name of the page XML which the textblock has been extracted from.
     :type page_name: string
-    :param issue_path: path of the ZIPPED archive or the issue
+    :param issue_path: Path of the ZIPPED archive or the issue
     :type issue_path: string
-    :param year: year of the publication
+    :param year: Year of the publication
     :type year: integer
-    :param keyword: word for which the textblock has been selected/filtered
+    :param keyword: Word for which the textblock has been selected/filtered
     :type keyword: string
-    :param output_path: path to store the cropped image
+    :param output_path: Path to store the cropped image
     :type output_path: string
     :param target: # TODO #3
     :type target: # TODO #3
@@ -448,9 +448,9 @@ def get_document_keywords(
 
     :param document: Document
     :type document: defoe.fmp.document.Document
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str)
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: sorted list of keywords that occur within document
@@ -479,9 +479,9 @@ def document_contains_word(
 
     :param document: Document
     :type document: defoe.fmp.document.Document
-    :param keyword: keyword
+    :param keyword: Keyword
     :type keyword: str
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: True if the document contains the word, false otherwise
@@ -507,7 +507,7 @@ def calculate_words_within_dictionary(
 
     :param page: Page
     :type page: defoe.fmp.page.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
     :rtype: list(str)
@@ -542,7 +542,7 @@ def calculate_words_confidence_average(page: Page):
 
     :param page: Page
     :type page: defoe.fmp.page.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
     :rtype: list(str)

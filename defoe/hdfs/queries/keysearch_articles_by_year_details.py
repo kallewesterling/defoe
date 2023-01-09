@@ -28,7 +28,7 @@ def do_query(df, config_file=None, logger=None, context=None):
     path, and the type of operating system.
 
     Returns result of form:
-    
+
         {
             <YEAR>:
                 [
@@ -51,9 +51,9 @@ def do_query(df, config_file=None, logger=None, context=None):
         }
 
     :type issues: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by date
@@ -63,7 +63,9 @@ def do_query(df, config_file=None, logger=None, context=None):
     config = query_utils.get_config(config_file)
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
 
     # Filter out the pages that are null, which model is nls, and select only 2 columns: year and the page as string (either raw or preprocessed).
     fdf = df.withColumn("definition", blank_as_null("definition"))
@@ -93,7 +95,8 @@ def do_query(df, config_file=None, logger=None, context=None):
         for keysentence in list(f):
             k_split = keysentence.split()
             sentence_word = [
-                query_utils.preprocess_word(word, preprocess_type) for word in k_split
+                query_utils.preprocess_word(word, preprocess_type)
+                for word in k_split
             ]
             sentence_norm = ""
 
@@ -194,4 +197,3 @@ def do_query(df, config_file=None, logger=None, context=None):
     )
 
     return result
-

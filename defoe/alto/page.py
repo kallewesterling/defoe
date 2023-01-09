@@ -5,11 +5,22 @@ METS/MODS format.
 
 from lxml import etree
 
+# FIXME: This needs docstring and typing fixing
+
 
 class Page(object):
     """
     Object model representation of a page represented as an XML file
     in METS/MODS format.
+
+    :param document: Document object corresponding to document to
+        which this page belongs
+    :type document: defoe.alto.document.Document
+    :param code: Identifier for this page within an archive
+    :type code: str or unicode
+    :param source: Stream. If None then an attempt is made to
+        open the file holding the page via the given "document"
+    :type source: zipfile.ZipExt or another file-like object
     """
 
     WORDS_XPATH = etree.XPath("//String/@CONTENT")
@@ -27,16 +38,7 @@ class Page(object):
 
     def __init__(self, document, code, source=None):
         """
-        Constructor.
-
-        :param document: Document object corresponding to document to
-        which this page belongs
-        :type document: defoe.alto.document.Document
-        :param code: identifier for this page within an archive
-        :type code: str or unicode
-        :param source: stream. If None then an attempt is made to
-        open the file holding the page via the given "document"
-        :type source: zipfile.ZipExt or another file-like object
+        Constructor method.
         """
         if not source:
             source = document.archive.open_page(document.code, code)

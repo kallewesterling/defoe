@@ -21,9 +21,9 @@ class Document(object):
     Object model representation of a document represented as a
     collection of XML files in METS/MODS format.
 
-    :param code: identifier for this document within an archive
+    :param code: Identifier for this document within an archive
     :type code: str
-    :param archive: archive to which this document belongs
+    :param archive: Archive to which this document belongs
     :type archive: defoe.nls.archive.Archive
     """
 
@@ -184,7 +184,7 @@ class Document(object):
         """
         Given a page index, return a new Page object.
 
-        :param index: page index
+        :param index: Page index
         :type index: int
         :return: Page object
         :rtype: defoe.nls.page.Page

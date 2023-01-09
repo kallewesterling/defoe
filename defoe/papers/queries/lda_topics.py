@@ -45,9 +45,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     :param issues: RDD of defoe.papers.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: LDA topics
     :rtype: dict
@@ -59,7 +59,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     optimizer = config["optimizer"]
     if optimizer != "online" and optimizer != "em":
-        raise ValueError(f"optimizer must be 'online' or 'em' but is '{optimizer}'")
+        raise ValueError(
+            f"optimizer must be 'online' or 'em' but is '{optimizer}'"
+        )
 
     max_iterations = config["max_iterations"]
     if max_iterations < 1:
@@ -150,9 +152,9 @@ def min_max_tuples(fst, snd):
     (min, max) where min is min(fst_min, snd_min) and
     max is max(fst_max, snd_max).
 
-    :param fst: tuple
+    :param fst: Tuple
     :type fst: tuple
-    :param fst: tuple
+    :param fst: Tuple
     :type snd: tuple
     :return: tuple
     :rtype: tuple
@@ -174,7 +176,7 @@ def article_idx_to_words_row(article_idx):
 
     Any stop words (words of less than 2 characters) are ignored.
 
-    :param article_idx: tuple
+    :param article_idx: Tuple
     :type article_idx: tuple(defoe.papers.article.Article, int)
     :return: Row
     :rtype: pyspark.sql.Row
@@ -196,14 +198,14 @@ def topic_render(topic, num_words, vocabulary):
     """
     Convert a topic result to a list of words
 
-    :param topic: topic data, first element is list of length
+    :param topic: Topic data, first element is list of length
     num_words, which contains indices which are used to extract words
     from vocabulary to form the list that is returned
     :type topic: tuple(list(int), list(float))
-    :param num_words: number of words, equal to "topic_words"
+    :param num_words: Number of words, equal to "topic_words"
     specified in query configuration file
     :type num_words: int
-    :param vocabulary: vocabulary
+    :param vocabulary: Vocabulary
     :type vocabulary: list(unicode)
     :return: list of num_words words from vocabulary
     :rtype: list(unicode)

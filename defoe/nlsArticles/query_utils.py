@@ -63,11 +63,11 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
 
-    :param document: document
+    :param document: Document
     :type document: defoe.nls.document.Document
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str or unicode:
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: list of tuples
@@ -101,9 +101,9 @@ def get_document_keywords(
 
     :param article: Article
     :type article: defoe.papers.article.Article
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str or unicode)
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: sorted list of keywords that occur within article
@@ -129,9 +129,9 @@ def document_contains_word(
 
     :param article: Article
     :type article: defoe.papers.article.Article
-    :param keywords: keyword
+    :param keywords: Keyword
     :type keywords: str or unicode
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: True if the article contains the word, false otherwise
@@ -156,7 +156,7 @@ def calculate_words_within_dictionary(
 
     :param page: Page
     :type page: defoe.nls.page.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
     :rtype: list(str or unicode)
@@ -189,7 +189,7 @@ def calculate_words_confidence_average(page):
     Page words are normalized.
     :param page: Page
     :type page: defoe.nls.page.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :return: matches
     :rtype: list(str or unicode)
@@ -213,7 +213,7 @@ def get_page_as_string(page, preprocess_type=PreprocessWordType.LEMMATIZE):
 
     :param page: Page
     :type page: defoe.nls.Page
-    :param preprocess_type: how words should be preprocessed
+    :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
     :return: page words as a string
@@ -511,7 +511,7 @@ def get_sentences_list_matches(text, keysentence):
     Check which key-sentences from occurs within a string
     and return the list of matches.
 
-    :param text: text
+    :param text: Text
     :type text: str or unicode
     :type: list(str or uniocde)
     :return: Set of sentences
@@ -618,9 +618,9 @@ def get_text_keyword_idx(text, keywords):
     Gets a list of keywords (and their position indices) within an
     article.
 
-    :param text: text
+    :param text: Text
     :type article: string
-    :param keywords: keywords
+    :param keywords: Keywords
     :type keywords: list(str or unicode)
     :return: sorted list of keywords and their indices
     :rtype: list(tuple(str or unicode, int))
@@ -639,11 +639,11 @@ def get_concordance(text, keyword, idx, window):
     For a given keyword (and its position in an article), return
     the concordance of words (before and after) using a window.
 
-    :param text: text
+    :param text: Text
     :type text: string 
-    :param keyword: keyword
+    :param keyword: Keyword
     :type keyword: str or unicode
-    :param idx: keyword index (position) in list of article's words
+    :param idx: Keyword index (position) in list of article's words
     :type idx: int
     :window: number of words to the right and left
     :type: int

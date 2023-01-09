@@ -28,9 +28,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by year
@@ -43,7 +43,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     )
 
     # [(year, sentences), ...]
-    raw_sentences = documents.flatMap(lambda document: extract_sentences(document))
+    raw_sentences = documents.flatMap(
+        lambda document: extract_sentences(document)
+    )
 
     # [(year, [preprocess_sentences]), (year, [preprocessed_sentence] ) , ...]
     preprocessed_sentences = raw_sentences.flatMap(
@@ -55,7 +57,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # [[year, [preprocess sentence],[preprocess sentence], year, []], ...]
     result = (
         preprocessed_sentences.groupByKey()
-        .map(lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1])))
+        .map(
+            lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1]))
+        )
         .collect()
     )
 

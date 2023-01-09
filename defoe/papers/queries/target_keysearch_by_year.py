@@ -53,9 +53,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     :param issues: RDD of defoe.papers.issue.Issue
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: number of occurrences of keywords grouped by year
     :rtype: dict
@@ -77,7 +77,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
         defoe_path = "./"
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
     num_target = int(config["num_target"])
     lexicon_start = int(config["lexicon_start"])
 
@@ -86,7 +88,8 @@ def do_query(issues, config_file=None, logger=None, context=None):
         for keysentence in list(f):
             k_split = keysentence.split()
             sentence_word = [
-                query_utils.preprocess_word(word, preprocess_type) for word in k_split
+                query_utils.preprocess_word(word, preprocess_type)
+                for word in k_split
             ]
             sentence_norm = ""
 
@@ -103,7 +106,10 @@ def do_query(issues, config_file=None, logger=None, context=None):
     keysentences = keysentences[lexicon_start:]
     clean_articles = issues.flatMap(
         lambda issue: [
-            (issue.date.year, clean_article_as_string(article, defoe_path, os_type))
+            (
+                issue.date.year,
+                clean_article_as_string(article, defoe_path, os_type),
+            )
             for article in issue.articles
         ]
     )
@@ -111,7 +117,10 @@ def do_query(issues, config_file=None, logger=None, context=None):
     # [(year, preprocess_article_string), ...]
     t_articles = clean_articles.flatMap(
         lambda cl_article: [
-            (cl_article[0], preprocess_clean_article(cl_article[1], preprocess_type))
+            (
+                cl_article[0],
+                preprocess_clean_article(cl_article[1], preprocess_type),
+            )
         ]
     )
 

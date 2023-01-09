@@ -32,9 +32,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: number of occurrences of keywords grouped bytitle
     :rtype: dict
@@ -56,14 +56,17 @@ def do_query(archives, config_file=None, logger=None, context=None):
         defoe_path = "./"
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
 
     keysentences = []
     with open(data_file, "r") as f:
         for keysentence in list(f):
             k_split = keysentence.split()
             sentence_word = [
-                query_utils.preprocess_word(word, preprocess_type) for word in k_split
+                query_utils.preprocess_word(word, preprocess_type)
+                for word in k_split
             ]
             sentence_norm = ""
 
@@ -77,13 +80,18 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     # [(year, document), ...]
     documents = archives.flatMap(
-        lambda archive: [(document.title, document) for document in list(archive)]
+        lambda archive: [
+            (document.title, document) for document in list(archive)
+        ]
     )
 
     # [(year, page_string)
     clean_pages = documents.flatMap(
         lambda title_document: [
-            (title_document[0], clean_page_as_string(page, defoe_path, os_type))
+            (
+                title_document[0],
+                clean_page_as_string(page, defoe_path, os_type),
+            )
             for page in title_document[1]
         ]
     )
@@ -112,7 +120,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # [[(year, keysentence), 1) ((year, keysentence), 1) ] ...]
     matching_sentences = matching_pages.flatMap(
         lambda title_sentence: [
-            ((title_sentence[0], sentence), 1) for sentence in title_sentence[1]
+            ((title_sentence[0], sentence), 1)
+            for sentence in title_sentence[1]
         ]
     )
 

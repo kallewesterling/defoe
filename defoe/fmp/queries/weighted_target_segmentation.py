@@ -214,9 +214,9 @@ def do_query(
 
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str
-    :param logger: logger
+    :param logger: Logger
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by word

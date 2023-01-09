@@ -43,9 +43,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: information on documents in which keywords occur grouped
     by word
@@ -55,7 +55,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     config = query_utils.get_config(config_file)
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
 
     keywords = query_utils.get_normalized_keywords(data_file, preprocess_type)
 
@@ -65,7 +67,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
     )
 
     filtered_words = documents.flatMap(
-        lambda document: get_article_matches(document, keywords, preprocess_type)
+        lambda document: get_article_matches(
+            document, keywords, preprocess_type
+        )
     )
 
     # [(year, document, article, textblock_id, textblock_coords, textblock_page_area, words, page_name, keyword), ....]

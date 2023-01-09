@@ -92,7 +92,7 @@ class Archive(AltoArchive):
         """
         Opens metadata file.
 
-        :param document_code: document file code
+        :param document_code: Document file code
         :type document_code: str
         :return: Stream
         :rtype: zipfile.ZipExtFile
