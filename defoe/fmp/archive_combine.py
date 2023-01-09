@@ -87,7 +87,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Gets number of documents in ZIP archive.
 
-        :return: number of documents
+        :return: Number of documents
         :rtype: int
         """
         return len(self.document_codes)
@@ -98,7 +98,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         Gets pattern to find metadata filename which has information about
         the document as a whole.
 
-        :return: pattern
+        :return: Pattern
         :rtype: str
         """
         return r""
@@ -108,7 +108,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         """
         Gets pattern to find filenames corresponding to individual pages.
 
-        :return: pattern
+        :return: Pattern
         :rtype: str
         """
         return r""
@@ -120,7 +120,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
 
         :param document_code: Document file code
         :type document_code: str
-        :return: information
+        :return: Information
         :rtype: zipfile.ZipInfo
         """
         return
@@ -136,7 +136,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         :type document_code: str
         :param page_code: File code
         :type page_code: str
-        :return: information
+        :return: Information
         :rtype: zipfile.ZipInfo
         """
         return
@@ -148,7 +148,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
 
         :param document_code: Document file code
         :type document_code: str
-        :return: stream
+        :return: Stream
         :rtype: zipfile.ZipExt
         """
         return
@@ -162,7 +162,7 @@ class AltoArchive(abc.ABCMeta("ABC", (object,), {})):
         :type document_code: str
         :param page_code: File code
         :type page_code: str
-        :return: stream
+        :return: Stream
         :rtype: zipfile.ZipExt
         """
         return

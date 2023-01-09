@@ -22,7 +22,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: unique root elements and frequencies
+    :return: Unique root elements and frequencies
     :rtype: dict
     """
 

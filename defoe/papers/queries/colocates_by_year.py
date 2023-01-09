@@ -53,7 +53,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on articles in which keywords occur grouped
+    :return: Information on articles in which keywords occur grouped
     by year
     :rtype: dict
     """
@@ -130,7 +130,7 @@ def get_colocates_matches(article, start_word, end_word, window=0):
     :type start_word: str or unicode
     :param end_word: End_word colocate
     :type end_word: str or unicode
-    :return: list of lists of words
+    :return: List of lists of words
     :rtype: list(list(str or unicode))
     """
 

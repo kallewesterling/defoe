@@ -156,7 +156,7 @@ def min_max_tuples(fst, snd):
     :type fst: tuple
     :param fst: Tuple
     :type snd: tuple
-    :return: tuple
+    :return: Tuple
     :rtype: tuple
     """
 
@@ -207,7 +207,7 @@ def topic_render(topic, num_words, vocabulary):
     :type num_words: int
     :param vocabulary: Vocabulary
     :type vocabulary: list(unicode)
-    :return: list of num_words words from vocabulary
+    :return: List of num_words words from vocabulary
     :rtype: list(unicode)
     """
 

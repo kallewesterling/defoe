@@ -23,7 +23,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: total number of issues, articles and words per year
+    :return: Total number of issues, articles and words per year
     :rtype: list
     """
 

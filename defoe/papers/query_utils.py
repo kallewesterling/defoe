@@ -37,7 +37,7 @@ def get_article_matches(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
+    :return: List of tuples
     :rtype: list(tuple)
     """
     matches = []
@@ -78,7 +78,7 @@ def get_article_keywords(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: sorted list of keywords that occur within article
+    :return: Sorted list of keywords that occur within article
     :rtype: list(str or unicode)
     """
     matches = set()
@@ -123,7 +123,7 @@ def article_stop_words_removal(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: article words without stop words
+    :return: Article words without stop words
     :rtype: list(str or unicode)
     """
     stop_words = set(stopwords.words("english"))
@@ -146,7 +146,7 @@ def get_article_as_string(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: article words as a string
+    :return: Article words as a string
     :rtype: string or unicode
     """
     article_string = ""
@@ -192,7 +192,7 @@ def get_article_keyword_idx(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: sorted list of keywords and their indices
+    :return: Sorted list of keywords and their indices
     :rtype: list(tuple(str or unicode, int))
     """
     matches = set()
@@ -222,7 +222,7 @@ def get_concordance(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: concordance
+    :return: Concordance
     :rtype: list(str or unicode)
     """
     article_size = len(article.words)
@@ -252,7 +252,7 @@ def clean_article_as_string(article, defoe_path, os_type):
 
     :param article: Article
     :type article: defoe.papers.article.Article
-    :return: clean article words as a string
+    :return: Clean article words as a string
     :rtype: string or unicode
     """
     article_string = ""

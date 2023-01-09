@@ -53,7 +53,7 @@ def convert_coords(x, y, w, h):
     :type w: int
     :param h: Rectangle's height in pixels
     :type h: int
-    :return: list of two tuples with coordinates of the rectangle's two
+    :return: List of two tuples with coordinates of the rectangle's two
     opposite corners: (1) upper-left, (2) lower-right
     :rtype: list(tuple)
     """
@@ -88,7 +88,7 @@ def get_page_matches(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
+    :return: List of tuples
     :rtype: list(tuple)
     """
 
@@ -121,7 +121,7 @@ def get_tb_matches(target_match, keywords):
     :type document: list
     :param keywords: Keywords
     :type keywords: list(str:
-    :return: list of tuples
+    :return: List of tuples
     :rtype: list(tuple)
     """
 
@@ -206,7 +206,7 @@ def get_article_matches(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
+    :return: List of tuples
     :rtype: list(tuple)
     """
 
@@ -327,7 +327,7 @@ def segment_image(
     :type max_height: # TODO #3
     :param limit_size: # TODO #3
     :type limit_size: # TODO #3
-    :return: the path of the cropped/segmented image
+    :return: The path of the cropped/segmented image
     """
 
     def get_image_name(issue_path, page_name):
@@ -453,7 +453,7 @@ def get_document_keywords(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: sorted list of keywords that occur within document
+    :return: Sorted list of keywords that occur within document
     :rtype: list(str)
     """
 
@@ -509,7 +509,7 @@ def calculate_words_within_dictionary(
     :type page: defoe.fmp.page.Page
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: matches
+    :return: Matches
     :rtype: list(str)
     """
 
@@ -544,7 +544,7 @@ def calculate_words_confidence_average(page: Page):
     :type page: defoe.fmp.page.Page
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: matches
+    :return: Matches
     :rtype: list(str)
     """
 

@@ -32,7 +32,7 @@ def get_page_matches(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
+    :return: List of tuples
     :rtype: list(tuple)
     """
     matches = []
@@ -65,7 +65,7 @@ def get_document_keywords(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: sorted list of keywords that occur within article
+    :return: Sorted list of keywords that occur within article
     :rtype: list(str or unicode)
     """
 
@@ -121,7 +121,7 @@ def calculate_words_within_dictionary(
     :type page: defoe.alto.page.Page
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: matches
+    :return: Matches
     :rtype: list(str or unicode)
     """
 
@@ -154,7 +154,7 @@ def calculate_words_confidence_average(page):
     :type page: defoe.alto.page.Page
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: matches
+    :return: Matches
     :rtype: list(str or unicode)
     """
 

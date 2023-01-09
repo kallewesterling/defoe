@@ -137,7 +137,7 @@ def get_colocates_matches(document, start_word, end_word, window=0):
     :type start_word: str or unicode
     :param end_word: End_word colocate
     :type end_word: str or unicode
-    :return: list of dicts
+    :return: List of dicts
     :rtype: list(dict)
     """
     start_page = None

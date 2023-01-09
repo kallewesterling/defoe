@@ -69,7 +69,7 @@ class Document(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: query result or None if the object represents an
+        :return: Query result or None if the object represents an
             empty document or any errors arose
         :rtype: Optional[str]
         """

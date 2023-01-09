@@ -246,7 +246,7 @@ class Document(object):
         """
         Iterate over the ``Document``'s HPOS and VPOS font words by ``Page``.
 
-        :return: page, hpos_vpos_font_words
+        :return: Page, hpos_vpos_font_words
         :rtype: Iterator[tuple[defoe.nlsArticles.page.Page, str]]
         """
         for page in self:
@@ -257,7 +257,7 @@ class Document(object):
         """
         Iterate over ``Document``'s word qualities by ``Page``.
 
-        :return: page and wc
+        :return: Page and wc
         :rtype: Iterator[tuple[defoe.nlsArticles.page.Page, str]]
         """
         for page in self:
@@ -290,7 +290,7 @@ class Document(object):
         """
         Iterate over the ``Document``'s strings.
 
-        :return: string
+        :return: String
         :rtype: Iterator[str]
         """
         for _, string in self.scan_strings():
@@ -300,7 +300,7 @@ class Document(object):
         """
         Iterate over the ``Document``'s words.
 
-        :return: word
+        :return: Word
         :rtype: Iterator[str]
         """
         for _, word in self.scan_words():
@@ -310,7 +310,7 @@ class Document(object):
         """
         Iterate over the ``Document``'s header_left_words.
 
-        :return: word
+        :return: Word
         :rtype: Iterator[str]
         """
         for _, header_left_word in self.scan_header_left_words():
@@ -320,7 +320,7 @@ class Document(object):
         """
         Iterate over the ``Document``'s header_right_words.
 
-        :return: word
+        :return: Word
         :rtype: Iterator[str]
         """
         for _, header_right_word in self.scan_header_right_words():
@@ -330,7 +330,7 @@ class Document(object):
         """
         Iterate over the ``Document``'s HPOS and VPOS font words.
 
-        :return: hpos and vpos of each word
+        :return: Hpos and vpos of each word
         :rtype: Iterator[str]
         """
         for _, hpos_vpos_font_word in self.scan_hpos_vpos_font_words():

@@ -20,7 +20,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: total size of document files in bytes
+    :return: Total size of document files in bytes
     :rtype: dict
     """
 

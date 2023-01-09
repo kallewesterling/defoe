@@ -11,7 +11,7 @@ def filename_to_object(
 
     :param filename: Filename
     :type filename: str
-    :return: tuple of form (Archive, None) or (filename, error message),
+    :return: Tuple of form (Archive, None) or (filename, error message),
         if there was an error creating Archive
     :rtype: tuple(defoe.books.archive.Archive | str, str)
     """

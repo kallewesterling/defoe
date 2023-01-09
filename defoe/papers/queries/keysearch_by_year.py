@@ -46,7 +46,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: number of occurrences of keywords grouped by year
+    :return: Number of occurrences of keywords grouped by year
     :rtype: dict
     """
 

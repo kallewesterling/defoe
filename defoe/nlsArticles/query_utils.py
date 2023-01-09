@@ -36,7 +36,7 @@ def get_pages_matches_no_prep(title, edition, archive, filename, text, keysenten
     If more than one keyword occurs on a page, there will be one tuple
     per keyword.
 
-    :return: list of tuples
+    :return: List of tuples
     """
 
     matches = []
@@ -70,7 +70,7 @@ def get_page_matches(document, keywords, preprocess_type=PreprocessWordType.NORM
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
+    :return: List of tuples
     :rtype: list(tuple)
     """
 
@@ -106,7 +106,7 @@ def get_document_keywords(
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: sorted list of keywords that occur within article
+    :return: Sorted list of keywords that occur within article
     :rtype: list(str or unicode)
     """
 
@@ -158,7 +158,7 @@ def calculate_words_within_dictionary(
     :type page: defoe.nls.page.Page
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: matches
+    :return: Matches
     :rtype: list(str or unicode)
     """
 
@@ -191,7 +191,7 @@ def calculate_words_confidence_average(page):
     :type page: defoe.nls.page.Page
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
-    :return: matches
+    :return: Matches
     :rtype: list(str or unicode)
     """
 
@@ -216,7 +216,7 @@ def get_page_as_string(page, preprocess_type=PreprocessWordType.LEMMATIZE):
     :param preprocess_type: How words should be preprocessed
     (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: page words as a string
+    :return: Page words as a string
     :rtype: string or unicode
     """
 
@@ -299,7 +299,7 @@ def clean_headers_page_as_string(page):
 
     :param page: Page
     :type page: defoe.nls.Page
-    :return: clean page words as a string
+    :return: Clean page words as a string
     :rtype: string or unicode
     """
 
@@ -330,7 +330,7 @@ def filter_terms_page(page, defoe_path, os_type):
     Discovering the TERMS in the leftmost side of each colum.
     :param page: Page
     :type page: defoe.nls.Page
-    :return: clean page words as a string
+    :return: Clean page words as a string
     :rtype: string or unicode
     """
 
@@ -622,7 +622,7 @@ def get_text_keyword_idx(text, keywords):
     :type article: string
     :param keywords: Keywords
     :type keywords: list(str or unicode)
-    :return: sorted list of keywords and their indices
+    :return: Sorted list of keywords and their indices
     :rtype: list(tuple(str or unicode, int))
     """
     text_list = text.split()
@@ -647,7 +647,7 @@ def get_concordance(text, keyword, idx, window):
     :type idx: int
     :window: number of words to the right and left
     :type: int
-    :return: concordance
+    :return: Concordance
     :rtype: list(str or unicode)
     """
     text_list = text.split()

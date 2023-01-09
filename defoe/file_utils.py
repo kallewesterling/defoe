@@ -66,7 +66,7 @@ def load_content(module: ModuleType, *name: str) -> str:
     :type module: module
     :param name: File name components, can be provided as positional arguments
     :type name: str
-    :return: file content
+    :return: File content
     :rtype: str
     """
     with open_file(module, *name) as f:

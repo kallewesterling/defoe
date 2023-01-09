@@ -22,7 +22,7 @@ def do_query(documents, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: unique namespaces and frequencies
+    :return: Unique namespaces and frequencies
     :rtype: dict
     """
 
@@ -39,7 +39,7 @@ def get_namespaces(document):
 
     :param document: Defoe.generic_xml.document.Document
     :type document: defoe.generic_xml.document.Document
-    :return: list of (URL, 1) for each namespace URL in the
+    :return: List of (URL, 1) for each namespace URL in the
     document
     :rtype: list(tuple(str or unicode, 1))
     """

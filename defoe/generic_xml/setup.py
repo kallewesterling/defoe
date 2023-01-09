@@ -12,7 +12,7 @@ def filename_to_object(
 
     :param filename: Filename
     :type filename: str
-    :return: tuple of form (Document, None) or (filename, error message),
+    :return: Tuple of form (Document, None) or (filename, error message),
         if there was an error creating Document
     :rtype: tuple(defoe.generic_xml.document.Document | str, str)
     """

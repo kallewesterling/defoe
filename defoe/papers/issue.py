@@ -102,7 +102,7 @@ class Issue(object):
 
         :param query: XPath query
         :type query: lxml.etree.XPath
-        :return: list of query results or an empty list if the object
+        :return: List of query results or an empty list if the object
             represents an empty document
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """

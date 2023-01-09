@@ -319,7 +319,7 @@ class Page(object):
         """
         Gets all words in page and contatenates together using ' ' as
         delimiter.
-        :return: content
+        :return: Content
         :rtype: str
         """
         return " ".join(self.words)

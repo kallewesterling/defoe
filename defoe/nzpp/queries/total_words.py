@@ -23,7 +23,7 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: total number of articles and words
+    :return: Total number of articles and words
     :rtype: dict
     """
 

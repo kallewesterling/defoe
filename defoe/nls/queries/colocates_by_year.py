@@ -55,7 +55,7 @@ def do_query(archives, config_file=None, logger=None):
     :type config_file: str or unicode
     :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on documents in which keywords occur grouped
+    :return: Information on documents in which keywords occur grouped
     by year
     :rtype: dict
     """
@@ -135,7 +135,7 @@ def get_colocates_matches(document, start_word, end_word, window=0):
     :type start_word: str or unicode
     :param end_word: End_word colocate
     :type end_word: str or unicode
-    :return: list of dicts
+    :return: List of dicts
     :rtype: list(dict)
     """
     start_page = None

@@ -40,7 +40,7 @@ def check_word(word, lst, fuzzy=False) -> bool:
     """
     Fuzzy/non-fuzzy check of word against a list.
 
-    :return: boolean determining whether a word exists in a list
+    :return: Boolean determining whether a word exists in a list
     :rtype: bool
     """
 
@@ -65,7 +65,7 @@ def get_word_data(
     """
     Combines data from a tb.location object, a Document, its article, and TextBlock.
 
-    :return: a WordLocation object that describes the word's data in-depth.
+    :return: A WordLocation object that describes the word's data in-depth.
     :rtype: defoe.fmp.query_utils.WordLocation
     """
 
@@ -218,7 +218,7 @@ def do_query(
     :type config_file: str
     :param logger: Logger
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on documents in which keywords occur grouped
+    :return: Information on documents in which keywords occur grouped
     by word
     :rtype: dict
     """

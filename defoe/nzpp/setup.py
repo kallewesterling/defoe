@@ -13,7 +13,7 @@ def filename_to_object(filename):
 
     :param filename: Filename
     :type filename: str or unicode
-    :return: tuple of form (Articles, None) or (filename, error message),
+    :return: Tuple of form (Articles, None) or (filename, error message),
     if there was an error creating Articles
     :rtype: tuple(defoe.nzpp.articles.Articles | str or unicode, str
     or unicode)
