@@ -88,7 +88,7 @@ def extract_preprocess_word_type(
     :return: word preprocessing type
     :rtype: defoe.query_utils.PreprocessWordType
     :raises: ValueError if "preprocess" is not one of
-    none|normalize|stem|lemmatize
+        none|normalize|stem|lemmatize
     """
     if "preprocess" not in config:
         preprocess_type = default
@@ -259,7 +259,7 @@ def stem(word: str) -> str:
     book, looked - look). The main two algorithms are:
 
     - Porter stemming algorithm: removes common morphological and inflexional
-    endings from words, used here (nltk.stem.PorterStemmer).
+        endings from words, used here (nltk.stem.PorterStemmer).
     - Lancaster stemming algorithm: a more aggressive stemming algorithm.
 
     Like lemmatization, stemming reduces inflectional forms to a common base
@@ -271,7 +271,10 @@ def stem(word: str) -> str:
     :rtype word: str
     """
 
-    # TODO: If we set this on module level instead, does that save memory, i.e. speed?
+    """
+    TODO: If we set this on module level instead, does that save memory
+    (=speed)?
+    """
     stemmer = PorterStemmer()
 
     return stemmer.stem(word)
@@ -293,7 +296,10 @@ def lemmatize(word: str) -> str:
     :rtype word: str
     """
 
-    # TODO: If we set this on module level instead, does that save memory, i.e. speed?
+    """
+    TODO: If we set this on module level instead, does that save memory
+    (=speed)?
+    """
     lemmatizer = WordNetLemmatizer()
 
     return lemmatizer.lemmatize(word)
@@ -445,7 +451,7 @@ def serialize_spacy(
     :param text: The text for which you want to create a
         ``spacy.tokens.doc.Doc`` which will be serialized through the function
     :type text: str
-    Language model to apply, defaults to ``en_core_web_sm``
+    :param lang_model: Language model to apply, defaults to ``en_core_web_sm``
     :type lang_model: str
     :return: A list consisting of two bytes values: one for the SpaCy
         container for accessing linguistic annotations, the other for the

@@ -64,5 +64,28 @@ html_static_path = ["_static"]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "lxml": ("https://lxml.de/apidoc", None),
-    # "spacy": ("https://spacy.io/", None), # TODO: Can we link to SpaCy's docs?
+    # TODO: Can we link to SpaCy's docs?
+    # "spacy": ("https://spacy.io/", None),
 }
+
+# List of zero or more Sphinx-specific warning categories to be squelched (i.e.,
+# suppressed, ignored).
+suppress_warnings = [
+    # FIXME: *THIS IS TERRIBLE.* Generally speaking, we do want Sphinx to
+    # inform us about cross-referencing failures. Remove this hack entirely
+    # after Sphinx resolves this open issue:
+    #    https://github.com/sphinx-doc/sphinx/issues/4961
+    # Squelch mostly ignorable warnings resembling:
+    #     WARNING: more than one target found for cross-reference 'Archive':
+    #     defoe.books.archive.Archive, defoe.fmp.archive.Archive,
+    #     defoe.nls.archive.Archive, defoe.nlsArticles.archive.Archive
+    #
+    # Sphinx currently emits many of these warnings against our documentation.
+    # All of these warnings appear to be ignorable. Although we could
+    # explicitly squelch *SOME* of these warnings by canonicalizing relative
+    # to absolute references in docstrings, Sphinx emits still others of these
+    # warnings when parsing PEP-compliant type hints via static analysis.
+    # Since those hints are actual hints that *CANNOT* by definition be
+    # canonicalized, our only recourse is to squelch warnings altogether.
+    "ref.python",
+]

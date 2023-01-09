@@ -206,7 +206,8 @@ class Page(object):
     @property
     def areas(self) -> list[Area]:
         """
-        Returns a list of the ``defoe.fmp.page.Page``'s :class:`defoe.fmp.area.Area` objects.
+        Returns a list of the ``defoe.fmp.page.Page``'s
+        :class:`defoe.fmp.area.Area` objects.
 
         (Calls :func:`~defoe.fmp.document.Document.get_areas_by_page_code`
         with the current ``defoe.fmp.page.Page``'s code as its argument)
@@ -239,8 +240,8 @@ class Page(object):
     @property
     def words(self) -> list[str]:
         """
-        Gets all the words in the ``defoe.fmp.page.Page``. These are then saved in an
-        attribute, so the words are only retrieved once.
+        Gets all the words in the ``defoe.fmp.page.Page``. These are then
+        saved in an attribute, so the words are only retrieved once.
 
         :return: List of words on ``defoe.fmp.page.Page``
         :rtype: list[str]
@@ -252,8 +253,9 @@ class Page(object):
     @property
     def word_confidences(self):
         """
-        Returns all the word confidences in the ``defoe.fmp.page.Page``. These are then saved
-        in an attribute, so the word confidences are only retrieved once.
+        Returns all the word confidences in the ``defoe.fmp.page.Page``. These
+        are then saved in an attribute, so the word confidences are only
+        retrieved once.
 
         :return: List of word confidences on ``defoe.fmp.page.Page``
         :rtype: list[float]
@@ -272,9 +274,9 @@ class Page(object):
     @property
     def character_confidences(self) -> list[float]:
         """
-        Returns all the character confidences in the ``defoe.fmp.page.Page``. These are then
-        saved in an attribute, so the character confidences are only retrieved
-        once.
+        Returns all the character confidences in the ``defoe.fmp.page.Page``.
+        These are then saved in an attribute, so the character confidences are
+        only retrieved once.
 
         :return: List of character confidences on ``defoe.fmp.page.Page``
         :rtype: list[float]
@@ -295,8 +297,8 @@ class Page(object):
     @property
     def strings(self) -> list:
         """
-        Returns all strings in the ``defoe.fmp.page.Page``. These are then saved in an
-        attribute, so the strings are only retrieved once.
+        Returns all strings in the ``defoe.fmp.page.Page``. These are then
+        saved in an attribute, so the strings are only retrieved once.
 
         :return: List of strings on ``defoe.fmp.page.Page``
         :rtype: list[lxml.etree._ElementStringResult]
@@ -308,8 +310,8 @@ class Page(object):
     @property
     def textblock_ids(self) -> list:
         """
-        Returns all strings in the ``defoe.fmp.page.Page``. These are then saved in an
-        attribute, so the strings are only retrieved once.
+        Returns all strings in the ``defoe.fmp.page.Page``. These are then
+        saved in an attribute, so the strings are only retrieved once.
 
         :return: List of strings on ``defoe.fmp.page.Page``
         :rtype: list[lxml.etree._ElementStringResult]
@@ -321,8 +323,9 @@ class Page(object):
     @property
     def graphics(self) -> list:
         """
-        Returns all graphical elements in the ``defoe.fmp.page.Page``. These are then saved
-        in an attribute, so the graphical elements are only retrieved once.
+        Returns all graphical elements in the ``defoe.fmp.page.Page``. These
+        are then saved in an attribute, so the graphical elements are only
+        retrieved once.
 
         :return: List of graphical elements on ``defoe.fmp.page.Page``
         :rtype: list[lxml.etree._Element]
@@ -334,8 +337,8 @@ class Page(object):
     @property
     def content(self) -> str:
         """
-        Returns all the words in the ``defoe.fmp.page.Page``, concatenated together using ' '
-        as delimiter.
+        Returns all the words in the ``defoe.fmp.page.Page``, concatenated
+        together using ' ' as delimiter.
 
         :return: Content
         :rtype: str
@@ -371,7 +374,8 @@ class Page(object):
 
     def get_image_path(self, document_code=None, page_code=None):
         """
-        Returns the path to a given ``defoe.fmp.document.Document``'s ``defoe.fmp.page.Page``'s image.
+        Returns the path to a given ``defoe.fmp.document.Document``'s
+        ``defoe.fmp.page.Page``'s image.
         (Calls :func:`~defoe.fmp.archive.Archive.get_image_path`)
 
         :param document_code: Page file code,
@@ -466,7 +470,8 @@ class Page(object):
         :type token: Union[str, list]
         :param normalise: See :func:`~defoe.fmp.textblock.TextBlock.match`
         :type normalise: bool, optional
-        :param include_numbers: See :func:`~defoe.fmp.textblock.TextBlock.match`
+        :param include_numbers: See
+            :func:`~defoe.fmp.textblock.TextBlock.match`
         :type include_numbers: bool, optional
         :param lemmatise: See :func:`~defoe.fmp.textblock.TextBlock.match`
         :type lemmatise: bool, optional

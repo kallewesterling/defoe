@@ -111,6 +111,7 @@ class Document(object):
         self.articlesParts = self.locators
         self._get_parts_coord = self.parts_coord
         self.art_id_lookup = self.article_id_lookup
+        self.struct_link = self.struct_links
 
         # Deprecated
         #
@@ -202,23 +203,18 @@ class Document(object):
         return self._date
 
     @property
-    def articles(self) -> dict:
+    def articles(self) -> tuple[str, list[Optional[TextBlock]]]:
         """
         Iterate over the articles in the document.
 
-        :return: a dictionary per page with all the articles. Each article
-            is conformed by one or more textblocks
-        :rtype: Dictionary of articles.
+        :return: A tuple consisting of the article ID and a list of the
+            article's available textblocks.
+        :rtype: tuple[str, list[Optional[TextBlock]]]
         """
         for art_id, areas in self._article_id_to_area_lookup.items():
-            yield {
-                art_id: [area.textblock for area in areas if area.textblock]
-            }
+            yield art_id, [area.textblock for area in areas if area.textblock]
 
-        # TODO: Yield/return?
-        return self._articles
-
-    def scan_strings(self) -> Iterator[tuple]:
+    def scan_strings(self) -> Iterator[tuple[Page, etree._Element]]:
         """
         Iterate over strings in pages.
 
@@ -229,7 +225,7 @@ class Document(object):
             for string in page.strings:
                 yield page, string
 
-    def scan_textblocks(self) -> Iterator[tuple]:
+    def scan_textblocks(self) -> Iterator[tuple[Page, TextBlock]]:
         """
         Iterate over textblocks in pages
 
@@ -241,7 +237,7 @@ class Document(object):
             for tb in page.tb:
                 yield page, tb
 
-    def scan_words(self) -> Iterator[tuple]:
+    def scan_words(self) -> Iterator[tuple[Page, str]]:
         """
         Iterate over words in pages.
 
@@ -252,7 +248,7 @@ class Document(object):
             for word in page.words:
                 yield page, word
 
-    def scan_page_confidences(self) -> Iterator[tuple]:
+    def scan_page_confidences(self) -> Iterator[tuple[Page, str]]:
         """
         Iterate over page confidences in pages.
 
@@ -263,7 +259,7 @@ class Document(object):
         for page in self:
             yield page, page.page_confidence
 
-    def scan_word_confidences(self) -> Iterator[tuple]:
+    def scan_word_confidences(self) -> Iterator[tuple[Page, str]]:
         """
         Iterate over words' word confidences in pages.
 
@@ -275,7 +271,7 @@ class Document(object):
             for wc in page.wc:
                 yield page, wc
 
-    def scan_character_confidences(self) -> Iterator[tuple]:
+    def scan_character_confidences(self) -> Iterator[tuple[Page, str]]:
         """
         Iterate over characters qualities in pages.
 
@@ -287,7 +283,7 @@ class Document(object):
             for cc in page.cc:
                 yield page, cc
 
-    def scan_graphics(self) -> Iterator[tuple]:
+    def scan_graphics(self) -> Iterator[tuple[Page, etree._Element]]:
         """
         Iterate over graphical elements in pages.
 
@@ -372,7 +368,7 @@ class Document(object):
 
     def get_page(self, code: str) -> Page:
         """
-        Given a page code, return a new Page object.
+        Given a page code, return a new ``defoe.fmp.page.Page`` object.
 
         :param code: Page code
         :type code: str
@@ -476,9 +472,10 @@ class Document(object):
     @property
     def parts_coord(self) -> dict:
         """
-        Parse the structMap Physical information
+        Parse the structMap Physical information.
+
         :return: dictionary with the ID of each part as a keyword. For each
-        part, it returns the shape and coord.
+            part, it returns the shape and coord.
         :rtype: dictionary
         """
         if not self._parts_coord:
@@ -492,10 +489,12 @@ class Document(object):
     @property
     def articles_ids(self) -> list:
         """
-        Parse the structMap Logical information.
+        Returns a different view of the logical structural map of the METS
+        document (see :func:`~defoe.fmp.document.Document.struct_map_logical`)
+        where the article IDs are picked out (the ones starting with ``art``)
+        and returned as a list.
 
-        :return: list of articlesID that conforms each document/issue. It only
-            returns the articles ID, no other type of elements.
+        :return: List of article IDs available in the document.
         :rtype: list
         """
         try:
@@ -518,34 +517,41 @@ class Document(object):
             )
         return self._articles_ids
 
-    @staticmethod
-    def _clean_id(string):
-        return PART_ID.sub("", string)
-
     @property
     def page_parts(self) -> dict:
         """
-        Parses the structLink information from the METS document.
+        Returns a different view of the structural links of the METS document
+        (see  :func:`~defoe.fmp.document.Document.struct_links`)) where
+        article IDs and page areas of the document are provided back as keys
+        in a dictionary, and the type of area (for article IDs) and the area's
+        designated string representation (for page areas) are provided as
+        values.
+
         :return: A dictionary with parts/textblocks IDs as keys, and page and
-        area as values.
+            area as values.
         :rtype: dict
         """
         return {
             self._clean_id(link.values()[0]): link.values()[1]
-            for x in self.struct_link
+            for x in self.struct_links
             for link in x.findall("mets:smLocatorLink", NAMESPACES)
         }
 
     @property
     def locators(self) -> dict:
         """
-        Parses the structLink information from the METS document.
+        Returns a different view of the structural links of the METS document
+        (see  :func:`~defoe.fmp.document.Document.struct_links`)) where the
+        article IDs from the document are provided as keys and a list of their
+        pertaining page areas are provided as string representations of their
+        IDs as values.
+
         :return: A dictionary with articles IDs as keys. And per article ID, we
-        have a list of parts/textblocks IDs that conform each article.
+            have a list of parts/textblocks IDs that conform each article.
         :rtype: dict
         """
         locators = {}
-        for x in self.struct_link:
+        for x in self.struct_links:
             for link in x.findall("mets:smLocatorLink", NAMESPACES):
                 locator = self._clean_id(link.values()[0])
                 if not locator.startswith("pa") and not locator.startswith(
@@ -556,6 +562,250 @@ class Document(object):
                 else:
                     locators[current].append(locator)
         return locators
+
+    @property
+    def struct_map_physical(self) -> etree._Element:
+        """
+        Returns the METS document's "physical structural map", which lists the
+        directories and files in the objects directory as they are laid out on
+        the disk.
+
+        If you want to preview the contents of the physical structural map of
+        the document, given that you already have a ``document`` assigned:
+
+        .. code-block:: python
+
+            from lxml import etree
+
+            # Extract as byte-encoded string
+            string = etree.tostring(document.struct_map_physical)
+
+            print(string.decode("utf-8"))
+
+        :return: The METS document's "physical structural map"  as XML element
+        :rtype: lxml.etree._Element
+        """
+        return self.tree.find('mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES)
+
+    @property
+    def struct_map_logical(self) -> etree._Element:
+        """
+        Returns the METS document's "logical structural map", an outline of
+        the hierarchical structure for the digital library object, and links
+        the elements of that structure to content files and metadata that
+        pertain to each element.
+
+        If you want to preview the contents of the physical structural map of
+        the document, given that you already have a ``document`` assigned:
+
+        .. code-block:: python
+
+            from lxml import etree
+
+            # Extract as byte-encoded string
+            string = etree.tostring(document.struct_map_logical)
+
+            print(string.decode("utf-8"))
+
+        :return: The METS document's "logical structural map" as XML element
+        :rtype: lxml.etree._Element
+        """
+        return self.tree.find('mets:structMap[@TYPE="LOGICAL"]', NAMESPACES)
+
+    @property
+    def struct_links(self) -> etree._Element:
+        """
+        Returns the METS document's structural links, which allow METS
+        creators to record the existence of hyperlinks between nodes in the
+        hierarchy outlined in the structural map.
+
+        Usage, if you want to preview the contents of the physical structural
+        map of the document, given that you already have a ``document``
+        assigned:
+
+        .. code-block:: python
+
+            from lxml import etree
+
+            # Extract as byte-encoded string
+            string = etree.tostring(document.struct_links)
+
+            print(string.decode("utf-8"))
+
+        :return: The METS document's structural links as XML element
+        :rtype: lxml.etree._Element
+        """
+        return self.tree.find("mets:structLink", NAMESPACES)
+
+    @property
+    def pages_metadata(self) -> dict:
+        """
+        Returns a different view of the physical structural map of the METS
+        document (see :func:`~defoe.fmp.document.Document.struct_map_physical`)
+        where each ``div`` in the structural map are divided into the pages in
+        the document and returned as a dictionary, which can be indexed into
+        with the help of each page code.
+
+        :return: Dictionary with page code as key and each page's metadata as
+            XML element as values
+        :rtype: dict
+        """
+        try:
+            self._pages_metadata
+        except AttributeError:
+            self._pages_metadata = None
+
+        if not self._pages_metadata:
+            self._pages_metadata = {
+                y.values()[1].zfill(4): y
+                for x in self.struct_map_physical
+                for y in x.findall('mets:div[@TYPE="page"]', NAMESPACES)
+            }
+
+        return self._pages_metadata
+
+    @property
+    def article_id_lookup(self) -> dict:
+        """
+        Returns a different view of the structural links of the METS document
+        (see  :func:`~defoe.fmp.document.Document.struct_links`)) where the
+        links are reorganised into a dictionary with the page area identifier
+        as key and the article ID to which the page area belongs as key. Can
+        thus easily be used to look up the article ID by page area ID.
+
+        :return: Dictionary with the page area identifier as key and the
+            article ID to which the page area belongs as key.
+        :rtype: dict
+        """
+        if not self._article_id_lookup:
+            _parts = {}
+            for link_group in self.struct_links:
+                links = link_group.findall("mets:smLocatorLink", NAMESPACES)
+                _tmp = []
+
+                for link in links:
+                    link_id, *_ = link.values()
+                    link_id = self._clean_id(link_id)
+                    _tmp.append(link_id)
+
+                _parts[_tmp[0]] = _tmp[1:]
+
+            self._article_id_lookup = {}
+            for art_id, lst in _parts.items():
+                for pa_id in lst:
+                    self._article_id_lookup[pa_id] = art_id
+
+        return self._article_id_lookup
+
+    @property
+    def page_codes(self) -> list[str]:
+        """
+        Returns a list of all page codes that belong to the
+        ``defoe.fmp.document.Document``.
+
+        :return: List of all the ``defoe.fmp.document.Document``'s page codes
+        :rtype: list[str]
+        """
+        return list(self.pages_metadata.keys())
+
+    def _select_metadata(self, selected_page_code=None) -> dict:
+        if not selected_page_code:
+            return self.pages_metadata
+        return {selected_page_code: self.pages_metadata[selected_page_code]}
+
+    def scan_areas(
+        self, selected_page_code: Optional[str] = None
+    ) -> Iterator[Area]:
+        """
+        Iterate over areas in ``defoe.fmp.document.Document``. The iterator
+        can be restricted to a given page code by providing it a
+        ``selected_page_code`` parameter.
+
+        Usage, given that you already have a ``document`` assigned:
+
+        .. code-block:: python
+            for area in document.scan_areas(selected_page_code="0001"):
+                area.tokens
+
+        :param selected_page_code: A page file code if you are only requesting
+            one page's areas
+        :type selected_page_code: str, optional
+        :return: Each ``defoe.fmp.area.Area`` that belongs to the
+            ``defoe.fmp.document.Document``
+        :rtype: Iterator[:class:`defoe.fmp.area.Area`]
+        """
+        metadata = self._select_metadata(selected_page_code)
+
+        for page_code, page_metadata in metadata.items():
+            for area in page_metadata.findall("mets:div", NAMESPACES):
+                for file_pointer in area.find("mets:fptr", NAMESPACES):
+                    yield Area(self, page_code, area, file_pointer)
+
+    def get_areas_by_page_code(
+        self, selected_page_code: Optional[str] = None
+    ) -> dict:
+        """
+        Returns a list of areas (see :class:`defoe.fmp.area.Area`) for the
+        each of the document's page/s, structured as a dictionary. If a
+        ``selected_page_code`` is set, the function will only return the areas
+        for the given page code.
+
+        :param selected_page_code: A page file code if you are only requesting
+            one page's areas
+        :type selected_page_code: str, optional
+        :return: Dictionary with page codes as keys and each
+            ``defoe.fmp.page.Page``'s areas as a list as value for each key.
+        :rtype: dict
+        """
+        metadata = self._select_metadata(selected_page_code)
+        page_codes = list(metadata.keys())
+
+        areas_by_page_code = {page_code: [] for page_code in page_codes}
+
+        for page_code in page_codes:
+            page = self.get_page(page_code)
+            for area in self.scan_areas(page_code):
+                area._page = page
+                areas_by_page_code[page_code].append(area)
+
+        return areas_by_page_code
+
+    @property
+    def areas(self) -> dict:
+        """
+        Shortcut property for running the standard setup of
+        :func:`~defoe.fmp.document.Document.get_areas_by_page_code`
+
+        :return: Dictionary with page codes as keys and each
+            ``defoe.fmp.page.Page``'s areas as a list as value for each key.
+        :rtype: dict
+        """
+        if not self._areas:
+            self._areas = self.get_areas_by_page_code()
+        return self._areas
+
+    @property
+    def _article_id_to_area_lookup(self) -> dict:
+        if not self._area_lookup:
+            self._area_lookup = {
+                y.id: y for x in self.areas.values() for y in x
+            }
+
+        if not self._article_id_to_area_lookup_obj:
+            self._article_id_to_area_lookup_obj = {
+                art_id: [
+                    self._area_lookup[k]
+                    for k, v in self.article_id_lookup.items()
+                    if v == art_id
+                ]
+                for art_id in self.articles_ids
+            }
+
+        return self._article_id_to_area_lookup_obj
+
+    @staticmethod
+    def _clean_id(string):
+        return PART_ID.sub("", string)
 
     def _get_struct_link(self) -> tuple[dict, dict]:
         """
@@ -687,7 +937,7 @@ class Document(object):
 
     def __getitem__(self, index: int) -> Page:
         """
-        Given a page index, return a new Page object.
+        Given a page index, return a new ``defoe.fmp.page.Page`` object.
 
         :param index: page index
         :type index: int
@@ -698,187 +948,10 @@ class Document(object):
 
     def __iter__(self) -> Iterator[Page]:
         """
-        Iterate over page codes, returning new Page objects.
+        Iterate over page codes, returning new ``defoe.fmp.page.Page`` objects.
 
         :return: Page object
         :rtype: defoe.fmp.page.Page
         """
         for page_code in self.page_codes:
             yield self.get_page(page_code)
-
-    @property
-    def struct_map_physical(self) -> etree._Element:
-        """
-        TODO
-
-        :return: TODO
-        :rtype: lxml.etree._Element
-        """
-        return self.tree.find('mets:structMap[@TYPE="PHYSICAL"]', NAMESPACES)
-
-    @property
-    def struct_map_logical(self) -> etree._Element:
-        """
-        TODO
-
-        :return: TODO
-        :rtype: lxml.etree._Element
-        """
-        return self.tree.find('mets:structMap[@TYPE="LOGICAL"]', NAMESPACES)
-
-    @property
-    def struct_link(self) -> etree._Element:
-        """
-        TODO
-
-        :return: TODO
-        :rtype: lxml.etree._Element
-        """
-        return self.tree.find("mets:structLink", NAMESPACES)
-
-    @property
-    def pages_metadata(self) -> dict:
-        """
-        TODO
-
-        :return: TODO
-        :rtype: dict
-        """
-        try:
-            self._pages_metadata
-        except AttributeError:
-            self._pages_metadata = None
-
-        if not self._pages_metadata:
-            self._pages_metadata = {
-                y.values()[1].zfill(4): y
-                for x in self.struct_map_physical
-                for y in x.findall('mets:div[@TYPE="page"]', NAMESPACES)
-            }
-
-        return self._pages_metadata
-
-    @property
-    def article_id_lookup(self) -> dict:
-        """
-        TODO
-
-        :return: TODO
-        :rtype: dict
-        """
-        if not self._article_id_lookup:
-            _parts = {}
-            for link_group in self.struct_link:
-                links = link_group.findall("mets:smLocatorLink", NAMESPACES)
-                _tmp = []
-
-                for link in links:
-                    link_id, *_ = link.values()
-                    link_id = self._clean_id(link_id)
-                    _tmp.append(link_id)
-
-                _parts[_tmp[0]] = _tmp[1:]
-
-            self._article_id_lookup = {}
-            for art_id, lst in _parts.items():
-                for pa_id in lst:
-                    self._article_id_lookup[pa_id] = art_id
-
-        return self._article_id_lookup
-
-    @property
-    def page_codes(self) -> list[str]:
-        """
-        Returns a list of all page codes that belong to the
-        ``defoe.fmp.document.Document``.
-
-        :return: List of all the ``defoe.fmp.document.Document``'s page codes
-        :rtype: list[str]
-        """
-        return list(self.pages_metadata.keys())
-
-    def _select_metadata(self, selected_page_code=None) -> dict:
-        if not selected_page_code:
-            return self.pages_metadata
-        return {selected_page_code: self.pages_metadata[selected_page_code]}
-
-    def scan_areas(
-        self, selected_page_code: Optional[str] = None
-    ) -> Iterator[Area]:
-        """
-        Iterate over areas in ``defoe.fmp.document.Document``.
-
-        :param selected_page_code: TODO
-        :type selected_page_code: str, optional
-        :return: Each ``defoe.fmp.area.Area`` that belongs to the
-            ``defoe.fmp.document.Document``
-        :rtype: Iterator[:class:`defoe.fmp.area.Area`]
-        """
-        metadata = self._select_metadata(selected_page_code)
-
-        for page_code, page_metadata in metadata.items():
-            for area in page_metadata.findall("mets:div", NAMESPACES):
-                for file_pointer in area.find("mets:fptr", NAMESPACES):
-                    yield Area(self, page_code, area, file_pointer)
-
-    def get_areas_by_page_code(
-        self, selected_page_code: Optional[str] = None
-    ) -> dict:
-        """
-        Returns a list of areas (see :class:`defoe.fmp.area.Area`) for the
-        each of the document's page/s, structured as a dictionary. If a
-        ``selected_page_code`` is set, the function will only return the areas
-        for the given page code.
-
-        :param selected_page_code: A page file code if you are only requesting
-            one page's areas
-        :type selected_page_code: str, optional
-        :return: Dictionary with page codes as keys and each
-            ``defoe.fmp.page.Page``'s areas as a list as value for each key.
-        :rtype: dict
-        """
-        metadata = self._select_metadata(selected_page_code)
-        page_codes = list(metadata.keys())
-
-        areas_by_page_code = {page_code: [] for page_code in page_codes}
-
-        for page_code in page_codes:
-            page = self.get_page(page_code)
-            for area in self.scan_areas(page_code):
-                area._page = page
-                areas_by_page_code[page_code].append(area)
-
-        return areas_by_page_code
-
-    @property
-    def areas(self) -> dict:
-        """
-        Shortcut property for running the standard setup of
-        :func:`~defoe.fmp.document.Document.get_areas_by_page_code`
-
-        :return: Dictionary with page codes as keys and each
-            ``defoe.fmp.page.Page``'s areas as a list as value for each key.
-        :rtype: dict
-        """
-        if not self._areas:
-            self._areas = self.get_areas_by_page_code()
-        return self._areas
-
-    @property
-    def _article_id_to_area_lookup(self) -> dict:
-        if not self._area_lookup:
-            self._area_lookup = {
-                y.id: y for x in self.areas.values() for y in x
-            }
-
-        if not self._article_id_to_area_lookup_obj:
-            self._article_id_to_area_lookup_obj = {
-                art_id: [
-                    self._area_lookup[k]
-                    for k, v in self.article_id_lookup.items()
-                    if v == art_id
-                ]
-                for art_id in self.articles_ids
-            }
-
-        return self._article_id_to_area_lookup_obj
