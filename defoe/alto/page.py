@@ -24,17 +24,11 @@ class Page(object):
     """
 
     WORDS_XPATH = etree.XPath("//String/@CONTENT")
-    """ XPath query for String content """
     STRINGS_XPATH = etree.XPath("//String")
-    """ XPath query for String elements """
     IMAGES_XPATH = etree.XPath("//GraphicalElement")
-    """ XPath query for Graphical Element """
     PAGE_XPATH = etree.XPath("//Page")
-    """ XPath query for Page """
     WC_XPATH = etree.XPath("//String/@WC")
-    """ XPath query for Word Confidence  content """
     CC_XPATH = etree.XPath("//String/@CC")
-    """ XPath query for Character Confidence content """
 
     def __init__(self, document, code, source=None):
         """
