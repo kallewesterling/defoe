@@ -20,8 +20,8 @@ Get preprocessed concordance (also called details) of articles in which we have 
     - defoe_path: /lustre/home/sc048/rosaf4/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>:

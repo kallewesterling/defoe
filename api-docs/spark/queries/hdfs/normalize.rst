@@ -8,8 +8,7 @@ It uses HDFS data.
 - Query module: ``defoe.hdfs.queries.normalize``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 

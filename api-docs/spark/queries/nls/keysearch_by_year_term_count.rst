@@ -16,8 +16,8 @@ Count number of ocurrence keywords or keysentences appear and group by year
     - defoe_path: /lustre/home/sc048/rosaf4/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>:

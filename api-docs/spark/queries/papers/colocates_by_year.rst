@@ -1,5 +1,5 @@
 Get colocates and group by year
-==========================================================
+===============================
 
 - Both colocated words and words in documents are normalized, by removing all non-``a-z|A-Z`` characters.
 - Query module: ``defoe.papers.queries.colocates_by_year``
@@ -19,8 +19,7 @@ Get colocates and group by year
 
     - ``queries/stranger_danger.yml``
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 
@@ -36,8 +35,8 @@ Result format:
   <YEAR>:
     - ...
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
+
 Query over ``Part 1/0000164- The Courier and Argus/*/*/*.xml`` with ``queries/stranger_danger.yml``:
 
 ..  code-block:: yaml

@@ -1,4 +1,4 @@
-ALTO document queries
+ALTO Document Queries
 =========================
 
 British Library Books dataset and Find My Past dataset.
@@ -22,8 +22,8 @@ Colocated word searches:
 
 - [Get colocated words and group by year](./colocates_by_year.md)
 
-Contents
---------
+ALTO Document Queries Contents
+------------------------------
 
 .. toctree::
   :maxdepth: 1

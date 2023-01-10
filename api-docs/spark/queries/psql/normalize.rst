@@ -1,5 +1,5 @@
 Read data from ES, and perform the normalize query
-==========================================================
+==================================================
 
 Count total number of documents, pages and words per year. This can be useful if wanting to see how the average number of documents, pages and words change over time.
 It uses ES data.
@@ -7,8 +7,7 @@ It uses ES data.
 - Query module: ``defoe.es.queries.normalize``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 

@@ -13,8 +13,7 @@ Extract automatically the EB articles within a page as string to HDFS (as a CSV 
       - defoe_path: /home/rosa_filgueira_vicente/defoe/
       - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 

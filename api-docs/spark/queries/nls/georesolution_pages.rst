@@ -17,8 +17,8 @@ Identify the locations (using spaCy) per page and geo-resolve them (using the Ed
     - defoe_path: /home/rosa_filgueira_vicente/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
     - YEAR:

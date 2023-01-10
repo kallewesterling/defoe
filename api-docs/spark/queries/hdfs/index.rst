@@ -1,5 +1,5 @@
-HDFS document queries
-==========================================================
+HDFS Document Queries
+=====================
 
 General:
 
@@ -17,8 +17,8 @@ Key searches:
 
 **Important:** We recommend to read also the documentation for running [nls indivual queries](../nls_demo_examples/nls_demo_individual_queries.md#writing-and-reading-data-fromto-hdfs).
 
-Contents
---------
+HDFS Document Queries Contents
+------------------------------
 
 .. toctree::
   :maxdepth: 1

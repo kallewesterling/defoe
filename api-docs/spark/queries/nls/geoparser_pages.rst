@@ -15,8 +15,8 @@ Identify the locations per page and geo-resolve them using the Original Edinburg
     - defoe_path: /home/rosa_filgueira_vicente/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
     - YEAR:

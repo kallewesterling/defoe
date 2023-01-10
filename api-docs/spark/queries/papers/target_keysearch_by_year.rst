@@ -20,8 +20,8 @@ Count number of articles in which appear keywords or keysentences, filtering tho
     - defoe_path: /lustre/home/sc048/rosaf4/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>:

@@ -7,8 +7,8 @@ Defoe comes with a ``run_query.py`` script.
 
 TODO: Document ``run_query.py`` here.
 
-Contents
---------
+Support for Spark Contents
+--------------------------
 
 .. toctree::
   :maxdepth: 2

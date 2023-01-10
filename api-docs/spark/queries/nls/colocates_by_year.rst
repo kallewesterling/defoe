@@ -18,8 +18,7 @@ Get colocates and group by year
 
     - ``queries/stranger_danger.yml``
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 

@@ -4,8 +4,7 @@ Count total number of words
 -  Query module: ``defoe.alto.queries.total_words``
 -  Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 
@@ -31,8 +30,7 @@ Result format:
       $ grep \<String ALTO/*xml | wc -l
       4372
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over British Library Books ``1510_1699/000001143_0_1-20pgs__560409_dat.zip`` and ``1510_1699/000000874_0_1-22pgs__570785_dat.zip``:
 

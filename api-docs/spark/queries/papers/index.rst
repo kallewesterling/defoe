@@ -1,5 +1,5 @@
-Newspapers dataset queries
-==========================================================
+Newspapers Dataset Queries
+==========================
 
 British Library Newspapers dataset and Times Digital Archive dataset.
 
@@ -40,8 +40,8 @@ Old queries:
 - [Count number of times that each keyword appears for every article that has a target word in it and group by year](./depricated/target_and_keywords_count_by_year.md)
 - [Count number of articles in which there are occurences of keysentences and group by year](./depricated/keysentence_by_year.md)
 
-Contents
---------
+Newspapers Dataset Queries Contents
+-----------------------------------
 
 .. toctree::
   :maxdepth: 1

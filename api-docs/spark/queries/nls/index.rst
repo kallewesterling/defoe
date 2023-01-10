@@ -1,5 +1,5 @@
-NLS document queries
-==========================================================
+NLS Document Queries
+====================
 
 General:
 
@@ -47,8 +47,8 @@ Old queries:
 
 **Important:** We recommend to read also the documentation for running [nls indivual queries](../nls_demo_examples/nls_demo_individual_queries.md) and [nls aggregated queries](../nls_demo_examples/nls_demo_aggregated_queries.md).
 
-Contents
---------
+NLS Document Queries Contents
+-----------------------------
 
 .. toctree::
   :maxdepth: 1

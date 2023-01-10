@@ -1,5 +1,5 @@
-Papers Past New Zealand and Pacific ewspapers dataset queries
-=============================================================
+Papers Past New Zealand and Pacific Newspapers Dataset Queries
+==============================================================
 
 General:
 
@@ -12,9 +12,8 @@ Keyword searches:
 - [Count number of occurrences of keywords and group by year](./keyword_by_year.md)
 - [Get concordance for keywords and group by date](./keyword_concordance_by_date.md)
 
-Contents
---------
-
+Papers Past New Zealand and Pacific Newspapers Dataset Queries Contents
+-----------------------------------------------------------------------
 .. toctree::
   :maxdepth: 1
 

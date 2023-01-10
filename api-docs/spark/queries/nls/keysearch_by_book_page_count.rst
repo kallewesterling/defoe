@@ -16,8 +16,8 @@ Count number of pages in which each of keywords or keysentences appear and group
     - defoe_path: /lustre/home/sc048/rosaf4/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <BOOK>:

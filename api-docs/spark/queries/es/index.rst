@@ -1,5 +1,5 @@
-ES document queries
-==========================================================
+ES Document Queries
+===================
 
 General:
 
@@ -21,8 +21,8 @@ Geoparser queries:
 
 **Important:** We recommend to read also the documentation for [writing and reading data from/to ES](../nls_demo_examples/nls_demo_individual_queries.md#writing-and-reading-data-tofrom-elasticsearch-es).
 
-Contents
---------
+ES Document Queries Contents
+----------------------------
 
 .. toctree::
   :maxdepth: 1

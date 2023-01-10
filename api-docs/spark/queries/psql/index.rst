@@ -1,5 +1,5 @@
-PSQL queries
-==========================================================
+PSQL Queries
+=============
 
 General:
 
@@ -13,9 +13,8 @@ Key searches:.
 
 **Important:** We recommend to read also the documentation for [writing and reading data from/to PSQL](../nls_demo_examples/nls_demo_individual_queries.md#writing-and-reading-data-fromto-postgresql-database).
 
-Contents
---------
-
+PSQL Queries Contents
+---------------------
 .. toctree::
   :maxdepth: 1
 

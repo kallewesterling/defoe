@@ -4,8 +4,8 @@ Get measure of OCR quality for each page and group by year
 - Query module: ``defoe.alto.queries.ocr_quality_by_year``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>: [<QUALITY>, ...]

@@ -11,8 +11,8 @@ Count number of occurrences of keywords and group by word
     - ``queries/diseases.txt``
     - ``queries/hearts.txt``
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <WORD>:
@@ -21,8 +21,7 @@ Result format:
   <WORD>:
     - ...
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over British Library Books ``1510_1699/000001143_0_1-20pgs__560409_dat.zip`` and ``1510_1699/000000874_0_1-22pgs__570785_dat.zip`` with ``queries/hearts.txt``:
 

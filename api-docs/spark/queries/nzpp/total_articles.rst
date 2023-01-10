@@ -1,11 +1,10 @@
 Count total number of articles
-==========================================================
+===============================
 
 - Query module: ``defoe.nzpp.queries.total_articles``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 
@@ -22,8 +21,7 @@ Result format:
       $ grep \<result\> ~/data/nzpp/*xml | wc -l
       40
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over ``1.xml`` and ``2.xml``:
 

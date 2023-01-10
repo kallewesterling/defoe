@@ -4,15 +4,14 @@ Get measure of OCR quality for each article and group by year
 - Query module: ``defoe.papers.queries.ocr_quality_by_year``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>: [<QUALITY>, ...]
   ...
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over ``Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml`` and ``Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml``:
 

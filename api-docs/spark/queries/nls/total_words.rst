@@ -1,11 +1,10 @@
 Count total number of words
-==========================================================
+===========================
 
 - Query module: ``defoe.nls.queries.total_words``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 

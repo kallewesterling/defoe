@@ -1,10 +1,10 @@
-Spark-queries
-====================
+Spark Queries
+=============
 
-Defoe comes with a number of pre-defined Spark queries, which can be modified and customised.
+Defoe comes with a large number of pre-defined Spark queries, which can be modified and customised.
 
-Contents
---------
+Spark Queries Contents
+----------------------
 
 .. toctree::
   :maxdepth: 1

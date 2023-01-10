@@ -12,8 +12,7 @@ Count number of occurrences of keywords and group by year
     - ``queries/krakatoa.txt``
     - ``queries/prof.txt``
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 
@@ -23,8 +22,8 @@ Result format:
   <YEAR>:
     - ...
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
+
 Query over ``1.xml`` and ``2.xml`` with ``queries/hearts.txt``:
 
 ..  code-block:: yaml

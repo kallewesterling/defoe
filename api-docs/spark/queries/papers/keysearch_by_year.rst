@@ -16,8 +16,8 @@ Count number of articles in which appear keywords or keysentences and group by y
     - defoe_path: /lustre/home/sc048/rosaf4/defoe/
     - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>:

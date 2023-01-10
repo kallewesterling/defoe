@@ -1,13 +1,12 @@
 Normalize
-==========================================================
+==========
 
 Count total number of issues, articles and words per year. This can be useful if wanting to see how the average number of issues, articles and words change over time.
 
 - Query module: ``defoe.papers.queries.normalize``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 
@@ -37,8 +36,7 @@ Result format:
       $ grep \<wd Part\ 1/0000164-\ The\ Courier\ and\ Argus/1901/*/*xml | wc -l
       22502099
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over ``Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml`` and ``Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml``:
 

@@ -1,4 +1,4 @@
-Welcome to Defoe's documentation!
+Welcome to Defoe's Documentation!
 =================================
 
 **Defoe** is a Python package that facilitates the analysis of historical books and newspapers datasets using Apache Spark. It includes a number of APIs for interpreting and manipulating different XML-coded files as Python objects.
@@ -7,8 +7,8 @@ Welcome to Defoe's documentation!
 
    This project is under active development.
 
-Contents
---------
+Defoe Documentation Contents
+----------------------------
 
 .. toctree::
    :maxdepth: 2

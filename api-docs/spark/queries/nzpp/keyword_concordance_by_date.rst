@@ -11,8 +11,7 @@ Get concordance for keywords and group by date
     - ``queries/gender.txt``
     - ``queries/krakatoa.txt``
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block:: yaml
 
@@ -30,8 +29,7 @@ Result format:
 
 **Caution:** as this query returns each article's content, for every match, there is a risk that the query will fail due to lack of memory. This query should only be run with interesting words that are not expected to occur often.
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over ``1.xml`` and ``2.xml`` with ``queries/hearts.txt``:
 

@@ -19,8 +19,7 @@ Stores each Page as string to ElasticSearch (ES) with some metadata associated w
       - defoe_path: /home/rosa_filgueira_vicente/defoe/
       - os_type: linux
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 

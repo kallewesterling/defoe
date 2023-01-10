@@ -1,11 +1,10 @@
 Count total number of documents
-==========================================================
+===============================
 
 - Query module: ``defoe.alto.queries.total_documents``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 
@@ -21,8 +20,7 @@ Result format:
 
       $ find . -name "*.zip*" -type f -exec unzip -l {} \; | grep meta | wc -l
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over British Library Books ``1510_1699/000001143_0_1-20pgs__560409_dat.zip`` and ``1510_1699/000000874_0_1-22pgs__570785_dat.zip``:
 

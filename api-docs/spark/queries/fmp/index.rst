@@ -1,5 +1,5 @@
-FMP document queries
-==========================================================
+FMP Document Queries
+====================
 
 Find My Past dataset.
 
@@ -11,11 +11,11 @@ General:
 
 Keyword searches:
 
-- [Count number of occurrences of keywords, get the metadata and  group by word](./keyword_metadata_by_word.md)
+- [Count number of occurrences of keywords, get the metadata and group by word](./keyword_metadata_by_word.md)
 - [Segment articles images by keywords, get the metadata and group by word](./keyword_segmentation.md)
 
-Contents
---------
+FMP Document Queries Contents
+-----------------------------
 
 .. toctree::
   :maxdepth: 1

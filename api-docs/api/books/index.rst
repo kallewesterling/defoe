@@ -1,8 +1,8 @@
 British Library Books API
 =========================
 
-Contents
---------
+British Library Books API Contents
+----------------------------------
 
 .. toctree::
    :maxdepth: 3

@@ -17,8 +17,8 @@ Get colocates and group by year
   - Examples:
     - ``queries/stranger_danger.yml``
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>:
@@ -36,8 +36,8 @@ Result format:
   <YEAR>:
     - ...
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
+
 Query over British Library Books ``1510_1699/*.zip`` with ``queries/stranger_danger.yml``:
 
 ..  code-block:: yaml

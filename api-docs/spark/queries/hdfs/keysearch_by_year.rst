@@ -13,8 +13,8 @@ Read data from HDFS, and count number of occurrences of keywords or keysentences
     - preprocess: normalize
     - data: sc_cities.txt
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>:

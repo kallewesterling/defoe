@@ -6,15 +6,14 @@ Count total number of documents, pages and words per year. This can be useful if
 - Query module: ``defoe.alto.queries.normalize``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
+
 ..  code-block:: yaml
 
   <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>]
   ...
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over British Library Books ``1510_1699/*.zip``:
 

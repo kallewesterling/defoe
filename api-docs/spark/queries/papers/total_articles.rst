@@ -1,11 +1,10 @@
 Count total number of articles
-==========================================================
+===============================
 
 - Query module: ``defoe.papers.queries.total_articles``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 
@@ -23,8 +22,7 @@ Result format:
       $ grep \<article *xml | wc -l
       287
 
-Sample results
-----------------------------------------------------------
+**Sample results:**
 
 Query over ``Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml`` and ``Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml``:
 

@@ -1,11 +1,10 @@
 Count total number of pages
-==========================================================
+===========================
 
 - Query module: ``defoe.alto.queries.total_pages``
 - Configuration file: None
 
-Result format:
-----------------------------------------------------------
+**Result format:**
 
 ..  code-block::
 
