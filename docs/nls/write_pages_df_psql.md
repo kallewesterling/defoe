@@ -20,7 +20,9 @@
      - driver: org.postgresql.Driver
      - defoe_path: /home/rosa_filgueira_vicente/defoe/
      - os_type: linux
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 Row("title",  "edition", "year", "place", "archive_filename",  "source_text_filename", 

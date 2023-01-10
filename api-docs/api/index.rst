@@ -1,5 +1,5 @@
 API Packages
-====================
+============
 
 Defoe comes with a number of API packages included.
 
@@ -9,8 +9,8 @@ The one which has most recently been in active development and is therefore some
 
   Some of the API's listed below, if not all of them, are under active development.
 
-Contents
---------
+API Packages Contents
+---------------------
 
 .. toctree::
   :maxdepth: 2

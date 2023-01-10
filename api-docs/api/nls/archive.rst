@@ -1,7 +1,7 @@
-Archive
-=============
+NLS ALTO ``Archive``
+====================
 
-API Reference
--------------
+NLS ALTO ``Archive`` API Reference
+----------------------------------
 .. automodule:: defoe.nls.archive
     :members:

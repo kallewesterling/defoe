@@ -7,7 +7,6 @@ Welcome to Defoe's documentation!
 
    This project is under active development.
 
-
 Contents
 --------
 
@@ -16,8 +15,6 @@ Contents
 
    api/index
    spark/index
-
-
 
 Indices and tables
 ==================

@@ -2,7 +2,9 @@
 
 * Query module: `defoe.nzpp.queries.total_words`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 {num_articles: <NUM_ARTICLES>, num_words: <NUM_WORDS>}

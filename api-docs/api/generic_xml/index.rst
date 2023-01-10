@@ -1,8 +1,8 @@
 Generic XML API
 =========================
 
-Contents
---------
+Generic XML API Contents
+-------------------------
 
 .. toctree::
    :maxdepth: 3

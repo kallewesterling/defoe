@@ -2,7 +2,9 @@
 
 * Query module: `defoe.alto.queries.ocr_quality_by_year`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>: [<QUALITY>, ...]

@@ -5,7 +5,9 @@ It uses HDFS data.
 
 * Query module: `defoe.hdfs.queries.normalize`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>]

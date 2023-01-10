@@ -7,7 +7,9 @@
   - Examples:
      - preprocess: normalize
      - data: sc_cities.txt
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>:

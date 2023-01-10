@@ -34,7 +34,7 @@ def do_query(
     default of 0 is assumed.
 
     Both colocated words and words in articles are normalized, by
-    removing all non-'a-z|A-Z' characters.
+    removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Returns result of form:
 

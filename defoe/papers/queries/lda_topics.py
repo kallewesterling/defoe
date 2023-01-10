@@ -191,7 +191,7 @@ def article_idx_to_words_row(article_idx):
     index ad a list of the words in the article.
 
     The words in the article are normalized, by removing all
-    non-'a-z|A-Z' characters.
+    non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Any stop words (words of less than 2 characters) are ignored.
 

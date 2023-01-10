@@ -1,7 +1,7 @@
-Document
-=============
+ALTO ``Document``
+=================
 
-API Reference
--------------
+ALTO ``Document`` API Reference
+-------------------------------
 .. automodule:: defoe.alto.document
     :members:

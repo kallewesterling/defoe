@@ -1,7 +1,7 @@
-Document
-=============
+Generic XML ``Document``
+========================
 
-API Reference
--------------
+Generic XML ``Document`` API Reference
+--------------------------------------
 .. automodule:: defoe.generic_xml.document
     :members:

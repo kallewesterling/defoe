@@ -22,7 +22,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     If no configuration file is provided then a threshold of 1 is
     assumed.
 
-    Words in documents are normalized, by removing all non-'a-z|A-Z'
+    Words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z``
     characters.
 
     Returns result of form:

@@ -1,13 +1,7 @@
-Page
-===========
+FMP ``Page``
+==================
 
-Usage
--------------
-
-TODO
-
-API Reference
--------------
-
+FMP ``Page`` API Reference
+--------------------------------
 .. automodule:: defoe.fmp.page
     :members:

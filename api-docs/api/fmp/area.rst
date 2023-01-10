@@ -1,13 +1,11 @@
-Area
-===========
+FMP ``Area``
+============
 
-Usage
--------------
-
+Usage of FMP ``Area``
+---------------------
 TODO
 
-API Reference
--------------
-
+FMP ``Area`` API Reference
+--------------------------
 .. automodule:: defoe.fmp.area
     :members:

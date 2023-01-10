@@ -24,8 +24,8 @@ To iterate through the elements of the ``Archive``:
             for area in page.areas:
                 area
 
-Contents
---------
+FMP API Contents
+----------------
 
 .. toctree::
    :maxdepth: 3

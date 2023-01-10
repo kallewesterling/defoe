@@ -1,7 +1,7 @@
-Archive
-=============
+ALTO ``Archive``
+================
 
-API Reference
--------------
+ALTO ``Archive`` API Reference
+------------------------------
 .. automodule:: defoe.alto.archive
     :members:

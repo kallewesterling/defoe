@@ -5,15 +5,17 @@
   - Record this list along with the article's year.
   - Use the lists of keywords to count the articles that share those lists of keywords.
   - Group the counts by year.
-* Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
+* Both keywords and words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 * Query module: `defoe.papers.queries.keywords_by_year`
 * Configuration file:
   - One or more words to search for, one per line.
   - Examples:
-    - `queries/gender.txt`
-    - `queries/krakatoa.txt`
-    - `queries/prof.txt`
-* Result format:
+    - ``queries/gender.txt``
+    - ``queries/krakatoa.txt``
+    - ``queries/prof.txt``
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>:
@@ -26,7 +28,7 @@
 
 ## Sample results
 
-Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with `queries/gender.txt`:
+Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with ``queries/gender.txt``:
 
 ```
 1907:

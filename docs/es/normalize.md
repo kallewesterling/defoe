@@ -5,7 +5,9 @@ It uses ES data.
 
 * Query module: `defoe.es.queries.normalize`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>]

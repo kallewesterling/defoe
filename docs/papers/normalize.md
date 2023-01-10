@@ -4,7 +4,9 @@ Count total number of issues, articles and words per year. This can be useful if
 
 * Query module: `defoe.papers.queries.normalize`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>: [<NUM_ISSUES>, <NUM_ARTICLES>, <NUM_WORDS>]

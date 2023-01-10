@@ -11,7 +11,9 @@
      - gazetteer: geonames
      - defoe_path: /home/rosa_filgueira_vicente/defoe/
      - os_type: linux
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
    - YEAR:

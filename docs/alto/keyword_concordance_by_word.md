@@ -1,13 +1,15 @@
 # Get concordance for keywords and group by word
 
-* Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
+* Both keywords and words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 * Query module: `defoe.alto.queries.keyword_concordance_by_word`
 * Configuration file:
   - One or more words to search for, one per line.
   - Examples:
-    - `queries/diseases.txt`
-    - `queries/hearts.txt`
-* Result format:
+    - ``queries/diseases.txt``
+    - ``queries/hearts.txt``
+
+Result format:
+----------------------------------------------------------
 
 ```
 <WORD>:
@@ -28,7 +30,7 @@
 
 ## Sample results
 
-Query over British Library Books `1510_1699/000001143_0_1-20pgs__560409_dat.zip` and `1510_1699/000000874_0_1-22pgs__570785_dat.zip` with `queries/hearts.txt`:
+Query over British Library Books `1510_1699/000001143_0_1-20pgs__560409_dat.zip` and `1510_1699/000000874_0_1-22pgs__570785_dat.zip` with ``queries/hearts.txt``:
 
 ```
 heart:

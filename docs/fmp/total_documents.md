@@ -2,7 +2,9 @@
 
 * Query module: `defoe.alto.queries.total_documents`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 {num_documents: <NUM_DOCUMENTS>}

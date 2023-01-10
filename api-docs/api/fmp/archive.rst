@@ -1,8 +1,8 @@
-Archive
-=============
+FMP ``Archive``
+===============
 
-Setting up
--------------
+Setting up FMP ``Archive``
+--------------------------
 
 .. _metadata-code:
 
@@ -35,7 +35,7 @@ The ``Archive`` object (which inherits from the abstract class :class:`defoe.fmp
 
 To read more about available properties and methods for the ``Document``, see :class:`defoe.fmp.document.Document`.
 
-API Reference
--------------
+FMP ``Archive`` API Reference
+-----------------------------
 .. automodule:: defoe.fmp.archive
     :members:

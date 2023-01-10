@@ -1,7 +1,7 @@
-Issue
-=============
+General newspaper ``Issue``
+===========================
 
-API Reference
--------------
+General newspaper ``Issue`` API Reference
+-----------------------------------------
 .. automodule:: defoe.papers.issue
     :members:

@@ -47,7 +47,7 @@ where:
 
 * `data.txt` is the file with the paths to the books files to run the query over. Examples of this can be found under the [others](../others) directory.
 * `defoe.alto.queries.find_words_group_by_year` is the module that runs the query.
-* `queries/hearts.txt` is a configuration file for the query which contains a list of the words, one per line, to search for.
+* ``queries/hearts.txt`` is a configuration file for the query which contains a list of the words, one per line, to search for.
 
 For example, to submit a query to search a set of newspapers for occurrences of gender-specific words (e.g. "she", "he" etc.) and return the counts of these occurrences grouped by year, you could run:
 
@@ -61,7 +61,7 @@ where:
 
 * `data.txt` is the file with the paths to the papers files to run the query over. Examples of this can be found under the [others](../others) directory.
 * `defoe.papers.queries.articles_containing_words` is the module that runs the query.
-* `queries/gender.txt` is a configuration file for the query which contains a list of the words, one per line, to search for.
+* ``queries/gender.txt`` is a configuration file for the query which contains a list of the words, one per line, to search for.
 
 If successful the results will be written into a new file (by default called `results.yml`) in the current directory.
 

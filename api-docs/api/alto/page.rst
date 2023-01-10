@@ -1,7 +1,7 @@
-Page
+ALTO ``Page``
 =============
 
-API Reference
--------------
+ALTO ``Page`` API Reference
+---------------------------
 .. automodule:: defoe.alto.page
     :members:

@@ -4,7 +4,9 @@ Count total number of documents, pages and words per year. This can be useful if
 
 * Query module: `defoe.nls.queries.normalize`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>: [<NUM_DOCUMENTS>, <NUM_PAGES>, <NUM_WORDS>]

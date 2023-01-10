@@ -1,8 +1,8 @@
 NLS Article ALTO API
 =========================
 
-Contents
---------
+NLS Article ALTO API Contents
+-----------------------------
 
 .. toctree::
    :maxdepth: 3

@@ -15,7 +15,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     of the keywords to search for, one per line.
 
     Both keywords and words in documents are normalized, by removing
-    all non-'a-z|A-Z' characters.
+    all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Returns result of form:
 

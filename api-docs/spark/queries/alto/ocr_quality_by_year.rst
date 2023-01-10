@@ -1,13 +1,14 @@
 Get measure of OCR quality for each page and group by year
 ==========================================================
 
-* Query module: `defoe.alto.queries.ocr_quality_by_year`
-* Configuration file: None
-* Result format:
+- Query module: ``defoe.alto.queries.ocr_quality_by_year``
+- Configuration file: None
 
-```
-<YEAR>: [<QUALITY>, ...]
-...
-```
+Result format:
+----------------------------------------------------------
+..  code-block:: yaml
 
-**Note:** If no `PC` attribute is present in the `Page` elements of the XML being queried then `null` is returned for each page.
+  <YEAR>: [<QUALITY>, ...]
+  ...
+
+**Note:** If no ``PC`` attribute is present in the ``Page`` elements of the XML being queried then ``null`` is returned for each page.

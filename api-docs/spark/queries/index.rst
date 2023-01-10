@@ -3,12 +3,11 @@ Spark-queries
 
 Defoe comes with a number of pre-defined Spark queries, which can be modified and customised.
 
-
 Contents
 --------
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
   alto/index
   es/index

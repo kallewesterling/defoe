@@ -1,7 +1,7 @@
-Document
-=============
+NLS Article ALTO ``Document``
+=============================
 
-API Reference
--------------
+NLS Article ALTO ``Document`` API Reference
+-------------------------------------------
 .. automodule:: defoe.nlsArticles.document
     :members:
