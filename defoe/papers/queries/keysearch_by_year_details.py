@@ -3,27 +3,41 @@ Get concordance (also called details) of articles in which we have keywords or
 keysentences. Group results by year. This query is the recommended to use when
 there are not target words.
 """
+from __future__ import annotations
 
-from defoe import query_utils
-from defoe.papers.query_utils import (
+from ..query_utils import (
     preprocess_clean_article,
     clean_article_as_string,
     get_articles_list_matches,
 )
 
+from defoe import query_utils
+from typing import TYPE_CHECKING
+
 import os
 
+if TYPE_CHECKING:
+    from ..issue import Issue
+    from py4j.java_gateway import JavaObject
+    from pyspark import SparkContext
+    from pyspark.rdd import RDD
 
-def do_query(issues, config_file=None, logger=None, context=None):
+
+def do_query(
+    issues: RDD[Issue],
+    config_file: str = None,
+    logger: JavaObject = None,
+    context: SparkContext = None,
+):
     """
-    Select the articles text along with metadata by using a list of
-    keywords or keysentences and groups by year.
+    Select the articles text along with metadata by using a list of keywords
+    or keysentences and groups by year.
 
     config_file must be the path to a lexicon file with a list of the keywords
     to search for, one per line.
 
-    Also the config_file can indicate the preprocess treatment, along with the defoe
-    path, and the type of operating system.
+    Also the config_file can indicate the preprocess treatment, along with the
+    Defoe path, and the type of operating system.
 
     Returns result of form:
 
@@ -92,7 +106,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
                     sentence_norm += " " + word
             keysentences.append(sentence_norm)
 
-    # [(year, article_string), ...]
+    # [(year, issue, article, clean_article_string), ...]
     clean_articles = issues.flatMap(
         lambda issue: [
             (
@@ -105,7 +119,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         ]
     )
 
-    # [(year, preprocess_article_string), ...]
+    # [(year, issue, article, preprocessed_article_string), ...]
     t_articles = clean_articles.flatMap(
         lambda cl_article: [
             (
@@ -117,14 +131,15 @@ def do_query(issues, config_file=None, logger=None, context=None):
         ]
     )
 
-    # [(year, clean_article_string)
+    # Filter only where preprocessed_article_string has correspondence in any
+    # of keysentences
     filter_articles = t_articles.filter(
         lambda year_article: any(
             keysentence in year_article[3] for keysentence in keysentences
         )
     )
 
-    # [(year, [keysentence, keysentence]), ...]
+    # [(year, issue, article, [keysentence, keysentence]), ...]
     # Note: get_articles_list_matches ---> articles count
     # Note: get_sentences_list_matches ---> word_count
     matching_articles = filter_articles.map(
@@ -136,6 +151,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         )
     )
 
+    # [(year, issue, article, keysentence), ...]
     matching_sentences = matching_articles.flatMap(
         lambda year_sentence: [
             (year_sentence[0], year_sentence[1], year_sentence[2], sentence)
@@ -143,6 +159,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         ]
     )
 
+    # [(year, {"title": <title>, "article_id": article_id, ...}, ...]
     matching_data = matching_sentences.map(
         lambda sentence_data: (
             sentence_data[0],
@@ -159,7 +176,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
         )
     )
 
-    # [(date, {"title": title, ...}), ...]
+    # [(year, {"title": <title>, "article_id": article_id, ...}, ...]
     # =>
     result = (
         matching_data.groupByKey()
