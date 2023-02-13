@@ -134,12 +134,17 @@ class Area:
         """
 
         # Get article_id
-        self.article_id = article_id_lookup[self.id]
-        """
-        Returns the ``defoe.fmp.area.Area``'s ID as a string representation.
+        try:
+            self.article_id = article_id_lookup[self.id]
+            """
+            Returns the ``defoe.fmp.area.Area``'s ID as a string
+            representation.
 
-        :rtype: str
-        """
+            :rtype: str
+            """
+        except KeyError:
+            # TODO: Issue warning that article ID is set to None
+            self.article_id = None
 
         # Get page part
         self.page_part = page_parts[self.id]

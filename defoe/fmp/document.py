@@ -747,7 +747,14 @@ class Document(object):
         for page_code, page_metadata in metadata.items():
             for area in page_metadata.findall("mets:div", NAMESPACES):
                 for file_pointer in area.find("mets:fptr", NAMESPACES):
-                    yield Area(self, page_code, area, file_pointer)
+                    yield Area(
+                        self,
+                        page_code,
+                        area,
+                        file_pointer,
+                        self.article_id_lookup,
+                        self.page_parts,
+                    )
 
     def get_areas_by_page_code(
         self, selected_page_code: Optional[str] = None
