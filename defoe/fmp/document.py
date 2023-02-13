@@ -517,7 +517,8 @@ class Document(object):
                             area.article_id
                             for _, areas in self.areas.items()
                             for area in areas
-                            if area.article_id.startswith("art")
+                            if area.article_id
+                            and area.article_id.startswith("art")
                         ]
                     )
                 )
