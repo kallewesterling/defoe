@@ -147,7 +147,11 @@ class Area:
             self.article_id = None
 
         # Get page part
-        self.page_part = page_parts[self.id]
+        try:
+            self.page_part = page_parts[self.id]
+        except KeyError:
+            # TODO: Issue warning that page part is set to None
+            self.page_part = None
 
         # See property accessors below
         self._page = None
