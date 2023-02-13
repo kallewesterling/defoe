@@ -102,7 +102,11 @@ class Page(object):
         try:
             self.page_confidence = float(self.page_confidence)
         except ValueError:
-            pass
+            # TODO: Warning: page confidence was set to 0
+            self.page_confidence = 0
+        except TypeError:
+            # TODO: Warning: page confidence was set to 0
+            self.page_confidence = 0
 
         # See property accessors below
         self._words = None
@@ -264,7 +268,9 @@ class Page(object):
 
         # Attempt to set word confidence to floating point
         try:
-            self._word_confidences = [float(x) for x in self._word_confidences]
+            self._word_confidences = [
+                float(x) if x else 0 for x in self._word_confidences
+            ]
         except ValueError:
             pass
 
@@ -286,7 +292,7 @@ class Page(object):
         # Attempt to set character confidence to floating point
         try:
             self._character_confidences = [
-                float(x) for x in self._character_confidences
+                float(x) if x else 0 for x in self._character_confidences
             ]
         except ValueError:
             pass

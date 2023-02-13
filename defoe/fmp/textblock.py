@@ -205,7 +205,7 @@ class TextBlock(object):
         # Attempt to set word confidence to floating point
         try:
             self._word_confidences = [
-                float(x) for x in self._word_confidences if x
+                float(x) if x else 0 for x in self._word_confidences
             ]
         except ValueError:
             pass
@@ -236,7 +236,7 @@ class TextBlock(object):
         # Attempt to set word confidence to floating point
         try:
             self._character_confidences = [
-                float(x) for x in self._character_confidences if x
+                float(x) if x else 0 for x in self._character_confidences
             ]
         except ValueError:
             pass
