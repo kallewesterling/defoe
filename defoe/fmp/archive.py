@@ -147,7 +147,7 @@ class Archive(AltoArchive):
             same page
         """
 
-        stem = f"{self.filename}{document_code}_{page_code}"
+        stem = f"{self.filename}/{document_code}_{page_code}"
 
         test = [
             f"{stem}{ext}"
