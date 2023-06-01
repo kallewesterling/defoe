@@ -45,10 +45,18 @@ def create_arg_parser():  # pragma: no cover
         default="results.txt",
     )
     parser.add_argument(
-        "-n", "--num", metavar="num_processes", help="number of processes", default="1"
+        "-n",
+        "--num",
+        metavar="num_processes",
+        help="number of processes",
+        default="1",
     )
     parser.add_argument(
-        "-l", "--log_file", metavar="logt_file", help="log_file", default="log.txt"
+        "-l",
+        "--log_file",
+        metavar="logt_file",
+        help="log_file",
+        default="log.txt",
     )
 
     return parser
@@ -60,10 +68,11 @@ def parse_common_args():  # pragma: no cover
 
 
 def load_inputs(args):
+    inputs = {}
+
     inputs["collection"] = args.collection
     inputs["query"] = args.query
 
-    inputs = {}
     err = 0
     if not args.file:
         err = 1
@@ -92,9 +101,7 @@ def load_inputs(args):
 
 
 def main():
-    from importlib import import_module
-
-    args, remaining = parse_common_args()
+    args, _ = parse_common_args()
     err = 0
     inputs, err = load_inputs(args)
     if err:

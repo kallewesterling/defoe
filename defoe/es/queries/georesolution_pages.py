@@ -46,9 +46,9 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return:
     :rtype: string
@@ -74,7 +74,9 @@ def do_query(df, config_file=None, logger=None, context=None):
     else:
         defoe_path = "./"
 
-    fdf = df.withColumn("source_text_clean", blank_as_null("source_text_clean"))
+    fdf = df.withColumn(
+        "source_text_clean", blank_as_null("source_text_clean")
+    )
 
     # newdf=fdf.filter(fdf.source_text_clean.isNotNull()).filter(fdf["model"]=="nls").filter(df["year"]==year).filter(df["archive_filename"]=="/home/tdm/datasets/nls-data-gazetteersOfScotland/97376462").select(fdf.year, fdf.title, fdf.edition, fdf.archive_filename, fdf.source_text_filename, fdf.text_unit_id, fdf.source_text_clean)
 
@@ -107,7 +109,11 @@ def do_query(df, config_file=None, logger=None, context=None):
                 "text_unit id": geo_page[5],
                 "lang_model": lang_model,
                 "georesolution_page": georesolve_page_2(
-                    geo_page[6], lang_model, defoe_path, gazetteer, bounding_box
+                    geo_page[6],
+                    lang_model,
+                    defoe_path,
+                    gazetteer,
+                    bounding_box,
                 ),
             },
         )

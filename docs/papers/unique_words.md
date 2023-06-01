@@ -1,6 +1,6 @@
 # Finds every unique word and its frequency
 
-* Words in documents are normalized, by removing all non-'a-z|A-Z' characters.
+* Words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 * Query module: `defoe.papers.queries.unique_words`
 * Configuration file:
   - YAML file of form:
@@ -12,8 +12,10 @@
   - <COUNT> is >= 1 and the threshold beneath which words will not be included.
   - If no configuration file is provided then a threshold of 1 is assumed.
   - Examples:
-    - `queries/unique_words.yml`
-* Result format:
+    - ``queries/unique_words.yml``
+
+Result format:
+----------------------------------------------------------
 
 ```
 {
@@ -25,7 +27,7 @@
 
 ## Sample results
 
-Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with `queries/unique_words.yml`:
+Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with ``queries/unique_words.yml``:
 
 ```
 {? '' : 12874, a: 2414, aberdeen: 65, able: 47, about: 94, above: 26, ac: 13, accepted: 11,

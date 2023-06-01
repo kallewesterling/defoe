@@ -2,7 +2,9 @@
 
 * Query module: `defoe.nzpp.queries.total_articles`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 {num_articles: <NUM_ARTICLES>}

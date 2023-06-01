@@ -7,16 +7,17 @@ from pyspark.sql.functions import col, when
 import re
 
 
-def get_sentences_list_matches(text, keysentence):
+def get_sentences_list_matches(text: str, keysentence: list[str]) -> list[str]:
     """
     Check which key-sentences from occurs within a string
     and return the list of matches.
 
-    :param text: text
-    :type text: str or unicode
-    :type: list(str or uniocde)
-    :return: Set of sentences
-    :rtype: set(str or unicode)
+    :param text: Text
+    :type text: str
+    :param keysentence: Key sentence
+    :type keysentence: list[str]
+    :return: Sorted list of sentences
+    :rtype: list[str]
     """
     text_list = text.split()
 
@@ -29,7 +30,7 @@ def get_sentences_list_matches(text, keysentence):
                 for _ in range(0, count):
                     matches.append(sentence)
         else:
-            pattern = re.compile(r"^%s$" % sentence)
+            pattern = re.compile(rf"^{sentence}$")
 
             for word in text_list:
                 if re.search(pattern, word):

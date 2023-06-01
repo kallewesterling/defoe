@@ -15,7 +15,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     of the keywords to search for, one per line.
 
     Both keywords and words in documents are normalized, by removing
-    all non-'a-z|A-Z' characters.
+    all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Returns result of form:
 
@@ -31,11 +31,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.alto.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: number of occurrences of keywords grouped by year
+    :return: Number of occurrences of keywords grouped by year
     :rtype: dict
     """
 
@@ -43,7 +43,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     # [(year, document), ...]
     documents = archives.flatMap(
-        lambda archive: [(document.year, document) for document in list(archive)]
+        lambda archive: [
+            (document.year, document) for document in list(archive)
+        ]
     )
 
     # [((year, word), 1), ...]
@@ -73,7 +75,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
             )
         )
         .groupByKey()
-        .map(lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1])))
+        .map(
+            lambda year_wordcount: (year_wordcount[0], list(year_wordcount[1]))
+        )
         .collect()
     )
 

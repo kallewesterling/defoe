@@ -1,6 +1,6 @@
 # Get colocates and group by year
 
-* Both colocated words and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
+* Both colocated words and words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 * Query module: `defoe.papers.queries.colocates_by_year`
 * Configuration file:
   - YAML file of form:
@@ -14,8 +14,10 @@
   - `<WINDOW>` is the maximum number of intervening words and, if
     provided, must be >= 0. If omitted, a default of 0 is used.
   - Examples:
-    - `queries/stranger_danger.yml`
-* Result format:
+    - ``queries/stranger_danger.yml``
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>:
@@ -34,7 +36,7 @@
 
 ## Sample results
 
-Query over `Part 1/0000164- The Courier and Argus/*/*/*.xml` with `queries/stranger_danger.yml`:
+Query over `Part 1/0000164- The Courier and Argus/*/*/*.xml` with ``queries/stranger_danger.yml``:
 
 ```
 1907:

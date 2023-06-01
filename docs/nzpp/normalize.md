@@ -4,7 +4,9 @@ Count total number of articles and words per year. This can be useful if wanting
 
 * Query module: `defoe.nzpp.queries.normalize`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>: [<NUM_ARTICLES>, <NUM_WORDS>]

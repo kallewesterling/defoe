@@ -15,21 +15,28 @@ Or newspapers conforming to the following DTDs:
 * LTO_issue.md
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from lxml import etree
+
 
 class Article(object):
     """
     Object model representation of an article of a newspaper
     represented as an XML document.
+
+    :param article_tree: Article XML
+    :type article_tree: lxml.etree._Element
+    :param filename: File from which the article XML was extracted
+    :type filename: str
     """
 
-    def __init__(self, article_tree, filename):
+    def __init__(self, article_tree: etree._Element, filename: str):
         """
-        Constructor.
-
-        :param article_tree: article XML
-        :type article_tree: lxml.etree._Element
-        :param filename: file from which the article XML was extracted
-        :type: filename: str or unicode
+        Constructor method.
         """
         self.article_tree = article_tree
         self.filename = filename
@@ -41,7 +48,9 @@ class Article(object):
         else:
             self.quality = None
         self.title = self.article_tree.xpath("text/text.title/p/wd/text()")
-        self.preamble = self.article_tree.xpath("text/text.preamble/p/wd/text()")
+        self.preamble = self.article_tree.xpath(
+            "text/text.preamble/p/wd/text()"
+        )
         self.content = self.article_tree.xpath("text/text.cr/p/wd/text()")
         self.article_id = ""
         article_id = self.article_tree.xpath("id/text()")
@@ -64,58 +73,58 @@ class Article(object):
                     self.page_ids.append(page_id.split(splitter)[-1])
 
     @property
-    def words(self):
+    def words(self) -> list[str]:
         """
         Get the full text of the article - the title, preamble and
         content - as a list of strings.
 
-        :return: full text
-        :rtype: list(str or unicode)
+        :return: Full text as string
+        :rtype: list[str]
         """
         return self.title + self.preamble + self.content
 
     @property
-    def words_string(self):
+    def words_string(self) -> str:
         """
-        Get the full text of the article - the title, preamble and
-        content - as a single string, concatenated by spaces and with
-        hyphenation removed.
+        Get the full text of the article - the title, preamble and content -
+        as a single string, concatenated by spaces and with hyphenation
+        removed.
 
-        Note: merging hyphenated words may cause problems with
-        subordinate clauses e.g. "The sheep - the really aloud one -
-        had just entered my office".
+        Note: merging hyphenated words may cause problems with subordinate
+        clauses e.g. "The sheep - the really aloud one - had just entered my
+        office".
 
-        :return: full text
-        :rtype: str or unicode
+        :return: Full text
+        :rtype: str
         """
         return " ".join(self.words).replace(" - ", "")
 
     @property
-    def title_string(self):
+    def title_string(self) -> str:
         """
-        Get the title as as a single string, concatenated by spaces
-    and with hyphenation removed.
+        Get the title as as a single string, concatenated by spaces and with
+        hyphenation removed.
 
-        Note: merging hyphenated words may cause problems with
-        subordinate clauses e.g. "The sheep - the really aloud one -
-        had just entered my office".
+        Note: merging hyphenated words may cause problems with subordinate
+        clauses e.g. "The sheep - the really aloud one - had just entered my
+        office".
 
-        :return: full text
-        :rtype: str or unicode
+        :return: Full title string
+        :rtype: str
         """
         return " ".join(self.title).replace(" - ", "")
 
     @property
-    def authors_string(self):
+    def authors_string(self) -> str:
         """
-        Get the title as as a single string, concatenated by spaces
-    and with hyphenation removed.
+        Get the authors as as a single string, concatenated by spaces and with
+        hyphenation removed.
 
-        Note: merging hyphenated words may cause problems with
-        subordinate clauses e.g. "The sheep - the really aloud one -
-        had just entered my office".
+        Note: merging hyphenated words may cause problems with subordinate
+        clauses e.g. "The sheep - the really aloud one - had just entered my
+        office".
 
-        :return: full text
-        :rtype: str or unicode
+        :return: Full text of authors
+        :rtype: str
         """
         return " ".join(self.authors).replace(" - ", "")

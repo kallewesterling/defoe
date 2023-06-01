@@ -2,7 +2,9 @@
 
 * Query module: `defoe.papers.queries.total_words`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 {num_issues: <NUM_ISSUES>, num_words: <NUM_WORDS>}

@@ -1,13 +1,15 @@
 # Get concordance for keywords and group by date
 
-* Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
+* Both keywords and words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 * Query module: `defoe.papers.queries.keyword_concordance_by_date`
 * Configuration file:
   - One or more words to search for, one per line.
   - Examples:
-    - `queries/gender.txt`
-    - `queries/krakatoa.txt`
-* Result format:
+    - ``queries/gender.txt``
+    - ``queries/krakatoa.txt``
+
+Result format:
+----------------------------------------------------------
 
 ```
 <DATE>:
@@ -27,7 +29,7 @@
 
 ## Sample results
 
-Query over `Part 1/0000164- The Courier and Argus/*/*/*.xml` with `queries/krakatoa.txt`:
+Query over `Part 1/0000164- The Courier and Argus/*/*/*.xml` with ``queries/krakatoa.txt``:
 
 ```
 1901-01-02:

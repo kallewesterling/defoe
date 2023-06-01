@@ -47,9 +47,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: "0"
     :rtype: string
@@ -117,7 +117,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
                 "text_unit id": geo_page[5],
                 "lang_model": lang_model,
                 "georesolution_page": georesolve_page_2(
-                    geo_page[6], lang_model, defoe_path, gazetteer, bounding_box
+                    geo_page[6],
+                    lang_model,
+                    defoe_path,
+                    gazetteer,
+                    bounding_box,
                 ),
             },
         )

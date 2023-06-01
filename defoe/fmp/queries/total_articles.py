@@ -19,18 +19,16 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.fmp.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file (unused)
-    :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param config_file: Query configuration file (unused)
+    :type config_file: str
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: total number of documents and pages
+    :return: Total number of documents and pages
     :rtype: dict
     """
 
-    # [archive, archive, ...]
+    # [document, document, ...]
     documents = archives.flatMap(lambda archive: list(archive))
-
-    print("num documents %s" % documents.count())
 
     # [num_articles, num_articles, ...]
     num_articles = documents.map(lambda document: document.num_articles)

@@ -18,11 +18,11 @@ def do_query(documents, config_file=None, logger=None, context=None):
 
     :param documents: RDD of defoe.generic_xml.document.Document
     :type documents: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file (unused)
+    :param config_file: Query configuration file (unused)
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: unique document types and frequencies
+    :return: Unique document types and frequencies
     :rtype: dict
     """
 

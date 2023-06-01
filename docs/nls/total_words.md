@@ -2,7 +2,9 @@
 
 * Query module: `defoe.nls.queries.total_words`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 {num_documents: <NUM_DOCUMENTS>, num_words: <NUM_WORDS>}

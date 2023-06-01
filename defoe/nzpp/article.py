@@ -2,24 +2,30 @@
 Object model representation of an article in a New Zealand Papers Past
 newspaper represented as an XML document.
 """
+from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from lxml import etree
 
 
 class Article(object):
     """
     Object model representation of an article in a New Zealand Papers
     Past newspaper represented as an XML document.
+
+    :param article_tree: Article XML
+    :type article_tree: lxml.etree._Element
+    :param filename: File from which the article XML was extracted
+    :type filename: str
     """
 
-    def __init__(self, article_tree, filename):
+    def __init__(self, article_tree: etree._Element, filename: str):
         """
         Constructor.
 
-        :param article_tree: article XML
-        :type article_tree: lxml.etree._Element
-        :param filename: file from which the article XML was extracted
-        :type: filename: str or unicode
         """
         self.article_tree = article_tree
         self.filename = filename
@@ -39,18 +45,18 @@ class Article(object):
         self.article_type = self.article_tree.findtext("dnz-type")
 
     @property
-    def words(self):
+    def words(self) -> list[str]:
         """
         Get the full text of the article - the title and content - as
         a list of strings.
 
-        :return: full text
-        :rtype: list(str or unicode)
+        :return: Full text as list of strings
+        :rtype: list[str]
         """
         return self.title + self.content
 
     @property
-    def words_string(self):
+    def words_string(self) -> str:
         """
         Get the full text of the article - the title and content - as
         a single string, concatenated by spaces and with hyphenation
@@ -60,13 +66,13 @@ class Article(object):
         subordinate clauses e.g. "The sheep - the really aloud one -
         had just entered my office".
 
-        :return: full text
-        :rtype: str or unicode
+        :return: Full text
+        :rtype: str
         """
         return " ".join(self.words).replace(" - ", "")
 
     @property
-    def title_string(self):
+    def title_string(self) -> str:
         """
         Get the title as as a single string, concatenated by spaces
         and with hyphenation removed.
@@ -75,7 +81,7 @@ class Article(object):
         subordinate clauses e.g. "The sheep - the really aloud one -
         had just entered my office".
 
-        :return: full text
-        :rtype: str or unicode
+        :return: Full title string
+        :rtype: str
         """
         return " ".join(self.title).replace(" - ", "")

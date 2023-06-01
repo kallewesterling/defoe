@@ -21,7 +21,7 @@ def do_query(archives, config_file=None, logger=None):
     default of 0 is assumed.
 
     Both colocated words and words in documents are normalized, by
-    removing all non-'a-z|A-Z' characters.
+    removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Returns result of form:
 
@@ -51,11 +51,11 @@ def do_query(archives, config_file=None, logger=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on documents in which keywords occur grouped
+    :return: Information on documents in which keywords occur grouped
     by year
     :rtype: dict
     """
@@ -129,13 +129,13 @@ def get_colocates_matches(document, start_word, end_word, window=0):
           "span": [<START_WORD>, ..., <END_WORD>]
         }
 
-    :param document: document
+    :param document: Document
     :type document: defoe.nls.document.Document
-    :param start_word: start_word colocate
+    :param start_word: Start_word colocate
     :type start_word: str or unicode
-    :param end_word: end_word colocate
+    :param end_word: End_word colocate
     :type end_word: str or unicode
-    :return: list of dicts
+    :return: List of dicts
     :rtype: list(dict)
     """
     start_page = None

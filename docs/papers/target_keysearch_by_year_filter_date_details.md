@@ -18,7 +18,9 @@
      - lexicon_start: 0
      - defoe_path: /lustre/home/sc048/rosaf4/defoe/
      - os_type: linux
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
           <YEAR>:

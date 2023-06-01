@@ -23,11 +23,11 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
 
     :param all_articles RDD of defoe.nzpp.articles.Articles
     :type all_articles: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file (unused)
+    :param config_file: Query configuration file (unused)
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: total number of articles and words per year
+    :return: Total number of articles and words per year
     :rtype: list
     """
 
@@ -37,7 +37,9 @@ def do_query(all_articles, config_file=None, logger=None, context=None):
     )
 
     # [(year, 1, num_words)]
-    counts = articles.map(lambda article: (article.date.year, (1, len(article.words))))
+    counts = articles.map(
+        lambda article: (article.date.year, (1, len(article.words)))
+    )
 
     result = (
         counts.reduceByKey(lambda x, y: tuple(i + j for i, j in zip(x, y)))

@@ -39,9 +39,9 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: "0"
     :rtype: string
@@ -157,6 +157,8 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     sqlContext = SQLContext(context)
     df = sqlContext.createDataFrame(pages_articles, nlsRow)
-    df.write.mode("overwrite").option("header", "true").csv("eb_total_articles.csv")
+    df.write.mode("overwrite").option("header", "true").csv(
+        "eb_total_articles.csv"
+    )
 
     return "0"

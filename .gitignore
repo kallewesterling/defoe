@@ -9,6 +9,7 @@ __pycache__/
 # Distribution/packaging files
 .Python
 build/
+_build/
 develop-eggs/
 dist/
 downloads/
@@ -83,3 +84,5 @@ error.yml
 #Geoparser
 geoparser-v1.1/
 georesolve/
+
+test.ipynb

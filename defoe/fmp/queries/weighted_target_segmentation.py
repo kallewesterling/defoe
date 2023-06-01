@@ -1,130 +1,222 @@
 """
-This query filters articles’ textblocks by selecting the ones that have one of
+This query filters articles' textblocks by selecting the ones that have one of
 the target word(s) AND any the keywords. Later it produces the segmentation/
 crop or the filtered textblocks.
 """
+from __future__ import annotations
 
 from defoe import query_utils
-from defoe.fmp.query_utils import segment_image
+from defoe.fmp.query_utils import (
+    segment_image,
+    preprocess_word,
+    PreprocessWordType,
+    MatchedWords,
+    WordLocation,
+)
+from itertools import product
+from typing import TYPE_CHECKING
 
-from collections import namedtuple, defaultdict
+if TYPE_CHECKING:
+    from ..document import Document
+    from ..textblock import TextBlock
+    from typing import Optional
+    from pyspark.rdd import RDD
+    from pyspark import SparkContext
+    from py4j.java_gateway import JavaObject
+
 import os
 
-WordLocation = namedtuple(
-    "WordLocation",
-    (
-        "word "
-        "position "
-        "year "
-        "document "
-        "article "
-        "textblock_id "
-        "textblock_coords "
-        "textblock_page_area "
-        "textblock_page_name"
-    ),
-)
-MatchedWords = namedtuple(
-    "MatchedWords", "target_word keyword textblock distance words preprocessed"
-)
 
-
-def compute_distance(word1_loc, word2_loc):
-    return abs(word1_loc.position - word2_loc.position)
-
-
-def get_min_distance_to_target(keyword_locations, target_locations):
-    min_distance = None
-    target_loc = None
-    keyword_loc = None
-    for k_loc in keyword_locations:
-        for t_loc in target_locations:
-            d = compute_distance(k_loc, t_loc)
-            if not min_distance or d < min_distance:
-                min_distance = d
-                target_loc = t_loc
-                keyword_loc = k_loc
-    return min_distance, target_loc, keyword_loc
-
-
-def find_words(
-    document,
-    target_words,
-    keywords,
-    preprocess_type=query_utils.PreprocessWordType.LEMMATIZE,
-):
+def get_highlight_coords(
+    target_loc: WordLocation, keyword_loc: WordLocation
+) -> list:
     """
-    If a keyword occurs more than once on a page, there will be only
-    one tuple for the page for that keyword.
-    If more than one keyword occurs on a page, there will be one tuple
-    per keyword.
-    The distance between keyword and target word is recorded in the output tuple.
-    :param document: document
-    :type document: defoe.alto.document.Document
-    :param keywords: keywords
-    :type keywords: list(str or unicode:
-    :param preprocess_type: how words should be preprocessed
-    (normalize, normalize and stem, normalize and lemmatize, none)
+    Parses out the coordinates for highlights around target words and keywords.
+    """
+
+    return [
+        (target_loc.x, target_loc.y, target_loc.w, target_loc.h),
+        (keyword_loc.x, keyword_loc.y, keyword_loc.w, keyword_loc.h),
+    ]
+
+
+def check_word(word: str, lst: list[str], fuzzy: bool = False) -> bool:
+    """
+    Fuzzy/non-fuzzy check of word against a list.
+
+    :return: Boolean determining whether a word exists in a list
+    :rtype: bool
+    """
+
+    if not word:
+        return False
+
+    if not fuzzy:
+        return word in lst
+
+    raise NotImplementedError(
+        "Fuzzy searching is not yet implemented into the FMP API."
+    )
+
+    # TODO: Consider DeezyMatch?
+    for target_or_keyword in lst:
+        if target_or_keyword in word:
+            return True
+
+
+def get_word_data(
+    loc: list[Optional[tuple[int, int, int, int, str]]],
+    document: Document,
+    article_id: str,
+    textblock: TextBlock,
+) -> WordLocation:
+    """
+    Combines data from a tb.location object, a Document, its article, and
+    TextBlock.
+
+    :param loc: The tokens property from a given TextBlock, see
+        :func:`~defoe.fmp.textblock.TextBlock.tokens`
+    :type loc: list[Optional[tuple[int, int, int, int, str]]]
+    :param document: A Document to get data from
+    :type document: defoe.fmp.document.Document
+    :param article_id: The article ID
+    :type article_id: str
+    :param textblock: A given TextBlock
+    :type textblock: defoe.fmp.textblock.TextBlock
+    :return: A WordLocation object that describes the word's data in-depth.
+    :rtype: defoe.fmp.query_utils.WordLocation
+    """
+
+    return WordLocation(
+        word=loc[4],
+        position=loc[5],
+        document=document,
+        year=document.year,
+        article=article_id,
+        textblock_id=textblock.id,
+        textblock_coords=textblock.coords,
+        textblock_page_area=textblock.page_area,
+        textblock_page_name=textblock.page_name,
+        x=loc[0],
+        y=loc[1],
+        w=loc[2],
+        h=loc[3],
+    )
+
+
+def find_closest(
+    document: Document,
+    target_words: list[str],
+    keywords: list[str],
+    preprocess_type: PreprocessWordType = PreprocessWordType.LEMMATIZE,
+    fuzzy_target: bool = False,
+    fuzzy_keyword: bool = False,
+) -> list[MatchedWords]:
+    """
+    Searches a document for matches and provides back a list which includes
+    the distance between the keyword and the target word.
+
+    :param document: Document to search
+    :type document: defoe.fmp.document.Document
+    :param target_words: List of target words
+    :type target_words: list[str]
+    :param keywords: List of keywords
+    :type keywords: list[str]
+    :param preprocess_type: How words should be preprocessed
+        (normalize, normalize and stem, normalize and lemmatize, none)
     :type preprocess_type: defoe.query_utils.PreprocessWordType
-    :return: list of tuples
-    :rtype: list(tuple)
+    :param fuzzy_target: Whether to fuzzy search the target word (Note: Not
+        yet implemented.), defaults to False
+    :type fuzzy_target: bool
+    :param fuzzy_keyword: Whether to fuzzy search the keyword (Note: Not yet
+        implemented.), defaults to False
+    :type fuzzy_keyword: bool
+    :return: List of matched words
+    :rtype: list[MatchedWords]
     """
 
     matches = []
-    document_articles = document.articles
-    for article in document_articles:
-        for tb in document_articles[article]:
-            keys = defaultdict(lambda: [])
-            targets = []
-            preprocessed_words = []
 
-            for pos, word in enumerate(tb.words):
-                preprocessed_word = query_utils.preprocess_word(word, preprocess_type)
-                loc = WordLocation(
-                    word=preprocessed_word,
-                    position=pos,
-                    year=document.year,
-                    document=document,
-                    article=article,
-                    textblock_id=tb.textblock_id,
-                    textblock_coords=tb.textblock_coords,
-                    textblock_page_area=tb.textblock_page_area,
-                    textblock_page_name=tb.page_name,
+    for article_id, article in document.articles.items():
+        for tb in article:
+            # Preprocess all words in textblock
+            # Result is list of tuples:
+            # [
+            #   (x, y, w, h, word, position in textblock),
+            #   ...
+            # ]
+            preprocessed_locations = [
+                (
+                    x[0],
+                    x[1],
+                    x[2],
+                    x[3],
+                    preprocess_word(x[4], preprocess_type),
+                    position,
                 )
-                preprocessed_words.append(preprocessed_word)
+                for position, x in enumerate(tb.locations)
+            ]
 
-                if preprocessed_word in keywords:
-                    keys[preprocessed_word].append(loc)
-                if preprocessed_word in target_words:
-                    targets.append(loc)
+            # Find targets in preprocessed_locations
+            found_targets = [
+                get_word_data(x, document, article_id, tb)
+                for x in preprocessed_locations
+                if check_word(x[4], target_words, fuzzy_target)
+            ]
 
-            for k, l in keys.items():
-                min_distance, target_loc, keyword_loc = get_min_distance_to_target(
-                    l, targets
-                )
+            # Find keywords in preprocessed_locations
+            found_keywords = [
+                get_word_data(x, document, article_id, tb)
+                for x in preprocessed_locations
+                if check_word(x[4], keywords, fuzzy_keyword)
+            ]
 
-                if min_distance:
-                    matches.append(
-                        MatchedWords(
-                            target_word=target_loc.word,
-                            keyword=keyword_loc.word,
-                            textblock=target_loc,
-                            distance=min_distance,
-                            words=tb.words,
-                            preprocessed=preprocessed_words,
-                        )
+            # Pair targets and keywords and add a final count of their
+            # difference in position
+            found = [
+                (x[0], x[1], abs(x[0].position - x[1].position))
+                for x in list(product(found_targets, found_keywords))
+            ]
+
+            # Sort by the difference in position
+            found.sort(key=lambda x: x[2])
+
+            if found:
+                # extract from found[0]:
+                # target:WordLocation, keyword:WordLocation, distance:int
+                target_loc, keyword_loc, distance = found[0]
+
+                # append the closest distance word between target and keyword
+                # to matches list
+                matches.append(
+                    MatchedWords(
+                        target_word=target_loc.word,
+                        keyword=keyword_loc.word,
+                        textblock=target_loc,
+                        distance=distance,
+                        words=tb.words,
+                        preprocessed=preprocessed_locations,
+                        highlight=get_highlight_coords(
+                            target_loc, keyword_loc
+                        ),
                     )
+                )
 
     return matches
 
 
-def do_query(archives, config_file=None, logger=None, context=None):
+def do_query(
+    archives: RDD,
+    config_file: Optional[str] = None,
+    logger: Optional[JavaObject] = None,
+    context: Optional[SparkContext] = None,
+):
     """
     Crops articles' images for keywords and groups by word.
 
-    config_file must a yml file that has the following values:
+    config_file must be a yml file that has the following values:
         * preprocess: Treatment to use for preprocessing the words. Options: [normalize|stem|lemmatize|none]
-        * data: yaml file with a list of the target words and a list of keywords to search for.
+        * data: YAML file with a list of the target words and a list of keywords to search for.
                 This should be in the same path at the configuration file.
         * years_filter: Min and Max years to filter the data. Separated by "-"
         * output_path: The path to store the cropped images.
@@ -141,7 +233,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
                         "coord": <COORDINATES>,
                         "cropped_image": <IMAGE.JPG>,
                         "page_area": <PAGE AREA>,
-                        "page_filename": < PAGE FILENAME>,
+                        "page_filename": <PAGE FILENAME>,
                         "place": <PLACE>,
                         "textblock_id": <TEXTBLOCK ID>,
                         "title": <TITLER>,
@@ -159,51 +251,130 @@ def do_query(archives, config_file=None, logger=None, context=None):
         }
 
     :param archives: RDD of defoe.fmp.archive.Archive
-    :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
-    :type config_file: str or unicode
-    :param logger: logger (unused)
-    :type logger: py4j.java_gateway.JavaObject
-    :return: information on documents in which keywords occur grouped
-    by word
+    :type archives: pyspark.rdd.RDD
+    :param config_file: Query configuration file
+    :type config_file: str, optional
+    :param logger: PySpark's Logger
+    :type logger: py4j.java_gateway.JavaObject, optional
+    :param context: PySpark's context
+    :type context: pyspark.SparkContext
+    :return: Information on documents in which keywords occur grouped
+        by word
     :rtype: dict
+    :raises RuntimeError: if data file does not contain two valid YAML lists
+        with targets and keywords
     """
 
-    config = query_utils.get_config(config_file)
+    '''
+    def log(msg, level):
+        """ Wrapper function for logging. """
 
+        if not logger:
+            return False
+
+        if level == "info":
+            logger.info(msg)
+
+        if level == "warn":
+            logger.warn(msg)
+    '''
+
+    def parse(input_words):
+        if (
+            not "targets" in input_words.keys()
+            or not "keywords" in input_words.keys()
+        ):
+            raise RuntimeError(
+                f"Your data file ({data_file}) must contain two lists: targets and keywords."
+            )
+        if (
+            not type(input_words.get("targets")) == list
+            or not type(input_words.get("keywords")) == list
+        ):
+            raise RuntimeError(
+                f"Your data file ({data_file}) must contain two lists: targets and keywords. At least one of them is currently not a valid YAML list."
+            )
+
+        target_words = set(
+            [
+                preprocess_word(word, preprocess_type)
+                for word in input_words["targets"]
+            ]
+        )
+
+        keywords = set(
+            [
+                preprocess_word(word, preprocess_type)
+                for word in input_words["keywords"]
+            ]
+        )
+
+        # target_list = ",".join(target_words)
+        # kw_list = ",".join(keywords)
+        # log(f"Query uses target words (after preprocessing): {target_list}", "info")
+        # log(f"Query uses keywords (after preprocessing): {kw_list}", "info")
+
+        return target_words, keywords
+
+    # Setup settings
+    config = query_utils.get_config(config_file)
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
     year_min, year_max = query_utils.extract_years_filter(config)
     output_path = query_utils.extract_output_path(config)
+    fuzzy_keyword = query_utils.extract_fuzzy(config, "keyword")
+    fuzzy_target = query_utils.extract_fuzzy(config, "target")
+    target_words, keywords = parse(query_utils.get_config(data_file))
 
-    input_words = query_utils.get_config(data_file)
+    if output_path == ".":
+        # log("Output path is set to `.` -- no images will be generated.", "warn")
+        get_highlight = lambda _: []
+    else:
+        highlight_results = config["highlight"]
+        get_highlight = (
+            lambda match: match.highlight if highlight_results else []
+        )
 
-    target_words = set(
-        [
-            query_utils.preprocess_word(word, preprocess_type)
-            for word in input_words["targets"]
-        ]
+    optional_crop = (
+        lambda match: segment_image(
+            coords=match.textblock.textblock_coords,
+            page_name=match.textblock.textblock_page_name,
+            issue_path=match.textblock.document.archive.filename,
+            keyword=match.keyword,
+            output_path=output_path,
+            target=match.target_word,
+            highlight=get_highlight(match),
+            logger=logger,
+        )
+        if output_path != "."
+        else None
     )
-    keywords = set(
-        [
-            query_utils.preprocess_word(word, preprocess_type)
-            for word in input_words["keywords"]
-        ]
-    )
 
-    # retrieve the documents from each archive
+    # Retrieve documents from each archive
     documents = archives.flatMap(
-        lambda archive: [
-            document
-            for document in archive
-            if int(year_min) <= document.year <= int(year_max)
+        lambda arch: [
+            doc for doc in arch if int(year_min) <= doc.year <= int(year_max)
         ]
     )
 
-    # find textblocks that contain pairs of (target word, keyword) and record their distance
+    # log("1/3 Documents retrieved from archive.", "info")
+
+    # find textblocks that contain the closest pair of any given tuple (target word,
+    # keyword) and record their distance
     filtered_words = documents.flatMap(
-        lambda document: find_words(document, target_words, keywords, preprocess_type)
+        lambda doc: find_closest(
+            doc,
+            target_words,
+            keywords,
+            preprocess_type,
+            fuzzy_target,
+            fuzzy_keyword,
+        )
     )
+
+    # log("2/3 Search query ran.", "info")
 
     # create the output dictionary
     # mapping from
@@ -211,35 +382,28 @@ def do_query(archives, config_file=None, logger=None, context=None):
     # to
     #   [(word, {"article_id": article_id, ...}), ...]
     matching_docs = filtered_words.map(
-        lambda matched: (
-            matched.keyword,
+        lambda match: (
+            match.keyword,
             {
-                "title": matched.textblock.document.title,
-                "place": matched.textblock.document.place,
-                "article_id": matched.textblock.article,
-                "textblock_id": matched.textblock.textblock_id,
-                "coord": matched.textblock.textblock_coords,
-                "page_area": matched.textblock.textblock_page_area,
-                "year": matched.textblock.year,
-                "date": matched.textblock.document.date,
-                # "words": matched.words,
-                # "preprocessed_words":  matched.preprocessed,
-                "page_filename": matched.textblock.textblock_page_name,
-                "issue_id": matched.textblock.document.documentId,
-                "issue_dirname": matched.textblock.document.archive.filename,
-                "target_word": matched.target_word,
-                "distance": matched.distance,
-                "cropped_image": segment_image(
-                    matched.textblock.textblock_coords,
-                    matched.textblock.textblock_page_name,
-                    matched.textblock.document.archive.filename,
-                    matched.keyword,
-                    output_path,
-                    matched.target_word,
-                ),
+                "title": match.textblock.document.title,
+                "place": match.textblock.document.place,
+                "article_id": match.textblock.article,
+                "textblock_id": match.textblock.textblock_id,
+                "coord": match.textblock.textblock_coords,
+                "page_area": match.textblock.textblock_page_area,
+                "year": match.textblock.year,
+                "date": match.textblock.document.date,
+                "page_filename": match.textblock.textblock_page_name,
+                "issue_id": match.textblock.document.documentId,
+                "issue_dirname": match.textblock.document.archive.filename,
+                "target_word": match.target_word,
+                "distance": match.distance,
+                "cropped_image": optional_crop(match),
             },
         )
     )
+
+    # log("3/3 Output dictionary created.", "info")
 
     # group by the matched keywords and collect all the articles by keyword
     # [(word, {"article_id": article_id, ...}), ...]

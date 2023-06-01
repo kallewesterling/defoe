@@ -54,11 +54,11 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     :param issues: RDD of defoe.alto.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on documents in which keywords occur grouped
+    :return: Information on documents in which keywords occur grouped
     by year
     :rtype: dict
     """
@@ -66,12 +66,15 @@ def do_query(issues, config_file=None, logger=None, context=None):
     config = query_utils.get_config(config_file)
 
     preprocess_type = query_utils.extract_preprocess_word_type(config)
-    data_file = query_utils.extract_data_file(config, os.path.dirname(config_file))
+    data_file = query_utils.extract_data_file(
+        config, os.path.dirname(config_file)
+    )
     window = query_utils.extract_window_size(config)
 
     with open(data_file, "r") as f:
         keywords = [
-            query_utils.preprocess_word(word, preprocess_type) for word in list(f)
+            query_utils.preprocess_word(word, preprocess_type)
+            for word in list(f)
         ]
 
     target_word = keywords[0]

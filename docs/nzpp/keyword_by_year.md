@@ -1,14 +1,16 @@
 # Count number of occurrences of keywords and group by year
 
-* Both keywords and words in documents are normalized, by removing all non-'a-z|A-Z' characters.
+* Both keywords and words in documents are normalized, by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 * Query module: `defoe.nzpp.queries.keyword_by_year`
 * Configuration file:
   - One or more words to search for, one per line.
   - Examples:
-    - `queries/gender.txt`
-    - `queries/krakatoa.txt`
-    - `queries/prof.txt`
-* Result format:
+    - ``queries/gender.txt``
+    - ``queries/krakatoa.txt``
+    - ``queries/prof.txt``
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>:
@@ -20,7 +22,7 @@
 
 ## Sample results
 
-Query over `1.xml` and `2.xml` with `queries/hearts.txt`:
+Query over `1.xml` and `2.xml` with ``queries/hearts.txt``:
 
 ```
 1839:
@@ -28,7 +30,7 @@ Query over `1.xml` and `2.xml` with `queries/hearts.txt`:
 - [hearts, 1]
 ```
 
-Query over `1.xml` and `2.xml` with `queries/gender.txt`:
+Query over `1.xml` and `2.xml` with ``queries/gender.txt``:
 
 ```
 1839:

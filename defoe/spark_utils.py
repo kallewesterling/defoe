@@ -2,29 +2,52 @@
 Spark-related file-handling utilities.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import requests
-import io
+from io import BytesIO, StringIO
 import os
 
+if TYPE_CHECKING:
+    from pyspark.context import SparkContext
+    from pyspark.rdd import RDD
+    from typing import BinaryIO, Union
+
+# Constants
+ROOT_MODULE = "defoe"
+SETUP_MODULE = "setup"
+MODELS = [
+    "books",
+    "papers",
+    "fmp",
+    "nzpp",
+    "generic_xml",
+    "nls",
+    "nlsArticles",
+    "hdfs",
+    "psql",
+    "es",
+]
 HTTP = "http://"
 HTTPS = "https://"
 BLOB = "blob:"
 
 
-def files_to_rdd(context, num_cores=1, data_file="data.txt"):
+def files_to_rdd(
+    context: SparkContext, num_cores: int = 1, data_file: str = "data.txt"
+) -> RDD:
     """
-    Populate Spark RDD with file names or URLs over which a query is
-    to be run.
+    Populate Spark RDD with file names or URLs over which a query is to be run.
 
     :param context: Spark Context
     :type context: pyspark.context.SparkContext
-    :param num_cores: number of cores over which to parallelize Spark
-    job
+    :param num_cores: Number of cores over which to parallelize Spark job
     :type num_cores: int
-    :param data_file: name of file with file names or URLs, one per
-    line
-    :type data_file: str or unicode
-    :return: RDD
+    :param data_file: Name of file with file names or URLs, one per line
+    :type data_file: str
+    :return: A Resilient Distributed Dataset
     :rtype: pyspark.rdd.RDD
     """
 
@@ -35,78 +58,67 @@ def files_to_rdd(context, num_cores=1, data_file="data.txt"):
     return rdd_filenames
 
 
-def files_to_dataframe(context, num_cores=1, data_file="data.txt"):
-    """
-    Populate Spark RDD with file names or URLs over which a query is
-    to be run.
-
-    :param context: Spark Context
-    :type context: pyspark.context.SparkContext
-    :param num_cores: number of cores over which to parallelize Spark
-    job
-    :type num_cores: int
-    :param data_file: name of file with file names or URLs, one per
-    line
-    :type data_file: str or unicode
-    """
-
-    filenames = [filename.strip() for filename in list(open(data_file))]
-
-    rdd_filenames = context.parallelize(filenames, num_cores)
-
-    return rdd_filenames
+# Note: This function was the same as the one above; keeping reference here
+# for backwards compatibility
+files_to_dataframe = files_to_rdd
 
 
-def open_stream(filename):
+def open_stream(filename: str) -> Union[StringIO, BytesIO, BinaryIO]:
     """
     Open a file and return a stream to the file.
 
-    If filename starts with "http:" or "https:" then file is assumed
-    to be a URL.
+    If filename starts with "http://" or "https://", the "file" is assumed to
+    be a URL.
 
-    If filename starts with "blob:" then file is assumed to be held
-    within Azure as a BLOB. This expects the following environment
-    variables to be set:
+    If filename starts with "blob:", the "file" is assumed to be held in
+    an Azure blob container. This expects three environment variables to be
+    set: ``BLOB_SAS_TOKEN``, ``BLOB_ACCOUNT_NAME`` and ``BLOB_CONTAINER_NAME``.
 
-    * BLOB_SAS_TOKEN
-    * BLOB_ACCOUNT_NAME
-    * BLOB_CONTAINER_NAME
+    Otherwise, the filename is assumed to be held on the file system.
 
-    Otherwise, the filename is assumed to be held on the file
-    system.
-
-    :param filename: file name or URL
-    :type filename: str or unicode
-    :return: open stream
-    :rtype: cStringIO.StringI (URL or file system) OR io.BytesIO (blob)
+    :param filename: File name, URL, or blob path
+    :type filename: str
+    :return: Stream
+    :rtype: Union[StringIO, BytesIO, BinaryIO]
+    :raises SyntaxError: if an empty filename is provided
     """
 
-    assert filename, "Filename must not be ''"
+    if filename == "":
+        raise SyntaxError("Filename must not be empty.")
 
-    is_url = filename.lower().startswith(HTTP) or filename.lower().startswith(HTTPS)
+    is_url = filename.lower().startswith(HTTP) or filename.lower().startswith(
+        HTTPS
+    )
     is_blob = filename.lower().startswith(BLOB)
 
     if is_url:
         stream = requests.get(filename, stream=True).raw
         stream.decode_content = True
-        stream = io.StringIO(stream.read())
+        stream = StringIO(stream.read())
 
     elif is_blob:
-        # TODO: Ensure azure is part of requirements
+        """
+        TODO: Ensure azure is part of requirements or add an exception for
+        ImportError here
+        """
         from azure.storage.blob import BlobService
 
-        sas_token = os.environ["BLOB_SAS_TOKEN"]
-        if sas_token[0] == "?":
-            sas_token = sas_token[1:]
+        SAS_TOKEN = os.environ["BLOB_SAS_TOKEN"]
+        ACCOUNT_NAME = os.environ["BLOB_ACCOUNT_NAME"]
+        CONTAINER_NAME = os.environ["BLOB_CONTAINER_NAME"]
+
+        # TODO: Test that environment variable have been correctly set up here
+
+        if SAS_TOKEN[0] == "?":
+            SAS_TOKEN = SAS_TOKEN[1:]
 
         blob_service = BlobService(
-            account_name=os.environ["BLOB_ACCOUNT_NAME"], sas_token=sas_token
+            account_name=ACCOUNT_NAME, sas_token=SAS_TOKEN
         )
-        filename = filename[len(BLOB) :]
-        blob = blob_service.get_blob_to_bytes(
-            os.environ["BLOB_CONTAINER_NAME"], filename
-        )
-        stream = io.BytesIO(blob)
+        start = len(BLOB)
+        filename = filename[start:]
+        blob = blob_service.get_blob_to_bytes(CONTAINER_NAME, filename)
+        stream = BytesIO(blob)
 
     else:
         stream = open(filename, "rb")

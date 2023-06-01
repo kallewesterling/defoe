@@ -3,43 +3,49 @@ Object model representation of a page represented as an XML file in
 METS/MODS format.
 """
 
+from __future__ import annotations
+
 from lxml import etree
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .document import Document
+    from typing import BinaryIO, Optional, Union
+
+# FIXME: This needs docstring and typing fixing
 
 
 class Page(object):
     """
     Object model representation of a page represented as an XML file
     in METS/MODS format.
+
+    :param document: Document object corresponding to document to
+        which this page belongs
+    :type document: defoe.alto.document.Document
+    :param code: Identifier for this page within an archive
+    :type code: str
+    :param source: Stream. If None then an attempt is made to
+        open the file holding the page via the given "document"
+    :type source: zipfile.ZipExt or another file-like object
     """
 
     WORDS_XPATH = etree.XPath("//String/@CONTENT")
-    """ XPath query for String content """
     STRINGS_XPATH = etree.XPath("//String")
-    """ XPath query for String elements """
     IMAGES_XPATH = etree.XPath("//GraphicalElement")
-    """ XPath query for Graphical Element """
     PAGE_XPATH = etree.XPath("//Page")
-    """ XPath query for Page """
     WC_XPATH = etree.XPath("//String/@WC")
-    """ XPath query for Word Confidence  content """
     CC_XPATH = etree.XPath("//String/@CC")
-    """ XPath query for Character Confidence content """
 
-    def __init__(self, document, code, source=None):
+    def __init__(
+        self, document: Document, code: str, source: Optional[BinaryIO] = None
+    ):
         """
-        Constructor.
-
-        :param document: Document object corresponding to document to
-        which this page belongs
-        :type document: defoe.alto.document.Document
-        :param code: identifier for this page within an archive
-        :type code: str or unicode
-        :param source: stream. If None then an attempt is made to
-        open the file holding the page via the given "document"
-        :type source: zipfile.ZipExt or another file-like object
+        Constructor method.
         """
         if not source:
             source = document.archive.open_page(document.code, code)
+        self.document = document
         self.code = code
         self.tree = etree.parse(source)
         self.page_tree = self.single_query(Page.PAGE_XPATH)
@@ -52,25 +58,32 @@ class Page(object):
         self.page_wc = None
         self.page_cc = None
 
-    def query(self, xpath_query):
+    def query(
+        self, xpath_query: etree.XPath
+    ) -> list[Optional[Union[etree._ElementUnicodeResult, etree._Element]]]:
         """
         Run XPath query.
 
+        :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: list of query results or None if none
+        :return: List of query results or an empty list if query returns no
+            results
         :rtype: list(lxml.etree.<MODULE>) (depends on query)
         """
         return xpath_query(self.tree)
 
-    def single_query(self, xpath_query):
+    def single_query(
+        self, xpath_query: etree.XPath
+    ) -> Optional[Union[etree._ElementUnicodeResult, etree._Element]]:
         """
         Run XPath query and return first result.
 
+        :meta private:
         :param xpath_query: XPath query
         :type xpath_query: lxml.etree.XPath
-        :return: query result or None if none
-        :rtype: lxml.etree.<MODULE> (depends on query)
+        :return: The query's result or None if no result is returned
+        :rtype: Optional[Union[etree._ElementUnicodeResult, etree._Element]]
         """
         result = self.query(xpath_query)
         if not result:
@@ -78,26 +91,27 @@ class Page(object):
         return result[0]
 
     @property
-    def words(self):
+    def words(self) -> list[str]:
         """
-        Gets all words in page. These are then saved in an attribute,
-        so the words are only retrieved once.
+        Returns all the words in the ``defoe.alto.page.Page``. These are then
+        saved in an attribute, so the words are only retrieved once.
 
-        :return: words
-        :rtype: list(str or unicode)
+        :return: List of words on ``defoe.alto.page.Page``
+        :rtype: list[str]
         """
         if not self.page_words:
             self.page_words = list(map(str, self.query(Page.WORDS_XPATH)))
         return self.page_words
 
     @property
-    def wc(self):
+    def wc(self) -> list[str]:
         """
-        Gets all word confidences (wc)  in page. These are then saved in an attribute,
-        so the wc are only retrieved once.
+        Returns all the word confidences in the ``defoe.alto.page.Page``. These
+        are then saved in an attribute, so the word confidences are only
+        retrieved once.
 
-        :return: wc
-        :rtype: list(str)
+        :return: List of word confidences on ``defoe.alto.page.Page``
+        :rtype: list[str]
         """
         if not self.page_wc:
             self.page_wc = list(self.query(Page.WC_XPATH))
@@ -105,13 +119,14 @@ class Page(object):
         return self.page_wc
 
     @property
-    def cc(self):
+    def cc(self) -> list[str]:
         """
-        Gets all character confidences (cc)  in page. These are then saved in an attribute,
-        so the cc are only retrieved once.
+        Returns all the character confidences in the ``defoe.alto.page.Page``.
+        These are then saved in an attribute, so the character confidences are
+        only retrieved once.
 
-        :return: cc
-        :rtype: list(str)
+        :return: List of character confidences on ``defoe.alto.page.Page``
+        :rtype: list[str]
         """
         if not self.page_cc:
             self.page_cc = list(self.query(Page.CC_XPATH))
@@ -119,38 +134,39 @@ class Page(object):
         return self.page_cc
 
     @property
-    def strings(self):
+    def strings(self) -> list:
         """
-        Gets all strings in page. These are then saved in an attribute,
-        so the strings are only retrieved once.
+        Returns all strings in the ``defoe.alto.page.Page``. These are then
+        saved in an attribute, so the strings are only retrieved once.
 
-        :return: strings
-        :rtype: list(lxml.etree._ElementStringResult)
+        :return: List of strings on ``defoe.alto.page.Page``
+        :rtype: list[lxml.etree._ElementStringResult]
         """
         if not self.page_strings:
             self.page_strings = self.query(Page.STRINGS_XPATH)
         return self.page_strings
 
     @property
-    def images(self):
+    def images(self) -> list:
         """
-        Gets all images in page. These are then saved in an attribute,
-        so the images are only retrieved once.
+        Returns all graphical elements in the ``defoe.alto.page.Page``. These
+        are then saved in an attribute, so the graphical elements are only
+        retrieved once.
 
-        :return: images
-        :rtype: list(lxml.etree._Element)
+        :return: List of graphical elements on ``defoe.alto.page.Page``
+        :rtype: list[lxml.etree._Element]
         """
         if not self.page_images:
             self.page_images = self.query(Page.IMAGES_XPATH)
         return self.page_images
 
     @property
-    def content(self):
+    def content(self) -> str:
         """
-        Gets all words in page and contatenates together using ' ' as
-        delimiter.
+        Returns all the words in the ``defoe.alto.page.Page``, concatenated
+        together using ' ' as delimiter.
 
-        :return: content
-        :rtype: str or unicode
+        :return: The content of ``defoe.alto.page.Page``
+        :rtype: str
         """
         return " ".join(self.words)

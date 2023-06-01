@@ -35,11 +35,11 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: number of occurrences of keywords grouped by year
+    :return: Number of occurrences of keywords grouped by year
     :rtype: dict
     """
 

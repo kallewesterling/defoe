@@ -1,13 +1,24 @@
 """
 Gets colocated words and groups by year.
 """
+from __future__ import annotations
 
 from defoe import query_utils
+from typing import TYPE_CHECKING
 
-import os
+if TYPE_CHECKING:
+    from ..issue import Issue
+    from py4j.java_gateway import JavaObject
+    from pyspark import SparkContext
+    from pyspark.rdd import RDD
 
 
-def do_query(issues, config_file=None, logger=None, context=None):
+def do_query(
+    issues: RDD[Issue],
+    config_file: str = None,
+    logger: JavaObject = None,
+    context: SparkContext = None,
+):
     """
     Gets colocated words and groups by year.
 
@@ -23,7 +34,7 @@ def do_query(issues, config_file=None, logger=None, context=None):
     default of 0 is assumed.
 
     Both colocated words and words in articles are normalized, by
-    removing all non-'a-z|A-Z' characters.
+    removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Returns result of form:
 
@@ -49,13 +60,14 @@ def do_query(issues, config_file=None, logger=None, context=None):
 
     :param issues: RDD of defoe.alto.issue.Issue
     :type issues: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on articles in which keywords occur grouped
+    :return: Information on articles in which keywords occur grouped
     by year
     :rtype: dict
+    :raises ValueError: if window is not larger than or equal to 0
     """
 
     config = query_utils.get_config(config_file)
@@ -76,7 +88,9 @@ def do_query(issues, config_file=None, logger=None, context=None):
         lambda issue_article: (
             issue_article[0],
             issue_article[1],
-            get_colocates_matches(issue_article[1], start_word, end_word, window),
+            get_colocates_matches(
+                issue_article[1], start_word, end_word, window
+            ),
         )
     )
 
@@ -122,13 +136,13 @@ def get_colocates_matches(article, start_word, end_word, window=0):
     A list of lists of each span of text, '<START_WORD>
     ... <END_WORD>', delimited by the colocates, is returned.
 
-    :param article: article
+    :param article: Article
     :type article: defoe.papers.article.Article
-    :param start_word: start_word colocate
+    :param start_word: Start_word colocate
     :type start_word: str or unicode
-    :param end_word: end_word colocate
+    :param end_word: End_word colocate
     :type end_word: str or unicode
-    :return: list of lists of words
+    :return: List of lists of words
     :rtype: list(list(str or unicode))
     """
 

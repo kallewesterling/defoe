@@ -45,9 +45,9 @@ def do_query(df, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.nls.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
     :return: "0"
     :rtype: string
@@ -75,7 +75,9 @@ def do_query(df, config_file=None, logger=None, context=None):
     else:
         defoe_path = "./"
 
-    fdf = df.withColumn("source_text_clean", blank_as_null("source_text_clean"))
+    fdf = df.withColumn(
+        "source_text_clean", blank_as_null("source_text_clean")
+    )
 
     newdf = (
         fdf.filter(fdf.source_text_clean.isNotNull())
@@ -120,7 +122,9 @@ def do_query(df, config_file=None, logger=None, context=None):
                 "page_filename": geo_page[4],
                 "text_unit id": geo_page[5],
                 "lang_model": "geoparser_original",
-                "georesolution_page": query_utils.geoparser_coord_xml(geo_page[6]),
+                "georesolution_page": query_utils.geoparser_coord_xml(
+                    geo_page[6]
+                ),
             },
         )
     )

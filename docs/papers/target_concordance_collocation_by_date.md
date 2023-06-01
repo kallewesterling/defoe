@@ -11,7 +11,7 @@
     ```
 
   - `none`: no word preprocessing is applied.
-  - `normalize`: words are normalized by removing all non-'a-z|A-Z' characters.
+  - `normalize`: words are normalized by removing all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
   - `stem`: words are normalized then reduced to their word stems (for example, books - book, looked - look) using the Porter stemming algorithm which removes common morphological and inflexional endings from words. Stemming is done using the NLTK [Porter Stemmer](https://www.nltk.org//api/nltk.stem.html#module-nltk.stem.porter).
   - `lemmatize`: words are lemmatized using lexical knowledge bases to get the correct base forms of each word. Like stemming, lemmatization reduces inflectional forms to a common base form. As opposed to stemming, lemmatization does not simply chop off inflections. Instead it uses lexical knowledge bases to get the correct base forms of words. Lemmatization is done using the NLTK [WordNet Lemmatizer](https://www.nltk.org/api/nltk.stem.html#module-nltk.stem.wordnet).
   - If `preprocess` is ommitted then `lemmatize` is used.
@@ -20,16 +20,18 @@
   - `<DATA_FILE>`: path to a plain-text data file (see below). If this is a relative path then it is assumed to be relative to the directory in which the configuration file resides.
 
   - Examples:
-    - `queries/emigration_taxonomy.yml`
-    - `queries/gender.yml`
-    - `queries/ladyqueenprincess.yml`
+    - ``queries/emigration_taxonomy.yml``
+    - ``queries/gender.yml``
+    - ``queries/ladyqueenprincess.yml``
 * Data file:
   - A target word followed by one or more words to search for, one per line.
   - Examples:
-    - `queries/emigration_taxonomy.txt`
-    - `queries/gender.txt`
-    - `queries/ladyqueenprincess.txt`
-* Result format:
+    - ``queries/emigration_taxonomy.txt``
+    - ``queries/gender.txt``
+    - ``queries/ladyqueenprincess.txt``
+
+Result format:
+----------------------------------------------------------
 
 ```
 <YEAR>:
@@ -42,7 +44,7 @@
 
 ## Sample results
 
-Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with `queries/ladyqueenprincess.yml`:
+Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with ``queries/ladyqueenprincess.yml``:
 
 ```
 1907:
@@ -73,7 +75,7 @@ Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_
   - 92.33
 ```
 
-Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with `queries/gender.yml`:
+Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_19070603.xml` and `Part 1/0000164- The Courier and Argus/1915/0000164_19151123/0000164_19151123.xml` with ``queries/gender.yml``:
 
 ```
 1907:
@@ -104,7 +106,7 @@ Query over `Part 1/0000164- The Courier and Argus/1907/0000164_19070603/0000164_
   - 93.26
 ```
 
-Query over `Part 1/0000164- The Courier and Argus/*/*/*.xml` with `queries/emigration_taxonomy.yml`:
+Query over `Part 1/0000164- The Courier and Argus/*/*/*.xml` with ``queries/emigration_taxonomy.yml``:
 
 ```
 1901:

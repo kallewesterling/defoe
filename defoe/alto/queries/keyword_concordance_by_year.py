@@ -14,7 +14,7 @@ def do_query(archives, config_file=None, logger=None, context=None):
     of the keywords to search for, one per line.
 
     Both keywords and words in documents are normalized, by removing
-    all non-'a-z|A-Z' characters.
+    all non-``a-z|A-Z``|non-``a-z|A-Z`` characters.
 
     Returns result of form:
 
@@ -39,11 +39,11 @@ def do_query(archives, config_file=None, logger=None, context=None):
 
     :param archives: RDD of defoe.alto.archive.Archive
     :type archives: pyspark.rdd.PipelinedRDD
-    :param config_file: query configuration file
+    :param config_file: Query configuration file
     :type config_file: str or unicode
-    :param logger: logger (unused)
+    :param logger: Logger (unused)
     :type logger: py4j.java_gateway.JavaObject
-    :return: information on documents in which keywords occur grouped
+    :return: Information on documents in which keywords occur grouped
     by year
     :rtype: dict
     """

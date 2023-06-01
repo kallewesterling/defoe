@@ -16,7 +16,9 @@ General:
 
 * Query module: `defoe.generic_xml.queries.get_metadata`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 - <FILENAME>:
@@ -36,7 +38,9 @@ General:
 
 * Query module: `defoe.generic_xml.queries.summarize_metadata`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 doc_type:
@@ -62,7 +66,9 @@ noNsSchemaLocation
 
 * Query module: `defoe.generic_xml.queries.total_documents`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 num_documents: <NUM_DOCUMENTS>
@@ -74,7 +80,9 @@ num_documents: <NUM_DOCUMENTS>
 
 * Query module: `defoe.generic_xml.queries.doc_types`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <DOCTYPE>: <COUNT>
@@ -88,7 +96,9 @@ num_documents: <NUM_DOCUMENTS>
 
 * Query module: `defoe.generic_xml.queries.namespaces`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <NAMESPACE>: <COUNT>
@@ -102,7 +112,9 @@ num_documents: <NUM_DOCUMENTS>
 
 * Query module: `defoe.generic_xml.queries.root_elements`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 <ELEMENT>: <COUNT>
@@ -116,7 +128,9 @@ num_documents: <NUM_DOCUMENTS>
 
 * Query module: `defoe.generic_xml.queries.total_size`
 * Configuration file: None
-* Result format:
+
+Result format:
+----------------------------------------------------------
 
 ```
 total_size: <TOTAL_SIZE>
