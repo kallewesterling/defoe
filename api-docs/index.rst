@@ -15,6 +15,7 @@ Defoe Documentation Contents
 
    api/index
    spark/index
+   tutorials/index
 
 Indices and tables
 ==================
